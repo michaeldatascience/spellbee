@@ -2,12 +2,35 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>SpellBee Practice - Level 4 Grade 2</title>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #FFFBF0; min-height: 100vh; }
-#root { min-height: 100vh; }
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#F0F7FF;min-height:100vh}
+#root{min-height:100vh}
+/* Section tab bar */
+.tab-bar{display:flex;gap:2px;overflow-x:auto;padding:4px 8px;background:#E1EBF5;border-radius:0;margin-bottom:0;-webkit-overflow-scrolling:touch}
+.tab-bar::-webkit-scrollbar{height:3px}
+.tab-bar::-webkit-scrollbar-thumb{background:#0078D4;border-radius:3px}
+.tab-bar button{flex-shrink:0;padding:8px 14px;border-radius:20px;font-size:12px;border:none;cursor:pointer;font-weight:500;white-space:nowrap;transition:all 0.2s}
+.tab-active{background:#0078D4;color:#fff!important;box-shadow:0 2px 6px rgba(0,120,212,0.3)}
+.tab-inactive{background:transparent;color:#444}
+.tab-inactive:hover{background:rgba(0,120,212,0.1)}
+/* Two-panel layout for exam */
+.exam-panels{display:flex;gap:0;min-height:calc(100vh - 160px)}
+.exam-left{flex:1;padding:16px 20px;border-right:1px solid #D1D9E6;background:#FAFCFF;overflow-y:auto}
+.exam-right{width:260px;flex-shrink:0;padding:16px;background:#fff;overflow-y:auto}
+@media(max-width:800px){
+  .exam-panels{flex-direction:column}
+  .exam-left{border-right:none;border-bottom:1px solid #D1D9E6}
+  .exam-right{width:100%}
+}
+/* Question nav grid */
+.q-nav{display:flex;flex-wrap:wrap;gap:4px}
+.q-nav button{width:34px;height:34px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.15s}
+/* General containers */
+.container-narrow{max-width:700px;margin:0 auto;padding:24px 16px}
+.container-wide{max-width:1100px;margin:0 auto}
 </style>
 </head>
 <body>
@@ -16,742 +39,688 @@ body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
 <script>
 // ─── DATA ───────────────────────────────────────────────────────
+// New question pool matching REAL SpellBee International Level 4 Grade 2 format
+// Based on actual SPIN MOCK exam screenshots and extracted questions
+
 const ROUNDS = [
-  "Spell It Right", "Word Analysis", "Inflections & Collocations",
-  "Find the Correct Sentence", "General Knowledge", "Words & Meanings",
-  "Form the Correct Sentence", "Phonetics", "Reading Comprehension",
-  "Crossword", "Word Weaving", "Compound Words / Types of Words",
-  "Synonyms", "Antonyms", "Idioms / Phrases / Presenting an Argument",
+  "Spell It Right",
+  "Word Analysis", 
+  "Inflections & Collocations",
+  "Find the Correct Sentence",
+  "General Knowledge",
+  "Words and Meanings",
+  "Form the Correct Sentence",
+  "Phonetics",
+  "Reading Comprehension",
+  "Crossword",
+  "Word Weaving",
+  "Compound Words and Types",
+  "Synonyms and Antonyms",
+  "Idioms and Phrases",
+  "Presenting an Argument",
 ];
 
 const RMETA = {
-  "Spell It Right": { icon: "✏️", teach: "Watch for double letters (pp, ss, ll), silent letters, and tricky vowels. Wrong options change just 1-2 letters!" },
-  "Word Analysis": { icon: "🔍", teach: "Prefix before (un-=not, re-=again, dis-=opposite). Suffix after (-ful=full of, -less=without, -ly, -er, -ing)." },
-  "Inflections & Collocations": { icon: "🔗", teach: "Plurals (mouse→mice), past tense (swim→swam), masculine/feminine (stallion→mare). Collocations: 'do homework', 'catch a cold'." },
-  "Find the Correct Sentence": { icon: "✅", teach: "Check subject-verb agreement (she goes, NOT she go), correct tense, articles (a/an/the), capital letters." },
-  "General Knowledge": { icon: "🌍", teach: "Animal homes, sounds, babies, bird facts, insect facts, nature from the word list." },
-  "Words & Meanings": { icon: "📖", teach: "Grade-2 vocabulary: adjectives (frigid, drowsy, keen), verbs (tremble), nouns (bazaar, galaxy)." },
-  "Form the Correct Sentence": { icon: "📝", teach: "Find subject (who), verb (does what), arrange the rest. Capital letter = first word." },
-  "Phonetics": { icon: "🔊", teach: "Rhyming, silent letters (knee, comb, lamb), vowel sounds, consonant digraphs (sh, ch, th), syllables." },
-  "Reading Comprehension": { icon: "📚", teach: "Answer is always IN the text. Look for key words from the question in the passage." },
-  "Crossword": { icon: "🧩", teach: "Fill missing letters using the clue. Think about the category (animal, fruit, body part)." },
-  "Word Weaving": { icon: "🧶", teach: "Unscramble jumbled letters. Write them down, try arrangements, look for common patterns." },
-  "Compound Words / Types of Words": { icon: "🏗️", teach: "Compound: two words joined (sun+flower). Types: Noun=naming, Verb=action, Adjective=describing." },
-  "Synonyms": { icon: "🔄", teach: "Same meaning. Official: enormous-large, crash-smash, wise-clever, lucky-fortunate, neat-tidy." },
-  "Antonyms": { icon: "↔️", teach: "Opposite meaning. Official: dull-bright, sour-sweet, lazy-lively, stiff-flexible, create-destroy." },
-  "Idioms / Phrases / Presenting an Argument": { icon: "💬", teach: "Idioms have special meanings. For ordering: cause→effect, first→then→finally." },
+  "Spell It Right": { icon: "✏️", teach: "Fill in the missing letters by reading the phonemic transcription (pronunciation guide). Sound out the word, then pick the letters that complete it. Example: APP___ /ə.pɔːl/ → EAR (APPEAR)", count: 10 },
+  "Word Analysis": { icon: "🔍", teach: "Choose the correct word part (prefix or suffix) to complete the word. Common parts: -ment (refreshment), -able (comfortable), -ful (beautiful), -est (shortest), -form (uniform), -face (surface)", count: 5 },
+  "Inflections & Collocations": { icon: "🔗", teach: "Part A: Spot the odd one out — find which word is NOT an inflection (change in form) of the base word. Part B: Choose the correct verb form or match adjective-noun pairs that naturally go together.", count: 10 },
+  "Find the Correct Sentence": { icon: "✅", teach: "Choose between two sentences. Watch for: a/an usage (a public, an apple), adverb vs adjective (easily not easy), punctuation marks, homophones (too/two, there/their).", count: 5 },
+  "General Knowledge": { icon: "🌍", teach: "Includes alphabetical ordering, word scrambles with clues, famous books/authors (literary world), and literary devices (poem, proverb, anecdote, simile).", count: 5 },
+  "Words and Meanings": { icon: "📖", teach: "Match each word to its correct meaning from a shared pool of definitions. Read ALL definitions first, then match carefully. Watch for (n)=noun and (v)=verb markers.", count: 5 },
+  "Form the Correct Sentence": { icon: "📝", teach: "Part A: Put word groups in correct order to form a sentence. Part B: Fill in the blank with the correct word from a shared pool.", count: 5 },
+  "Phonetics": { icon: "🔊", teach: "Tests: silent letters (foreign→g is silent), phonetic symbols, homophones (words that sound the same: straight/strait), and matching words to their pronunciation.", count: 10 },
+  "Reading Comprehension": { icon: "📚", teach: "Read a poem or passage carefully. Questions test: meaning, rhyming lines, couplets (pairs of rhyming lines), vocabulary from context, and transformation themes.", count: 5 },
+  "Crossword": { icon: "🧩", teach: "Spell words correctly based on clues. Watch for tricky plurals (COOKIES not COOKEES), and choose between correct and misspelled versions.", count: 5 },
+  "Word Weaving": { icon: "🧶", teach: "Three types: Word Wheel (unscramble letters in a circle), Word Stairs (build words letter by letter using hints), Word Combo (combine columns to form words).", count: 5 },
+  "Compound Words and Types": { icon: "🏗️", teach: "Tests: singular vs collective nouns, past tense of phrasal verbs (give up→gave up), adjective forms (need→needy), contraction full forms (I've=I have), and capitonyms (Nice=city in France).", count: 5 },
+  "Synonyms and Antonyms": { icon: "🔄", teach: "Replace the bracketed word in a sentence with its synonym (same meaning) or antonym (opposite meaning). Read the full sentence to understand context. Only 2 options.", count: 10 },
+  "Idioms and Phrases": { icon: "💬", teach: "Fill the correct idiom into a sentence from a shared pool. Know: crack of dawn (very early), go bananas (go crazy), bolt from the blue (unexpected), tickled pink (very happy), time and again (repeatedly).", count: 5 },
+  "Presenting an Argument": { icon: "🎤", teach: "Arrange 8-10 sentences in logical order. Look for: opening/setting → cause → sequence of events → reflection/conclusion. Time words and cause-effect help.", count: 10 },
 };
 
 const Q = [
-  // SPELL IT RIGHT (20)
-  { k:"sir_001", r:"Spell It Right", q:"From the given alternatives, choose the correct spelling:", o:["Hippopotomus","Hippopotamus","Hipopotamus","Hippopotumus"], a:1, e:"HIPPOPOTAMUS — double 'p', then pot-a-mus. H-I-P-P-O-P-O-T-A-M-U-S." },
-  { k:"sir_002", r:"Spell It Right", q:"From the given alternatives, choose the correct spelling:", o:["Buterfly","Butterflie","Butterfly","Butterfliy"], a:2, e:"BUTTERFLY — double 't' in butter, then -fly." },
-  { k:"sir_003", r:"Spell It Right", q:"Choose the correctly spelled word:", o:["Strawbery","Strawberry","Strowberry","Strawberri"], a:1, e:"STRAWBERRY — double 'r' before 'y'. S-T-R-A-W-B-E-R-R-Y." },
-  { k:"sir_004", r:"Spell It Right", q:"Select the correctly spelled bird:", o:["Humingbird","Hummingbird","Hummingbrd","Humminbird"], a:1, e:"HUMMINGBIRD — double 'm' in humming + bird." },
-  { k:"sir_005", r:"Spell It Right", q:"From the given alternatives, choose the correct spelling:", o:["Chimpanzee","Chimpanse","Chimpanzy","Chimapnzee"], a:0, e:"CHIMPANZEE — ends in 'zee'. C-H-I-M-P-A-N-Z-E-E." },
-  { k:"sir_006", r:"Spell It Right", q:"From the given alternatives, choose the correct spelling:", o:["Pomegranate","Pomegranete","Pomegranite","Pomgranate"], a:0, e:"POMEGRANATE — P-O-M-E-G-R-A-N-A-T-E." },
-  { k:"sir_007", r:"Spell It Right", q:"Choose the correctly spelled word:", o:["Grasshoper","Grasshopper","Grashoper","Grashopper"], a:1, e:"GRASSHOPPER — double 's' + double 'p'." },
-  { k:"sir_008", r:"Spell It Right", q:"Select the correct spelling:", o:["Cauliflour","Cauliflower","Coliflower","Cauliflowar"], a:1, e:"CAULIFLOWER — cauli + flower." },
-  { k:"sir_009", r:"Spell It Right", q:"From the given alternatives, choose the correct spelling:", o:["Electrisity","Electricty","Electricity","Electricitie"], a:2, e:"ELECTRICITY — E-L-E-C-T-R-I-C-I-T-Y." },
-  { k:"sir_010", r:"Spell It Right", q:"Choose the correctly spelled double-letter word:", o:["Succses","Sucess","Success","Succsess"], a:2, e:"SUCCESS — double 'c' AND double 's'." },
-  { k:"sir_011", r:"Spell It Right", q:"From the given alternatives, choose the correct spelling:", o:["Kangaro","Kangaroo","Kangeroo","Kanguroo"], a:1, e:"KANGAROO — ends in 'roo' with double 'o'." },
-  { k:"sir_012", r:"Spell It Right", q:"Choose the correctly spelled word:", o:["Woodpeker","Woodpecker","Woodpeckar","Woodpecer"], a:1, e:"WOODPECKER — wood + pecker." },
-  { k:"sir_013", r:"Spell It Right", q:"From the given alternatives, choose the correct spelling:", o:["Pineaple","Pinneapple","Pineapple","Pinapple"], a:2, e:"PINEAPPLE — pine + apple (double 'p')." },
-  { k:"sir_014", r:"Spell It Right", q:"Select the correctly spelled word:", o:["Squirel","Squirrel","Squrrel","Squirrl"], a:1, e:"SQUIRREL — double 'r'. S-Q-U-I-R-R-E-L." },
-  { k:"sir_015", r:"Spell It Right", q:"Choose the correct spelling:", o:["Crocodile","Crocodlie","Crocadile","Croccodile"], a:0, e:"CROCODILE — C-R-O-C-O-D-I-L-E." },
-  { k:"sir_016", r:"Spell It Right", q:"From the given alternatives, choose the correct spelling:", o:["Leoperd","Leppard","Leopard","Leapard"], a:2, e:"LEOPARD — L-E-O-P-A-R-D." },
-  { k:"sir_017", r:"Spell It Right", q:"Choose the correctly spelled word:", o:["Cockroach","Cockroch","Cokroach","Cockroche"], a:0, e:"COCKROACH — C-O-C-K-R-O-A-C-H." },
-  { k:"sir_018", r:"Spell It Right", q:"Select the correct spelling:", o:["Magisian","Magicien","Magician","Magicain"], a:2, e:"MAGICIAN — ends in '-cian'." },
-  { k:"sir_019", r:"Spell It Right", q:"From the given alternatives, choose the correct spelling:", o:["Vegitarian","Vegetarian","Vegiterian","Vegetarean"], a:1, e:"VEGETARIAN — V-E-G-E-T-A-R-I-A-N." },
-  { k:"sir_020", r:"Spell It Right", q:"Choose the correct double-letter word:", o:["Cotage","Cottage","Cottege","Cottagge"], a:1, e:"COTTAGE — double 't'. C-O-T-T-A-G-E." },
+  // ══════════════════════════════════════════════════════════════
+  // SPELL IT RIGHT — Fill missing letters using phonemic transcription
+  // Real format: ___UPY /ɒk.jə.paɪ/ → OCC (OCCUPY)
+  // 3 options each
+  // ══════════════════════════════════════════════════════════════
 
-  // WORD ANALYSIS (16)
-  { k:"wa_001", r:"Word Analysis", q:"What is the root word in 'careful'?", o:["car","care","ful","careful"], a:1, e:"Root = 'care'. '-ful' = full of." },
-  { k:"wa_002", r:"Word Analysis", q:"The word 'discover' has the prefix:", o:["di-","dis-","disc-","no prefix"], a:1, e:"'dis-' = opposite/remove." },
-  { k:"wa_003", r:"Word Analysis", q:"In 'unkind', the prefix 'un-' means:", o:["again","not","very","before"], a:1, e:"'un-' = not. Unkind = not kind." },
-  { k:"wa_004", r:"Word Analysis", q:"Which word is made from the root word 'play'?", o:["player","plane","place","plate"], a:0, e:"Player = play + er." },
-  { k:"wa_005", r:"Word Analysis", q:"What does the prefix 're-' mean in 'recover'?", o:["Not","Again / back","Before","After"], a:1, e:"Re- = again/back." },
-  { k:"wa_006", r:"Word Analysis", q:"The suffix '-less' in 'harmless' means:", o:["Full of","Without","More","Like"], a:1, e:"'-less' = without." },
-  { k:"wa_007", r:"Word Analysis", q:"Which word has the prefix 'dis-' meaning 'opposite'?", o:["discover","discuss","display","disappear"], a:3, e:"Disappear = dis+appear." },
-  { k:"wa_008", r:"Word Analysis", q:"What is the root word in 'electricity'?", o:["city","electric","elect","tri"], a:1, e:"Root = 'electric'. '-ity' = noun suffix." },
-  { k:"wa_009", r:"Word Analysis", q:"What is the root word in 'kindness'?", o:["kin","kind","ness","kindly"], a:1, e:"Root = 'kind'. '-ness' turns adjective to noun." },
-  { k:"wa_010", r:"Word Analysis", q:"In 'telescope', 'tele-' means:", o:["small","far","big","under"], a:1, e:"'Tele-' = far. Telescope = see far things." },
-  { k:"wa_011", r:"Word Analysis", q:"What does '-able' mean in 'acceptable'?", o:["Without","Full of","Can be done","Person who"], a:2, e:"'-able' = can be done." },
-  { k:"wa_012", r:"Word Analysis", q:"Which word has a prefix meaning 'again'?", o:["reflect","remove","require","recover"], a:0, e:"Reflect = re+flect (bend back)." },
-  { k:"wa_013", r:"Word Analysis", q:"What is the root word in 'subtraction'?", o:["sub","subtract","tract","action"], a:1, e:"Root = 'subtract'. '-ion' = noun suffix." },
-  { k:"wa_014", r:"Word Analysis", q:"The suffix '-er' in 'manager' means:", o:["Without","Full of","Person who does","Place where"], a:2, e:"'-er' = person who does." },
-  { k:"wa_015", r:"Word Analysis", q:"Which word has 'mis-' meaning 'wrong'?", o:["mission","mischief","mistake","missile"], a:2, e:"Mistake = mis+take = take wrongly." },
-  { k:"wa_016", r:"Word Analysis", q:"What is the root word in 'excitement'?", o:["cite","excite","ment","exciting"], a:1, e:"Root = 'excite'. '-ment' = noun suffix." },
+  // FROM ACTUAL MOCK
+  { k:"sir_m01", r:"Spell It Right", q:"_ _ _ UPY /ɒk.jə.paɪ/", o:["OCC","PKA","ACU"], a:0, e:"OCC + UPY = OCCUPY. The /ɒk/ sound = OCC." },
+  { k:"sir_m02", r:"Spell It Right", q:"_ _ _ EZE /sniːz/", o:["SNE","SNI","SAI"], a:0, e:"SNE + EZE = SNEEZE. The /sniː/ sound = SNE." },
+  { k:"sir_m03", r:"Spell It Right", q:"_ _ _ CK /klɒk/", o:["CLO","KLO","KLA"], a:0, e:"CLO + CK = CLOCK. The /klɒ/ sound = CLO." },
+  { k:"sir_m04", r:"Spell It Right", q:"JETTL _ _ _ /ˈdʒet.ɪ.sən/", o:["SON","SEN","SIN"], a:0, e:"JETTL + SON = JETTISON. The /sən/ sound = SON." },
+  { k:"sir_m05", r:"Spell It Right", q:"MU _ _ _ /mjuː.zɪk/", o:["SIC","ZIC","ZIK"], a:0, e:"MU + SIC = MUSIC. The /zɪk/ sound is spelled SIC." },
+  { k:"sir_m06", r:"Spell It Right", q:"SYM _ _ _ _ ISE /ˈsɪm.pə.θaɪz/", o:["PATH","PAOA","PADH"], a:0, e:"SYM + PATH + ISE = SYMPATHISE. /pə.θ/ = PATH." },
+  { k:"sir_m07", r:"Spell It Right", q:"_ _ _ ONNAISE /ˌmæj.əˈneɪz/", o:["MAY","MEI","MEY"], a:0, e:"MAY + ONNAISE = MAYONNAISE. /mæj/ = MAY." },
+  { k:"sir_m08", r:"Spell It Right", q:"WIN _ _ _ /ˈwɪn.dəʊ/", o:["DOW","DAW","DEW"], a:0, e:"WIN + DOW = WINDOW. /dəʊ/ = DOW." },
+  { k:"sir_m09", r:"Spell It Right", q:"_ _ _ MITE /ˈtɜː.maɪt/", o:["TER","TAR","TOR"], a:0, e:"TER + MITE = TERMITE. /tɜː/ = TER." },
+  { k:"sir_m10", r:"Spell It Right", q:"_ _ _ CINATE /ˈvæk.sɪ.neɪt/", o:["VAC","VEC","VAK"], a:0, e:"VAC + CINATE = VACCINATE. /væk/ = VAC." },
 
-  // INFLECTIONS & COLLOCATIONS (16)
-  { k:"ic_001", r:"Inflections & Collocations", q:"What is the plural of 'tooth'?", o:["Tooths","Teeth","Toothes","Teeths"], a:1, e:"Tooth → Teeth. Irregular." },
-  { k:"ic_002", r:"Inflections & Collocations", q:"What is the past tense of 'freeze'?", o:["Freezed","Frozen","Froze","Freezing"], a:2, e:"Freeze → froze." },
-  { k:"ic_003", r:"Inflections & Collocations", q:"What is the feminine of 'stallion'?", o:["Mare","Cow","Hen","Doe"], a:0, e:"Stallion → Mare (horse)." },
-  { k:"ic_004", r:"Inflections & Collocations", q:"What is the plural of 'fox'?", o:["Foxs","Foxes","Foxen","Foxies"], a:1, e:"Fox → foxes. Add '-es' after x." },
-  { k:"ic_005", r:"Inflections & Collocations", q:"Which combination is correct?", o:["make homework","do homework","take homework","give homework"], a:1, e:"'Do homework' — natural collocation." },
-  { k:"ic_006", r:"Inflections & Collocations", q:"What is the plural of 'sheep'?", o:["Sheeps","Sheep","Sheepes","Sheepies"], a:1, e:"Sheep → sheep (same!)." },
-  { k:"ic_007", r:"Inflections & Collocations", q:"What is the plural of 'leaf'?", o:["Leafs","Leaves","Leafes","Leafies"], a:1, e:"Leaf → leaves. 'f' → 'ves'." },
-  { k:"ic_008", r:"Inflections & Collocations", q:"Past tense: 'The wind ___ strongly.'", o:["blow","blowed","blew","blowing"], a:2, e:"Blow → blew. Irregular." },
-  { k:"ic_009", r:"Inflections & Collocations", q:"What is the masculine of 'queen'?", o:["King","Prince","Emperor","Duke"], a:0, e:"Queen → King." },
-  { k:"ic_010", r:"Inflections & Collocations", q:"What is the past tense of 'begin'?", o:["Beginned","Began","Begun","Beginning"], a:1, e:"Begin → began." },
-  { k:"ic_011", r:"Inflections & Collocations", q:"What is the plural of 'mouse'?", o:["Mouses","Mice","Mices","Mousies"], a:1, e:"Mouse → mice." },
-  { k:"ic_012", r:"Inflections & Collocations", q:"Which combination is correct?", o:["catch a cold","get a cold","take a cold","hold a cold"], a:0, e:"'Catch a cold' — natural collocation." },
-  { k:"ic_013", r:"Inflections & Collocations", q:"What is the past tense of 'drive'?", o:["Drived","Driven","Drove","Driving"], a:2, e:"Drive → drove." },
-  { k:"ic_014", r:"Inflections & Collocations", q:"What is the past tense of 'leave'?", o:["Leaved","Left","Leaven","Leaving"], a:1, e:"Leave → left." },
-  { k:"ic_015", r:"Inflections & Collocations", q:"What is the past tense of 'hear'?", o:["Heared","Heard","Hearn","Hearing"], a:1, e:"Hear → heard." },
-  { k:"ic_016", r:"Inflections & Collocations", q:"What is the plural of 'child'?", o:["Childs","Children","Childes","Childrens"], a:1, e:"Child → children. NOT 'childrens'!" },
+  // GENERATED similar format
+  { k:"sir_g01", r:"Spell It Right", q:"_ _ _ TURE /ˈpɪk.tʃər/", o:["PIC","PIK","PKC"], a:0, e:"PIC + TURE = PICTURE. /pɪk/ = PIC." },
+  { k:"sir_g02", r:"Spell It Right", q:"_ _ _ CUIT /ˈbɪs.kɪt/", o:["BIS","BES","BUS"], a:0, e:"BIS + CUIT = BISCUIT. /bɪs/ = BIS." },
+  { k:"sir_g03", r:"Spell It Right", q:"_ _ _ CESS /sək.ˈsɛs/", o:["SUC","SEC","SAC"], a:0, e:"SUC + CESS = SUCCESS. /sək/ = SUC." },
+  { k:"sir_g04", r:"Spell It Right", q:"BEAU _ _ _ _ _ /ˈbjuː.tɪ.fʊl/", o:["TIFUL","TYFUL","TIFEL"], a:0, e:"BEAU + TIFUL = BEAUTIFUL. /tɪ.fʊl/ = TIFUL." },
+  { k:"sir_g05", r:"Spell It Right", q:"_ _ _ WICH /ˈsæn.wɪdʒ/", o:["SAND","SEND","SOND"], a:0, e:"SAND + WICH = SANDWICH. /sæn/ → SAND (d is part of it)." },
+  { k:"sir_g06", r:"Spell It Right", q:"_ _ _ PHIN /ˈdɒl.fɪn/", o:["DOL","DAL","DEL"], a:0, e:"DOL + PHIN = DOLPHIN. /dɒl/ = DOL." },
+  { k:"sir_g07", r:"Spell It Right", q:"KIT _ _ _ _ /ˈkɪtʃ.ən/", o:["CHEN","CHAN","CHIN"], a:0, e:"KIT + CHEN = KITCHEN. /tʃən/ = CHEN." },
+  { k:"sir_g08", r:"Spell It Right", q:"_ _ _ THER /ˈwɛð.ər/", o:["WEA","WEE","WAE"], a:0, e:"WEA + THER = WEATHER. /wɛð/ = WEA." },
+  { k:"sir_g09", r:"Spell It Right", q:"MOUN _ _ _ _ /ˈmaʊn.tɪn/", o:["TAIN","TANE","TEIN"], a:0, e:"MOUN + TAIN = MOUNTAIN. /tɪn/ → TAIN." },
+  { k:"sir_g10", r:"Spell It Right", q:"_ _ _ CKEN /ˈtʃɪk.ɪn/", o:["CHI","CHA","CHE"], a:0, e:"CHI + CKEN = CHICKEN. /tʃɪk/ = CHI+CK." },
 
-  // FIND THE CORRECT SENTENCE (12)
-  { k:"fcs_001", r:"Find the Correct Sentence", q:"Which sentence is correct?", o:["She don't like vegetables.","She doesn't like vegetables.","She doesn't likes vegetables.","She not like vegetables."], a:1, e:"He/she/it → 'doesn't'. Base verb after: doesn't like." },
-  { k:"fcs_002", r:"Find the Correct Sentence", q:"Find the correct sentence:", o:["The childrens are playing.","The children is playing.","The children are playing in the garden.","The children are play in the garden."], a:2, e:"'Children' already plural + are + playing." },
-  { k:"fcs_003", r:"Find the Correct Sentence", q:"Which has NO error?", o:["A spider have eight legs.","A spider has eight legs.","A spider haves eight legs.","A spider having eight legs."], a:1, e:"Spider (singular) → 'has'." },
-  { k:"fcs_004", r:"Find the Correct Sentence", q:"Find the correct sentence:", o:["The hummingbird is smallest bird.","The hummingbird is the smallest bird in the world.","The hummingbird are the smallest bird.","Hummingbird is the smallest bird in world."], a:1, e:"Superlative needs 'the'. Also 'the world'." },
-  { k:"fcs_005", r:"Find the Correct Sentence", q:"Which sentence is correct?", o:["There are many sheeps.","There is many sheep.","There are many sheep in the field.","There are much sheep."], a:2, e:"Sheep = same in plural. 'Many' + 'are'." },
-  { k:"fcs_006", r:"Find the Correct Sentence", q:"Find the correct sentence:", o:["Yesterday I go to the market.","Yesterday I went to the market.","Yesterday I goed to market.","Yesterday I going to market."], a:1, e:"Go → went (past, irregular)." },
-  { k:"fcs_007", r:"Find the Correct Sentence", q:"Which sentence is correct?", o:["My friend and I went to the park.","Me and my friend went to the park.","I and my friend went to the park.","My friend and me went to park."], a:0, e:"'My friend and I' — put yourself last, use 'I'." },
-  { k:"fcs_008", r:"Find the Correct Sentence", q:"Find the correct sentence:", o:["She seen a beautiful canary.","She saw a beautiful canary.","She seed a beautiful canary.","She has saw a canary."], a:1, e:"See → saw (past). 'Seen' needs 'has'." },
-  { k:"fcs_009", r:"Find the Correct Sentence", q:"Which has NO error?", o:["The leopard run very fast.","The leopard runs very fast.","The leopard running very fast.","The leopard runned very fast."], a:1, e:"Leopard (singular) → runs." },
-  { k:"fcs_010", r:"Find the Correct Sentence", q:"Which sentence is correct?", o:["I saw a elephant at the circus.","I saw an elephant at the circus.","I saw an elephant at circus.","I seed an elephant at the circus."], a:1, e:"'An' before vowel sounds. 'The circus'. 'Saw'." },
-  { k:"fcs_011", r:"Find the Correct Sentence", q:"Find the correct sentence:", o:["The vulture flied high in the sky.","The vulture flew high in the sky.","The vulture flyed high in sky.","The vulture has flew high."], a:1, e:"Fly → flew." },
-  { k:"fcs_012", r:"Find the Correct Sentence", q:"Which has NO error?", o:["She is more taller than me.","She is taller than me.","She is taller then me.","She is tallest than me."], a:1, e:"'Taller' already = more tall. 'Than' not 'then'." },
+  // ══════════════════════════════════════════════════════════════
+  // WORD ANALYSIS — Choose word part to complete the word
+  // Shared option pool format
+  // ══════════════════════════════════════════════════════════════
 
-  // GENERAL KNOWLEDGE (16)
-  { k:"gk_001", r:"General Knowledge", q:"What sound does a donkey make?", o:["Neigh","Bray","Trumpet","Growl"], a:1, e:"Donkey → bray." },
-  { k:"gk_002", r:"General Knowledge", q:"Where does a horse live?", o:["Cave","Stable","Shed","Kennel"], a:1, e:"Horse → stable." },
-  { k:"gk_003", r:"General Knowledge", q:"What is a baby fox called?", o:["Lamb","Cub","Infant","Owlet"], a:1, e:"Fox → cub." },
-  { k:"gk_004", r:"General Knowledge", q:"Which bird cannot fly but runs very fast?", o:["Hummingbird","Ostrich","Kingfisher","Woodpecker"], a:1, e:"Ostrich — largest bird, cannot fly." },
-  { k:"gk_005", r:"General Knowledge", q:"What is a baby sheep called?", o:["Cub","Lamb","Calf","Pup"], a:1, e:"Sheep → lamb." },
-  { k:"gk_006", r:"General Knowledge", q:"Which insect has eight legs?", o:["Beetle","Spider","Grasshopper","Ant"], a:1, e:"Spider has 8 legs." },
-  { k:"gk_007", r:"General Knowledge", q:"What is New Zealand's flightless bird?", o:["Kiwi","Penguin","Ostrich","Emu"], a:0, e:"Kiwi — NZ national bird." },
-  { k:"gk_008", r:"General Knowledge", q:"What sound does a pig make?", o:["Squeak","Grunt","Bleat","Moo"], a:1, e:"Pig → grunt." },
-  { k:"gk_009", r:"General Knowledge", q:"Which bird has a long beak and colourful feathers?", o:["Robin","Vulture","Hornbill","Magpie"], a:2, e:"Hornbill." },
-  { k:"gk_010", r:"General Knowledge", q:"What keeps your hands warm in winter?", o:["Scarf","Gloves","Jacket","Stockings"], a:1, e:"Gloves." },
-  { k:"gk_011", r:"General Knowledge", q:"What do we use to erase pencil marks?", o:["Stamp","Eraser","Brush","Chain"], a:1, e:"Eraser." },
-  { k:"gk_012", r:"General Knowledge", q:"What sound does a duck make?", o:["Bleat","Quack","Grunt","Bark"], a:1, e:"Duck → quack." },
-  { k:"gk_013", r:"General Knowledge", q:"Which flower is the national flower of the Netherlands?", o:["Daisy","Tulip","Jasmine","Sunflower"], a:1, e:"Tulip." },
-  { k:"gk_014", r:"General Knowledge", q:"Which body part helps us smell?", o:["Jaw","Nostril","Elbow","Ribs"], a:1, e:"Nostrils." },
-  { k:"gk_015", r:"General Knowledge", q:"What do we make bread from?", o:["Rice","Wheat","Honey","Spice"], a:1, e:"Wheat." },
-  { k:"gk_016", r:"General Knowledge", q:"What is a baby owl called?", o:["Cub","Lamb","Owlet","Infant"], a:2, e:"Owl → owlet." },
+  // FROM ACTUAL MOCK (options: form, moral, able, face, est, ment)
+  { k:"wa_m01", r:"Word Analysis", q:"Choose the correct word part to complete:\nRefresh ___\n\nOptions: form | moral | able | face | est | ment", o:["ment","able","est","form"], a:0, e:"Refresh + MENT = REFRESHMENT. A drink or snack." },
+  { k:"wa_m02", r:"Word Analysis", q:"Choose the correct word part to complete:\nLaugh ___\n\nOptions: form | moral | able | face | est | ment", o:["able","ment","est","form"], a:0, e:"Laugh + ABLE = LAUGHABLE. Something so silly it makes you laugh." },
+  { k:"wa_m03", r:"Word Analysis", q:"Choose the correct word part to complete:\nUni ___\n\nOptions: form | moral | able | face | est | ment", o:["form","face","moral","est"], a:0, e:"Uni + FORM = UNIFORM. Clothes that look the same." },
+  { k:"wa_m04", r:"Word Analysis", q:"Choose the correct word part to complete:\nIm ___\n\nOptions: form | moral | able | face | est | ment", o:["moral","able","ment","form"], a:0, e:"Im + MORAL = IMMORAL. Not moral, wrong behaviour." },
+  { k:"wa_m05", r:"Word Analysis", q:"Choose the correct word part to complete:\nSur ___\n\nOptions: form | moral | able | face | est | ment", o:["face","form","able","ment"], a:0, e:"Sur + FACE = SURFACE. The top or outside of something." },
 
-  // WORDS & MEANINGS (16)
-  { k:"wm_001", r:"Words & Meanings", q:"What does 'frigid' mean?", o:["Very hot","Very cold","Very gentle","Very clean"], a:1, e:"Frigid = extremely cold." },
-  { k:"wm_002", r:"Words & Meanings", q:"Which word means 'to shake from cold or fear'?", o:["Tremble","Travel","Settle","Steer"], a:0, e:"Tremble = to shake." },
-  { k:"wm_003", r:"Words & Meanings", q:"'Maritime' is related to:", o:["Mountains","The sea","The sky","Forests"], a:1, e:"Maritime = sea-related." },
-  { k:"wm_004", r:"Words & Meanings", q:"What does 'sacred' mean?", o:["Scary","Holy and special","Very old","Broken"], a:1, e:"Sacred = holy." },
-  { k:"wm_005", r:"Words & Meanings", q:"What does 'drowsy' mean?", o:["Very hungry","Feeling sleepy","Very excited","Feeling cold"], a:1, e:"Drowsy = sleepy." },
-  { k:"wm_006", r:"Words & Meanings", q:"What does 'mischief' mean?", o:["Kindness","Naughty playful behaviour","Sadness","Bravery"], a:1, e:"Mischief = naughty behaviour." },
-  { k:"wm_007", r:"Words & Meanings", q:"What is a 'bazaar'?", o:["A strange thing","A type of bird","A market area","A musical instrument"], a:2, e:"Bazaar = market." },
-  { k:"wm_008", r:"Words & Meanings", q:"What does 'keen' mean?", o:["Lazy","Eager and interested","Scared","Confused"], a:1, e:"Keen = eager." },
-  { k:"wm_009", r:"Words & Meanings", q:"What does 'elastic' mean?", o:["Hard and stiff","Able to stretch and bounce back","Very heavy","Extremely cold"], a:1, e:"Elastic = stretchy." },
-  { k:"wm_010", r:"Words & Meanings", q:"What does 'plump' mean?", o:["Very thin","Slightly round and fat","Very tall","Very fast"], a:1, e:"Plump = slightly fat." },
-  { k:"wm_011", r:"Words & Meanings", q:"What is a 'galaxy'?", o:["A type of flower","A system of billions of stars","A deep ocean","A tall mountain"], a:1, e:"Galaxy = star system." },
-  { k:"wm_012", r:"Words & Meanings", q:"What does 'blunt' mean?", o:["Very sharp","Not sharp, dull","Very bright","Very loud"], a:1, e:"Blunt = not sharp." },
-  { k:"wm_013", r:"Words & Meanings", q:"What does 'accurate' mean?", o:["Very fast","Exactly correct","Very large","Very quiet"], a:1, e:"Accurate = exactly correct." },
-  { k:"wm_014", r:"Words & Meanings", q:"What is 'gravity'?", o:["A type of music","Force that pulls things down","A bright light","A strong wind"], a:1, e:"Gravity = pulling force." },
-  { k:"wm_015", r:"Words & Meanings", q:"What does 'luxury' mean?", o:["Something cheap","Great comfort, expensive","Something old","Something small"], a:1, e:"Luxury = expensive comfort." },
-  { k:"wm_016", r:"Words & Meanings", q:"What is a 'shelter'?", o:["A type of food","A safe place that protects","A musical instrument","A type of clothing"], a:1, e:"Shelter = safe place." },
+  // GENERATED similar
+  { k:"wa_g01", r:"Word Analysis", q:"Choose the correct word part to complete:\nEnjoy ___\n\nOptions: ness | ful | less | ment | able | ward", o:["ment","ful","ness","less"], a:0, e:"Enjoy + MENT = ENJOYMENT." },
+  { k:"wa_g02", r:"Word Analysis", q:"Choose the correct word part to complete:\nComfort ___\n\nOptions: ness | ful | less | ment | able | ward", o:["able","ful","ment","less"], a:0, e:"Comfort + ABLE = COMFORTABLE." },
+  { k:"wa_g03", r:"Word Analysis", q:"Choose the correct word part to complete:\nBack ___\n\nOptions: ness | ful | less | ment | able | ward", o:["ward","ful","ment","ness"], a:0, e:"Back + WARD = BACKWARD. Moving towards the back." },
+  { k:"wa_g04", r:"Word Analysis", q:"Choose the correct word part to complete:\nCare ___\n\nOptions: ness | ful | less | ment | able | ward", o:["less","ful","ment","ness"], a:0, e:"Care + LESS = CARELESS. Without care." },
+  { k:"wa_g05", r:"Word Analysis", q:"Choose the correct word part to complete:\nThank ___\n\nOptions: ness | ful | less | ment | able | ward", o:["ful","less","ment","ness"], a:0, e:"Thank + FUL = THANKFUL. Full of thanks." },
+  { k:"wa_g06", r:"Word Analysis", q:"Choose the correct word part to complete:\nDark ___\n\nOptions: ness | ful | less | ment | able | ward", o:["ness","ful","ment","able"], a:0, e:"Dark + NESS = DARKNESS." },
+  { k:"wa_g07", r:"Word Analysis", q:"Choose the correct word part to complete:\n___ happy\n\nOptions: un | re | dis | pre | mis | over", o:["un","re","dis","mis"], a:0, e:"UN + happy = UNHAPPY. Not happy." },
+  { k:"wa_g08", r:"Word Analysis", q:"Choose the correct word part to complete:\n___ place\n\nOptions: un | re | dis | pre | mis | over", o:["re","un","dis","over"], a:0, e:"RE + place = REPLACE. Put back again." },
 
-  // FORM THE CORRECT SENTENCE (12)
-  { k:"ftcs_001", r:"Form the Correct Sentence", q:"Arrange: kangaroo / the / its / carries / baby / pouch / in / its / The", o:["The kangaroo carries its baby in its pouch.","The baby kangaroo carries its pouch.","Carries the kangaroo its baby in pouch.","Its baby the kangaroo carries in pouch."], a:0, e:"Subject + verb + object + where." },
-  { k:"ftcs_002", r:"Form the Correct Sentence", q:"Arrange: caterpillar / a / into / turns / butterfly / A", o:["A caterpillar turns into a butterfly.","A butterfly turns into a caterpillar.","Turns a caterpillar into a butterfly.","Into a butterfly a caterpillar turns."], a:0, e:"Caterpillar changes first!" },
-  { k:"ftcs_003", r:"Form the Correct Sentence", q:"Arrange: makes / The / from / honeybee / honey / nectar", o:["The honey makes honeybee from nectar.","The honeybee makes honey from nectar.","From nectar the honeybee honey makes.","Makes the honeybee honey from nectar."], a:1, e:"Who + action + what + how." },
-  { k:"ftcs_004", r:"Form the Correct Sentence", q:"Arrange: jasmine / at / blooms / night / The / flower", o:["The jasmine flower blooms at night.","At night blooms the jasmine flower.","Blooms the jasmine flower at night.","Night at the jasmine flower blooms."], a:0, e:"Subject + verb + when." },
-  { k:"ftcs_005", r:"Form the Correct Sentence", q:"Arrange: fastest / is / animal / The / cheetah / land / the", o:["The fastest land animal is the cheetah.","The cheetah is the fastest land animal.","Is the cheetah the fastest land animal.","The land animal fastest is cheetah."], a:1, e:"Subject + is + description." },
-  { k:"ftcs_006", r:"Form the Correct Sentence", q:"Arrange: eight / has / A / spider / legs", o:["A spider has eight legs.","Eight legs has a spider.","Has a spider eight legs.","A legs spider eight has."], a:0, e:"Subject + verb + what." },
-  { k:"ftcs_007", r:"Form the Correct Sentence", q:"Arrange: collects / squirrel / The / for / nuts / winter", o:["The squirrel collects nuts for winter.","Collects the squirrel nuts for winter.","For winter squirrel collects nuts.","Nuts collects the squirrel for winter."], a:0, e:"Who + action + what + why." },
-  { k:"ftcs_008", r:"Form the Correct Sentence", q:"Arrange: feathers / has / The / colourful / hornbill", o:["The hornbill has colourful feathers.","Colourful feathers the hornbill has.","Has the hornbill colourful feathers.","The colourful has hornbill feathers."], a:0, e:"Subject + verb + adjective + noun." },
-  { k:"ftcs_009", r:"Form the Correct Sentence", q:"Arrange: in / lives / A / stable / horse / a", o:["A horse lives in a stable.","In a stable a horse lives.","Lives a horse in a stable.","A stable lives in a horse."], a:0, e:"Who + verb + where." },
-  { k:"ftcs_010", r:"Form the Correct Sentence", q:"Arrange: colourful / The / has / feathers / kingfisher", o:["The kingfisher has colourful feathers.","Colourful the kingfisher has feathers.","The feathers has colourful kingfisher.","Has the kingfisher colourful feathers."], a:0, e:"Subject + verb + adj + noun." },
-  { k:"ftcs_011", r:"Form the Correct Sentence", q:"Arrange: a / lives / crocodile / The / in / river", o:["The crocodile lives in a river.","A river lives in the crocodile.","In a river the crocodile lives.","Lives the crocodile in a river."], a:0, e:"Who + verb + where." },
-  { k:"ftcs_012", r:"Form the Correct Sentence", q:"Arrange: village / lives / grandmother / in / My / a", o:["My grandmother lives in a village.","A village lives in my grandmother.","In a village my grandmother lives.","Lives my grandmother in a village."], a:0, e:"Who + verb + where." },
+  // ══════════════════════════════════════════════════════════════
+  // INFLECTIONS & COLLOCATIONS
+  // Part A: Spot the odd one out (not an inflection)
+  // Part B: Fill verb form + Match adjective-noun
+  // ══════════════════════════════════════════════════════════════
 
-  // PHONETICS (16)
-  { k:"ph_001", r:"Phonetics", q:"Which word has a silent 'k'?", o:["kite","knee","keep","king"], a:1, e:"'Knee' — k is silent. Also: know, knife, knight." },
-  { k:"ph_002", r:"Phonetics", q:"Which word rhymes with 'hare'?", o:["here","hair","hear","hire"], a:1, e:"Hare and hair sound the same!" },
-  { k:"ph_003", r:"Phonetics", q:"How many syllables in 'caterpillar'?", o:["3","4","5","2"], a:1, e:"Cat-er-pil-lar = 4." },
-  { k:"ph_004", r:"Phonetics", q:"Which word has a silent 'b'?", o:["cabin","comb","cube","club"], a:1, e:"'Comb' — b is silent." },
-  { k:"ph_005", r:"Phonetics", q:"Which word starts with the 'kw' sound?", o:["queen","keen","key","knee"], a:0, e:"Queen — 'qu' = 'kw' sound." },
-  { k:"ph_006", r:"Phonetics", q:"Which two words rhyme?", o:["squirrel / barrel","vulture / culture","canary / cherry","leopard / record"], a:1, e:"Vulture and culture both end '-ulture'." },
-  { k:"ph_007", r:"Phonetics", q:"How many syllables in 'pomegranate'?", o:["3","4","5","2"], a:1, e:"Pom-e-gran-ate = 4." },
-  { k:"ph_008", r:"Phonetics", q:"Which pair starts with the same sound?", o:["church / cheese","chair / school","ship / chin","phone / pump"], a:0, e:"Church and cheese = 'ch' sound." },
-  { k:"ph_009", r:"Phonetics", q:"Which word has a silent 'w'?", o:["water","write","window","winter"], a:1, e:"'Write' — w is silent." },
-  { k:"ph_010", r:"Phonetics", q:"Which words rhyme?", o:["pony / honey","jaguar / guitar","canary / dairy","leopard / record"], a:2, e:"Canary and dairy end '-ary'." },
-  { k:"ph_011", r:"Phonetics", q:"How many syllables in 'hippopotamus'?", o:["4","5","6","3"], a:1, e:"Hip-po-pot-a-mus = 5." },
-  { k:"ph_012", r:"Phonetics", q:"Which word has the long 'ee' sound?", o:["bread","creek","head","weather"], a:1, e:"Creek = long 'ee'." },
-  { k:"ph_013", r:"Phonetics", q:"Which has 'oo' sound like 'moon'?", o:["book","broom","cook","foot"], a:1, e:"Broom = long 'oo'." },
-  { k:"ph_014", r:"Phonetics", q:"How many syllables in 'vegetarian'?", o:["4","5","6","3"], a:1, e:"Ve-ge-ta-ri-an = 5." },
-  { k:"ph_015", r:"Phonetics", q:"Which word ends with 'shun' sound?", o:["addition","admission","subtraction","all of these"], a:3, e:"All end with 'shun'. -tion/-sion sound same." },
-  { k:"ph_016", r:"Phonetics", q:"In which word does 'ph' make 'f' sound?", o:["elephant","uphill","shepherd","trophy"], a:0, e:"Elephant — 'ph' = 'f'." },
+  // FROM ACTUAL MOCK
+  { k:"ic_m01", r:"Inflections & Collocations", q:"Spot the odd one out — which is NOT an inflection of the base word?\n\nA. EXTRACTS\nB. EXTRACT\nC. EXTRACTION\nD. EXTRACTED", o:["EXTRACTS","EXTRACTION","EXTRACT","EXTRACTED"], a:1, e:"EXTRACTION is a derivation (new word), not an inflection. Extracts/extract/extracted are all forms of the verb 'extract'." },
+  { k:"ic_m02", r:"Inflections & Collocations", q:"Spot the odd one out — which is NOT an inflection?\n\nA. CHANT\nB. CHANTING\nC. CHANTER\nD. CHANTED", o:["CHANT","CHANTING","CHANTER","CHANTED"], a:2, e:"CHANTER is a different word (a person who chants). Chant/chanting/chanted are inflections." },
+  { k:"ic_m03", r:"Inflections & Collocations", q:"Fill in: It will not ___ again.", o:["happen","happens","happening"], a:0, e:"After 'will not', use base form: will not HAPPEN." },
+  { k:"ic_m04", r:"Inflections & Collocations", q:"Fill in: Did you ___ the airport on time?", o:["reach","reached","reaching"], a:0, e:"After 'did', use base form: Did you REACH." },
+  { k:"ic_m05", r:"Inflections & Collocations", q:"Fill in: The humming bird ___ from one flower to another.", o:["flitted","flit","fliting"], a:0, e:"Past tense: The bird FLITTED (flew quickly)." },
+  { k:"ic_m06", r:"Inflections & Collocations", q:"Choose the word that goes with:\nHighest ___\n\nOptions: peak | age | security | people | rule | vegetable", o:["peak","age","rule","people"], a:0, e:"Highest PEAK. A mountain's highest point." },
+  { k:"ic_m07", r:"Inflections & Collocations", q:"Choose the word that goes with:\nGolden ___\n\nOptions: peak | age | security | people | rule | vegetable", o:["age","peak","rule","security"], a:0, e:"Golden AGE. A period of great achievement." },
+  { k:"ic_m08", r:"Inflections & Collocations", q:"Choose the word that goes with:\nYoung ___\n\nOptions: peak | age | security | people | rule | vegetable", o:["people","age","peak","rule"], a:0, e:"Young PEOPLE. A natural word pair." },
+  { k:"ic_m09", r:"Inflections & Collocations", q:"Choose the word that goes with:\nLeafy ___\n\nOptions: peak | age | security | people | rule | vegetable", o:["vegetable","peak","age","people"], a:0, e:"Leafy VEGETABLE. Like spinach or lettuce." },
+  { k:"ic_m10", r:"Inflections & Collocations", q:"Choose the word that goes with:\nTop ___\n\nOptions: peak | age | security | people | rule | vegetable", o:["security","peak","age","people"], a:0, e:"Top SECURITY. Highest level of protection." },
 
-  // READING COMPREHENSION (12)
-  { k:"rc_001", r:"Reading Comprehension", q:"Read:\n'The ostrich is the largest bird. It cannot fly but runs very fast — faster than a horse. It lives in Africa and eats plants, seeds, and insects.'\n\nWhere does the ostrich live?", o:["Australia","Africa","Asia","America"], a:1, e:"'It lives in Africa.'" },
-  { k:"rc_002", r:"Reading Comprehension", q:"From the ostrich passage:\nWhat can it do faster than a horse?", o:["Fly","Swim","Run","Jump"], a:2, e:"'Runs faster than a horse.'" },
-  { k:"rc_003", r:"Reading Comprehension", q:"Read:\n'Jasmine blooms at night and is white. In India it is used to make garlands.'\n\nWhen does jasmine bloom?", o:["Morning","Afternoon","Night","Noon"], a:2, e:"'Blooms at night.'" },
-  { k:"rc_004", r:"Reading Comprehension", q:"Read:\n'The woodpecker pecks trees to find insects in the bark. It can peck up to 20 times per second.'\n\nWhy does it peck trees?", o:["Build a house","Find insects","Make music","Sharpen beak"], a:1, e:"'To find insects.'" },
-  { k:"rc_005", r:"Reading Comprehension", q:"From the woodpecker passage:\nHow fast can it peck?", o:["10/sec","15/sec","20/sec","25/sec"], a:2, e:"'Up to 20 times per second.'" },
-  { k:"rc_006", r:"Reading Comprehension", q:"Read:\n'Honeybees collect nectar from flowers. One bee visits 50 to 100 flowers per trip.'\n\nHow many flowers per trip?", o:["10-20","25-50","50-100","100-200"], a:2, e:"'50 to 100 flowers.'" },
-  { k:"rc_007", r:"Reading Comprehension", q:"Read:\n'The kangaroo lives in Australia. A baby kangaroo is called a joey. It lives in its mother's pouch.'\n\nWhat is a baby kangaroo called?", o:["Cub","Joey","Lamb","Calf"], a:1, e:"'Called a joey.'" },
-  { k:"rc_008", r:"Reading Comprehension", q:"From the kangaroo passage:\nWhere does the joey live?", o:["In a nest","In a tree","In its mother's pouch","In a cave"], a:2, e:"'In its mother's pouch.'" },
-  { k:"rc_009", r:"Reading Comprehension", q:"Read:\n'The kingfisher has blue and orange feathers. It lives near rivers and dives to catch fish.'\n\nWhere does it live?", o:["Deserts","Near rivers","Mountains","Forests"], a:1, e:"'Near rivers.'" },
-  { k:"rc_010", r:"Reading Comprehension", q:"Read:\n'The cheetah runs up to 100 km/hour. Black lines near its eyes protect them from the sun.'\n\nHow fast can it run?", o:["50 km/h","80 km/h","100 km/h","120 km/h"], a:2, e:"'Up to 100 km/hour.'" },
-  { k:"rc_011", r:"Reading Comprehension", q:"From the cheetah passage:\nWhat do the eye lines do?", o:["Help see prey","Protect from sun","Run faster","Help hide"], a:1, e:"'Protect from the sun.'" },
-  { k:"rc_012", r:"Reading Comprehension", q:"Read:\n'Sunflowers grow up to 3m high and face the sun. Seeds can be eaten or made into oil.'\n\nWhat are seeds made into?", o:["Bread","Oil","Butter","Juice"], a:1, e:"'Made into oil.'" },
+  // GENERATED similar
+  { k:"ic_g01", r:"Inflections & Collocations", q:"Spot the odd one out — which is NOT an inflection?\n\nA. WALKS\nB. WALKED\nC. WALKING\nD. WALKWAY", o:["WALKS","WALKED","WALKWAY","WALKING"], a:2, e:"WALKWAY is a compound word, not an inflection of 'walk'." },
+  { k:"ic_g02", r:"Inflections & Collocations", q:"Spot the odd one out — which is NOT an inflection?\n\nA. PLAYED\nB. PLAYS\nC. PLAYING\nD. PLAYFUL", o:["PLAYED","PLAYS","PLAYFUL","PLAYING"], a:2, e:"PLAYFUL is a derivation (adjective), not an inflection of 'play'." },
+  { k:"ic_g03", r:"Inflections & Collocations", q:"Spot the odd one out — which is NOT an inflection?\n\nA. JUMPED\nB. JUMPS\nC. JUMPING\nD. JUMPER", o:["JUMPED","JUMPS","JUMPER","JUMPING"], a:2, e:"JUMPER is a noun (person/thing), not an inflection of 'jump'." },
+  { k:"ic_g04", r:"Inflections & Collocations", q:"Fill in: She ___ not want to go.", o:["does","do","doing"], a:0, e:"She DOES not want to go. He/she/it → does." },
+  { k:"ic_g05", r:"Inflections & Collocations", q:"Choose the word that goes with:\nHeavy ___\n\nOptions: rain | light | thin | soft | quiet | small", o:["rain","light","thin","quiet"], a:0, e:"Heavy RAIN. Natural collocation." },
+  { k:"ic_g06", r:"Inflections & Collocations", q:"Choose the word that goes with:\nBright ___\n\nOptions: rain | light | thin | soft | quiet | small", o:["light","rain","thin","quiet"], a:0, e:"Bright LIGHT. Natural collocation." },
 
-  // CROSSWORD (12)
-  { k:"cw_001", r:"Crossword", q:"Complete: G _ R _ F F E\n(tall animal, long neck)", o:["I, A","I, E","A, I","E, A"], a:0, e:"GIRAFFE." },
-  { k:"cw_002", r:"Crossword", q:"Insert missing letter: SH _ ULDER\n(body part)", o:["O","A","U","E"], a:0, e:"SHOULDER." },
-  { k:"cw_003", r:"Crossword", q:"Insert missing letter: STR _ WBERRY\n(red fruit)", o:["A","E","O","U"], a:0, e:"STRAWBERRY." },
-  { k:"cw_004", r:"Crossword", q:"Fill in: C _ C K R _ _ C H\n(an insect)", o:["O, O, A","O, A, A","O, O, E","A, O, A"], a:0, e:"COCKROACH." },
-  { k:"cw_005", r:"Crossword", q:"Complete: _ _ NGFISHER\n(colourful bird)", o:["KI","KE","KA","KO"], a:0, e:"KINGFISHER." },
-  { k:"cw_006", r:"Crossword", q:"Fill in: H _ PP _ P _ TAMUS\n(large river animal)", o:["I, O, O","I, O, A","E, O, O","I, A, O"], a:0, e:"HIPPOPOTAMUS." },
-  { k:"cw_007", r:"Crossword", q:"Fill in: SQ _ _ RREL\n(collects nuts)", o:["UI","UE","AI","OI"], a:0, e:"SQUIRREL." },
-  { k:"cw_008", r:"Crossword", q:"Insert missing letter: CH _ MPANZEE\n(an ape)", o:["I","A","E","U"], a:0, e:"CHIMPANZEE." },
-  { k:"cw_009", r:"Crossword", q:"Complete: _ _ OPARD\n(spotted big cat)", o:["LE","LI","LA","LO"], a:0, e:"LEOPARD." },
-  { k:"cw_010", r:"Crossword", q:"Fill in: V _ LT _ RE\n(eats dead animals)", o:["U, U","A, U","U, A","O, U"], a:0, e:"VULTURE." },
-  { k:"cw_011", r:"Crossword", q:"Insert missing letters: F _ RN _ T _ RE\n(tables/chairs)", o:["U, I, U","U, A, U","A, I, U","U, I, A"], a:0, e:"FURNITURE." },
-  { k:"cw_012", r:"Crossword", q:"Fill in: P _ N _ _ PPLE\n(tropical fruit with crown)", o:["I, EA","I, EA","A, EA","E, IA"], a:0, e:"PINEAPPLE." },
+  // ══════════════════════════════════════════════════════════════
+  // FIND THE CORRECT SENTENCE — 2 options only (a/b)
+  // ══════════════════════════════════════════════════════════════
 
-  // WORD WEAVING (12)
-  { k:"ww_001", r:"Word Weaving", q:"Form a word from: B-A-O-D-R", o:["Bread","Board","Broad","Adore"], a:1, e:"→ BOARD." },
-  { k:"ww_002", r:"Word Weaving", q:"Form a word from: P-U-L-Z-E-Z", o:["Puzzle","Puzzel","Pluzze","Puzlze"], a:0, e:"→ PUZZLE." },
-  { k:"ww_003", r:"Word Weaving", q:"Form a word from: T-H-I-R-D", o:["Third","Dirty","Thrid","Dirth"], a:0, e:"→ THIRD." },
-  { k:"ww_004", r:"Word Weaving", q:"Form a word from: R-E-L-E-V-A-T-O", o:["Elevator","Relative","Tolerate","Evermore"], a:0, e:"→ ELEVATOR." },
-  { k:"ww_005", r:"Word Weaving", q:"Form a word from: C-O-R-O-D-I-L-E-C", o:["Crocodile","Procedure","Chocolate","Crocodeli"], a:0, e:"→ CROCODILE." },
-  { k:"ww_006", r:"Word Weaving", q:"Form a word from: T-O-W-E-R", o:["Tower","Wrote","Throw","Rowet"], a:0, e:"→ TOWER." },
-  { k:"ww_007", r:"Word Weaving", q:"Form a word from: L-E-O-T-S-C-P-E-E", o:["Telescope","Telpescoe","Spectacle","Steelcope"], a:0, e:"→ TELESCOPE." },
-  { k:"ww_008", r:"Word Weaving", q:"Form a word from: G-A-N-M-E-T", o:["Magnet","Garnet","Manage","Magent"], a:0, e:"→ MAGNET." },
-  { k:"ww_009", r:"Word Weaving", q:"Form a word from: R-U-N-F-I-T-U-R-E", o:["Furniture","Furnitre","Furtinure","Furinture"], a:0, e:"→ FURNITURE." },
-  { k:"ww_010", r:"Word Weaving", q:"Form a word from: N-E-K-L-E-N", o:["Kennel","Kneel","Kernel","Liken"], a:0, e:"→ KENNEL." },
-  { k:"ww_011", r:"Word Weaving", q:"Form a word from: T-A-G-O-C-E-T", o:["Cottage","Catgote","Gotcate","Cogtate"], a:0, e:"→ COTTAGE." },
-  { k:"ww_012", r:"Word Weaving", q:"Form a word from: I-E-G-L-A-L-V", o:["Village","Illegal","Gallive","Villega"], a:0, e:"→ VILLAGE." },
+  // FROM ACTUAL MOCK
+  { k:"fcs_m01", r:"Find the Correct Sentence", q:"Click and choose the correct one:", o:["There is a public park next to my home.","There is an public park next to my home."], a:0, e:"'A public' not 'an public'. Use 'a' before consonant sounds." },
+  { k:"fcs_m02", r:"Find the Correct Sentence", q:"Click and choose the correct one:", o:["But my friend taught me how to score runs easily.","But my friend taught me how to score runs easy."], a:0, e:"'Easily' (adverb) describes HOW, not 'easy' (adjective)." },
+  { k:"fcs_m03", r:"Find the Correct Sentence", q:"Click and choose the correct one:", o:["I am satisfied with my performance.","I'm satisfied with my performance."], a:0, e:"In formal writing, 'I am' is preferred over the contraction 'I'm'." },
+  { k:"fcs_m04", r:"Find the Correct Sentence", q:"Click and choose the correct one:", o:["I am excited but a little nervous too.","I am excited but a little nervous two."], a:0, e:"'Too' (also) not 'two' (number 2). These are homophones!" },
+  { k:"fcs_m05", r:"Find the Correct Sentence", q:"Click and choose the correct one:", o:["\"Are you plucking flowers, grandma?\"","\"Are you plucking flowers, grandma!\""], a:0, e:"A question needs a question mark (?), not exclamation mark (!)." },
 
-  // COMPOUND WORDS / TYPES (12)
-  { k:"ct_001", r:"Compound Words / Types of Words", q:"Which is a compound word?", o:["backpack","discover","beautiful","important"], a:0, e:"Backpack = back + pack." },
-  { k:"ct_002", r:"Compound Words / Types of Words", q:"'Nervous' is a/an:", o:["Noun","Verb","Adjective","Adverb"], a:2, e:"Nervous = adjective." },
-  { k:"ct_003", r:"Compound Words / Types of Words", q:"Which is a compound word?", o:["doorbell","magician","cushion","energy"], a:0, e:"Doorbell = door + bell." },
-  { k:"ct_004", r:"Compound Words / Types of Words", q:"Which is a compound word?", o:["seesaw","furniture","accuracy","bacteria"], a:0, e:"Seesaw = see + saw." },
-  { k:"ct_005", r:"Compound Words / Types of Words", q:"'Moist' is a/an:", o:["Noun","Verb","Adjective","Adverb"], a:2, e:"Moist = adjective (slightly wet)." },
-  { k:"ct_006", r:"Compound Words / Types of Words", q:"'Daybreak' is made from:", o:["day + break","day + brake","da + ybreak","days + break"], a:0, e:"Daybreak = day + break = dawn." },
-  { k:"ct_007", r:"Compound Words / Types of Words", q:"Which is a compound word?", o:["baseball","bacteria","balance","barrier"], a:0, e:"Baseball = base + ball." },
-  { k:"ct_008", r:"Compound Words / Types of Words", q:"'Admire' is a/an:", o:["Noun","Verb","Adjective","Adverb"], a:1, e:"Admire = verb (action)." },
-  { k:"ct_009", r:"Compound Words / Types of Words", q:"'Housefly' is made from:", o:["house + fly","hous + efly","ho + usefly","house + flie"], a:0, e:"Housefly = house + fly." },
-  { k:"ct_010", r:"Compound Words / Types of Words", q:"Which is a compound word?", o:["washroom","magician","crocodile","telescope"], a:0, e:"Washroom = wash + room." },
-  { k:"ct_011", r:"Compound Words / Types of Words", q:"'Gloomy' is a/an:", o:["Noun","Verb","Adjective","Adverb"], a:2, e:"Gloomy = adjective." },
-  { k:"ct_012", r:"Compound Words / Types of Words", q:"'Escape' is a/an:", o:["Noun","Verb","Adjective","Adverb"], a:1, e:"Escape = verb." },
+  // GENERATED similar
+  { k:"fcs_g01", r:"Find the Correct Sentence", q:"Click and choose the correct one:", o:["She ate an orange for breakfast.","She ate a orange for breakfast."], a:0, e:"'An orange' — use 'an' before vowel sounds (o)." },
+  { k:"fcs_g02", r:"Find the Correct Sentence", q:"Click and choose the correct one:", o:["The children played quiet in the library.","The children played quietly in the library."], a:1, e:"'Quietly' (adverb) describes HOW they played." },
+  { k:"fcs_g03", r:"Find the Correct Sentence", q:"Click and choose the correct one:", o:["We went to the beach, and we built a sandcastle.","We went to the beach and, we built a sandcastle."], a:0, e:"Comma goes BEFORE 'and' joining two sentences, not after." },
+  { k:"fcs_g04", r:"Find the Correct Sentence", q:"Click and choose the correct one:", o:["Their going to the park tomorrow.","They're going to the park tomorrow."], a:1, e:"They're = they are. Their = belonging to them." },
+  { k:"fcs_g05", r:"Find the Correct Sentence", q:"Click and choose the correct one:", o:["\"What a beautiful painting!\" said the teacher.","\"What a beautiful painting.\" said the teacher."], a:0, e:"Exclamation needs '!' not '.'. It shows excitement." },
+  { k:"fcs_g06", r:"Find the Correct Sentence", q:"Click and choose the correct one:", o:["The dog wagged it's tail happily.","The dog wagged its tail happily."], a:1, e:"'Its' (possessive) not 'it's' (it is). The tail belongs to the dog." },
+  { k:"fcs_g07", r:"Find the Correct Sentence", q:"Click and choose the correct one:", o:["He ran quick to catch the bus.","He ran quickly to catch the bus."], a:1, e:"'Quickly' (adverb) describes HOW he ran." },
 
-  // SYNONYMS (16)
-  { k:"syn_001", r:"Synonyms", q:"Synonym of 'enormous':", o:["Tiny","Large","Narrow","Frigid"], a:1, e:"Enormous = large." },
-  { k:"syn_002", r:"Synonyms", q:"Another word for 'wise'?", o:["Mad","Lazy","Clever","Plump"], a:2, e:"Wise = clever." },
-  { k:"syn_003", r:"Synonyms", q:"Synonym of 'crash':", o:["Float","Smash","Settle","Steer"], a:1, e:"Crash = smash." },
-  { k:"syn_004", r:"Synonyms", q:"Synonym of 'neat'?", o:["Tidy","Filthy","Gloomy","Bulky"], a:0, e:"Neat = tidy." },
-  { k:"syn_005", r:"Synonyms", q:"Synonym of 'little'?", o:["Large","Small","Giant","Broad"], a:1, e:"Little = small." },
-  { k:"syn_006", r:"Synonyms", q:"Synonym of 'lucky':", o:["Unlucky","Fortunate","Wealthy","Famous"], a:1, e:"Lucky = fortunate." },
-  { k:"syn_007", r:"Synonyms", q:"Another word for 'gentle'?", o:["Rough","Pleasant","Greedy","Gloomy"], a:1, e:"Gentle = pleasant." },
-  { k:"syn_008", r:"Synonyms", q:"Synonym of 'wonder':", o:["Worry","Amaze","Tremble","Escape"], a:1, e:"Wonder = amaze." },
-  { k:"syn_009", r:"Synonyms", q:"Synonym of 'forgive':", o:["Punish","Excuse","Blame","Ignore"], a:1, e:"Forgive = excuse." },
-  { k:"syn_010", r:"Synonyms", q:"Another word for 'ill'?", o:["Healthy","Sick","Strong","Lively"], a:1, e:"Ill = sick." },
-  { k:"syn_011", r:"Synonyms", q:"Synonym of 'stout':", o:["Thin","Fat","Tall","Short"], a:1, e:"Stout = fat." },
-  { k:"syn_012", r:"Synonyms", q:"Synonym of 'jog'?", o:["Walk","Run","Sit","Stand"], a:1, e:"Jog = run." },
-  { k:"syn_013", r:"Synonyms", q:"Synonym of 'grow':", o:["Shrink","Cultivate","Destroy","Reduce"], a:1, e:"Grow = cultivate." },
-  { k:"syn_014", r:"Synonyms", q:"Another word for 'listen'?", o:["Speak","Hear","Shout","Whisper"], a:1, e:"Listen = hear." },
-  { k:"syn_015", r:"Synonyms", q:"Synonym of 'true':", o:["False","Right","Wrong","Fake"], a:1, e:"True = right." },
-  { k:"syn_016", r:"Synonyms", q:"Synonym of 'puzzle'?", o:["Answer","Riddle","Solution","Clue"], a:1, e:"Puzzle = riddle." },
+  // ══════════════════════════════════════════════════════════════
+  // GENERAL KNOWLEDGE — Mixed: alphabetical order, scrambles, literary world
+  // ══════════════════════════════════════════════════════════════
 
-  // ANTONYMS (16)
-  { k:"ant_001", r:"Antonyms", q:"Opposite of 'dull'?", o:["Bright","Flexible","Serious","Plump"], a:0, e:"Dull ↔ bright." },
-  { k:"ant_002", r:"Antonyms", q:"Opposite of 'sour':", o:["Bitter","Salty","Sweet","Spicy"], a:2, e:"Sour ↔ sweet." },
-  { k:"ant_003", r:"Antonyms", q:"Opposite of 'remember'?", o:["Recall","Forget","Remind","Think"], a:1, e:"Remember ↔ forget." },
-  { k:"ant_004", r:"Antonyms", q:"Opposite of 'lazy':", o:["Sleepy","Lively","Drowsy","Bored"], a:1, e:"Lazy ↔ lively." },
-  { k:"ant_005", r:"Antonyms", q:"Opposite of 'stiff'?", o:["Hard","Flexible","Rigid","Tough"], a:1, e:"Stiff ↔ flexible." },
-  { k:"ant_006", r:"Antonyms", q:"Opposite of 'create':", o:["Build","Make","Destroy","Design"], a:2, e:"Create ↔ destroy." },
-  { k:"ant_007", r:"Antonyms", q:"Opposite of 'separate'?", o:["Divide","Split","Combine","Apart"], a:2, e:"Separate ↔ combine." },
-  { k:"ant_008", r:"Antonyms", q:"Opposite of 'thick':", o:["Thin","Fat","Wide","Heavy"], a:0, e:"Thick ↔ thin." },
-  { k:"ant_009", r:"Antonyms", q:"Opposite of 'noise'?", o:["Sound","Quiet","Loud","Music"], a:1, e:"Noise ↔ quiet." },
-  { k:"ant_010", r:"Antonyms", q:"Opposite of 'sell':", o:["Give","Buy","Trade","Earn"], a:1, e:"Sell ↔ buy." },
-  { k:"ant_011", r:"Antonyms", q:"Opposite of 'dream'?", o:["Sleep","Reality","Night","Fantasy"], a:1, e:"Dream ↔ reality." },
-  { k:"ant_012", r:"Antonyms", q:"Opposite of 'right':", o:["Correct","Wrong","True","Proper"], a:1, e:"Right ↔ wrong." },
-  { k:"ant_013", r:"Antonyms", q:"Opposite of 'care'?", o:["Love","Ignore","Worry","Protect"], a:1, e:"Care ↔ ignore." },
-  { k:"ant_014", r:"Antonyms", q:"Opposite of 'start':", o:["Begin","Stop","Continue","Pause"], a:1, e:"Start ↔ stop." },
-  { k:"ant_015", r:"Antonyms", q:"Opposite of 'short'?", o:["Thin","Long","Small","Narrow"], a:1, e:"Short ↔ long." },
-  { k:"ant_016", r:"Antonyms", q:"Opposite of 'last':", o:["End","Final","First","Recent"], a:2, e:"Last ↔ first." },
+  // FROM ACTUAL MOCK
+  { k:"gk_m01", r:"General Knowledge", q:"Arrange in alphabetical order:\nA) RAINBOW  B) RIBCAGE  C) REASON  D) RUNNING", o:["A, C, B, D","C, D, B, A","A, B, C, D","D, C, B, A"], a:0, e:"R-A (rainbow), R-E (reason), R-I (ribcage), R-U (running). So: A, C, B, D." },
+  { k:"gk_m02", r:"General Knowledge", q:"Unscramble using the clue:\nRUPE → Clue: CLEAN", o:["PURE","REPU","RUPE","PRUE"], a:0, e:"RUPE unscrambled = PURE. Pure means clean!" },
+  { k:"gk_m03", r:"General Knowledge", q:"\"Jumanji\" refers to the name of a:", o:["Game","Palace","Boy","King"], a:0, e:"Jumanji is the name of a magical board GAME in the story." },
+  { k:"gk_m04", r:"General Knowledge", q:"\"They say Aslan is on the move.\" — Who is the author?", o:["C. S. Lewis","J. R. R. Tolkien","Lewis Carroll","J. K. Rowling"], a:0, e:"Aslan is from 'The Chronicles of Narnia' by C. S. Lewis." },
+  { k:"gk_m05", r:"General Knowledge", q:"What literary device is used when someone tells a short personal story about something that happened to them?", o:["Anecdote","Poem","Proverb","Theme"], a:0, e:"An ANECDOTE is a short personal story about a real experience." },
 
-  // IDIOMS / PHRASES / PRESENTING AN ARGUMENT (12)
-  { k:"id_001", r:"Idioms / Phrases / Presenting an Argument", q:"'Raining cats and dogs' means:", o:["Animals falling","Raining very heavily","Pets outside","Nice weather"], a:1, e:"= very heavy rain." },
-  { k:"id_002", r:"Idioms / Phrases / Presenting an Argument", q:"Order:\n1. Butterfly flew away\n2. Caterpillar made cocoon\n3. Came out as butterfly", o:["2 → 3 → 1","1 → 2 → 3","3 → 2 → 1","2 → 1 → 3"], a:0, e:"Cocoon→butterfly→flies. Life cycle!" },
-  { k:"id_003", r:"Idioms / Phrases / Presenting an Argument", q:"'Don't judge a book by its cover' means:", o:["Don't buy ugly books","Don't judge by appearance","Always read books","Covers unimportant"], a:1, e:"Don't judge by outside looks." },
-  { k:"id_004", r:"Idioms / Phrases / Presenting an Argument", q:"'Once bitten, twice shy' means:", o:["Dogs bite twice","After bad experience, more careful","Shy people bitten","Be shy"], a:1, e:"After something bad, be extra careful." },
-  { k:"id_005", r:"Idioms / Phrases / Presenting an Argument", q:"Order for honey-making:\n1. Store honey\n2. Collect nectar\n3. Nectar→honey", o:["2 → 3 → 1","1 → 2 → 3","3 → 1 → 2","2 → 1 → 3"], a:0, e:"Collect→change→store." },
-  { k:"id_006", r:"Idioms / Phrases / Presenting an Argument", q:"'Actions speak louder than words' means:", o:["Speak loudly","Words useless","What you DO matters more","Actions noisy"], a:2, e:"Actions show more than words." },
-  { k:"id_007", r:"Idioms / Phrases / Presenting an Argument", q:"'Early bird catches the worm' means:", o:["Birds eat worms","Start early to succeed","Worms at dawn","Birds are fast"], a:1, e:"Start early = best chance of success." },
-  { k:"id_008", r:"Idioms / Phrases / Presenting an Argument", q:"Order:\n1. Put on scarf/gloves\n2. Cold morning\n3. Went outside to play", o:["2 → 1 → 3","1 → 2 → 3","3 → 1 → 2","2 → 3 → 1"], a:0, e:"Cold→dress warmly→go out." },
-  { k:"id_009", r:"Idioms / Phrases / Presenting an Argument", q:"'A stitch in time saves nine' means:", o:["Sewing important","Fix problems early","Nine stitches enough","Time fast"], a:1, e:"Fix small problems before they grow." },
-  { k:"id_010", r:"Idioms / Phrases / Presenting an Argument", q:"'Too many cooks spoil the broth' means:", o:["Don't cook much","Too many people on one job = worse","Cooks bad at soup","Broth bad"], a:1, e:"Too many people = bad result." },
-  { k:"id_011", r:"Idioms / Phrases / Presenting an Argument", q:"Order:\n1. Magician bowed\n2. Audience clapped\n3. Pulled rabbit from hat", o:["3 → 1 → 2","1 → 3 → 2","3 → 2 → 1","2 → 3 → 1"], a:0, e:"Trick→bow→clapping." },
-  { k:"id_012", r:"Idioms / Phrases / Presenting an Argument", q:"'Practice makes perfect' means:", o:["Must be perfect first","Repeating helps improve","Only practice never perform","Perfection impossible"], a:1, e:"The more you practice, the better!" },
+  // GENERATED similar
+  { k:"gk_g01", r:"General Knowledge", q:"Arrange in alphabetical order:\nA) BUTTERFLY  B) BANANA  C) BRIDGE  D) BASKET", o:["B, D, C, A","D, B, A, C","A, B, C, D","B, C, D, A"], a:0, e:"B-A (banana, basket), B-R (bridge), B-U (butterfly). Banana before basket (BAN before BAS). So: B, D, C, A." },
+  { k:"gk_g02", r:"General Knowledge", q:"Unscramble using the clue:\nOLCK → Clue: TIME", o:["LOCK","CLOCK","COLE","OLK"], a:1, e:"OLCK + C = CLOCK. A clock tells time!" },
+  { k:"gk_g03", r:"General Knowledge", q:"Which author wrote 'Charlie and the Chocolate Factory'?", o:["Roald Dahl","J.K. Rowling","Enid Blyton","Dr. Seuss"], a:0, e:"Roald Dahl wrote Charlie and the Chocolate Factory." },
+  { k:"gk_g04", r:"General Knowledge", q:"What is a short, well-known saying that gives advice called?", o:["Proverb","Anecdote","Simile","Poem"], a:0, e:"A PROVERB is a well-known saying. Like 'A stitch in time saves nine.'" },
+  { k:"gk_g05", r:"General Knowledge", q:"Unscramble using the clue:\nIMSUC → Clue: MELODY", o:["MUSIC","MUCIS","SIMUC","MUSCI"], a:0, e:"IMSUC unscrambled = MUSIC. Music is melody!" },
+
+  // ══════════════════════════════════════════════════════════════
+  // WORDS AND MEANINGS — Match word to definition from shared pool
+  // ══════════════════════════════════════════════════════════════
+
+  // FROM ACTUAL MOCK
+  { k:"wm_m01", r:"Words and Meanings", q:"Choose the correct meaning of LOAD:\n\nA) a colourless gas people need to breathe\nB) to put something into a machine\nC) a TV programme with animated characters", o:["to put something into a machine","a colourless gas people breathe","a TV programme"], a:0, e:"LOAD (v) = to put or insert something into a machine." },
+  { k:"wm_m02", r:"Words and Meanings", q:"Choose the correct meaning of OXYGEN:\n\nA) a colourless gas people need to breathe\nB) a tall timber tree for furniture\nC) a person who looks after passengers", o:["a colourless gas people need to breathe","a tall timber tree","a person who looks after passengers"], a:0, e:"OXYGEN (n) = a colourless, odourless gas that people need to breathe." },
+  { k:"wm_m03", r:"Words and Meanings", q:"Choose the correct meaning of STEWARD:\n\nA) a person who looks after passengers on a ship/aircraft\nB) to give something an earlier date\nC) a colourless gas", o:["a person who looks after passengers","to give an earlier date","a colourless gas"], a:0, e:"STEWARD (n) = a person whose job is to take care of passengers." },
+  { k:"wm_m04", r:"Words and Meanings", q:"Choose the correct meaning of BACKDATE:\n\nA) to give something an earlier date than the actual date\nB) a tall timber tree\nC) to put something into a machine", o:["to give something an earlier date","a tall timber tree","to put into a machine"], a:0, e:"BACKDATE (v) = to give something an earlier date than the actual one." },
+  { k:"wm_m05", r:"Words and Meanings", q:"Choose the correct meaning of TEAK:\n\nA) a tall timber tree used in furniture and ships\nB) a colourless gas\nC) a TV programme with animated characters", o:["a tall timber tree for furniture/ships","a colourless gas","a TV programme"], a:0, e:"TEAK (n) = a tall timber tree used in making furniture and building ships." },
+
+  // GENERATED similar
+  { k:"wm_g01", r:"Words and Meanings", q:"Choose the correct meaning of SHELTER:\n\nA) a type of musical instrument\nB) a place giving protection from weather\nC) a kind of fabric used in clothing", o:["a place giving protection from weather","a musical instrument","a kind of fabric"], a:0, e:"SHELTER (n) = a place that gives protection from bad weather or danger." },
+  { k:"wm_g02", r:"Words and Meanings", q:"Choose the correct meaning of TELESCOPE:\n\nA) a device to see faraway things\nB) a machine that washes clothes\nC) a tool for digging holes", o:["a device to see faraway things","a machine that washes clothes","a tool for digging"], a:0, e:"TELESCOPE (n) = a device used to see distant things like stars." },
+  { k:"wm_g03", r:"Words and Meanings", q:"Choose the correct meaning of GRAVITY:\n\nA) a type of music from classical period\nB) the force that pulls things toward the ground\nC) a precious stone found in mines", o:["the force pulling things toward ground","a type of music","a precious stone"], a:0, e:"GRAVITY (n) = the natural force that pulls things down toward the earth." },
+  { k:"wm_g04", r:"Words and Meanings", q:"Choose the correct meaning of ADMIRE:\n\nA) to look at with respect and pleasure\nB) to cook food on an open fire\nC) to clean with a cloth", o:["to look at with respect and pleasure","to cook on fire","to clean with cloth"], a:0, e:"ADMIRE (v) = to respect and look at someone/something with pleasure." },
+  { k:"wm_g05", r:"Words and Meanings", q:"Choose the correct meaning of BACTERIA:\n\nA) tiny living things, some cause disease\nB) a tool used for painting\nC) a type of sweet dessert", o:["tiny living things, some cause disease","a tool for painting","a sweet dessert"], a:0, e:"BACTERIA (n) = very small living things, some of which cause disease." },
+
+  // ══════════════════════════════════════════════════════════════
+  // FORM THE CORRECT SENTENCE — Word order + Fill blanks
+  // ══════════════════════════════════════════════════════════════
+
+  // FROM ACTUAL MOCK
+  { k:"ftcs_m01", r:"Form the Correct Sentence", q:"Put in correct order:\nA. KINDLY DON'T\nB. ANY NOISE\nC. MAKE", o:["A, C, B","C, A, B","B, C, A","A, B, C"], a:0, e:"KINDLY DON'T + MAKE + ANY NOISE = 'Kindly don't make any noise.'" },
+  { k:"ftcs_m02", r:"Form the Correct Sentence", q:"Put in correct order:\nA. BE LATE\nB. DON'T\nC. FOR THE EVENT", o:["B, A, C","B, C, A","A, B, C","C, B, A"], a:0, e:"DON'T + BE LATE + FOR THE EVENT = 'Don't be late for the event.'" },
+  { k:"ftcs_m03", r:"Form the Correct Sentence", q:"Put in correct order:\nA. CHOPPED\nB. MONICA\nC. THE TOMATOES", o:["B, A, C","C, A, B","A, B, C","C, B, A"], a:0, e:"MONICA + CHOPPED + THE TOMATOES = 'Monica chopped the tomatoes.'" },
+  { k:"ftcs_m04", r:"Form the Correct Sentence", q:"Fill in the blank:\nKrish and ___ play in the park every evening.\n\nOptions: buzzing | I | doing | did | fizzed", o:["I","doing","did","buzzing"], a:0, e:"Krish and I play... 'I' is correct with another person as subject." },
+  { k:"ftcs_m05", r:"Form the Correct Sentence", q:"Fill in the blank:\nThe bubbles ___ over the top of the bottle.\n\nOptions: buzzing | I | doing | did | fizzed", o:["fizzed","buzzing","doing","did"], a:0, e:"The bubbles FIZZED over the top. Past tense, bubbles make fizzing sound." },
+
+  // GENERATED similar
+  { k:"ftcs_g01", r:"Form the Correct Sentence", q:"Put in correct order:\nA. THE GARDEN\nB. WATERS\nC. GRANDMOTHER", o:["C, B, A","A, B, C","B, C, A","A, C, B"], a:0, e:"GRANDMOTHER + WATERS + THE GARDEN." },
+  { k:"ftcs_g02", r:"Form the Correct Sentence", q:"Put in correct order:\nA. YOUR SHOES\nB. PLEASE\nC. REMOVE", o:["B, C, A","C, B, A","A, B, C","A, C, B"], a:0, e:"PLEASE + REMOVE + YOUR SHOES." },
+  { k:"ftcs_g03", r:"Form the Correct Sentence", q:"Fill in the blank:\nThe bees were ___ around the flowers.\n\nOptions: buzzing | running | sleeping | eating", o:["buzzing","running","sleeping","eating"], a:0, e:"Bees BUZZ. The bees were buzzing around the flowers." },
+
+  // ══════════════════════════════════════════════════════════════
+  // PHONETICS — Silent letters, phonetic symbols, homophones
+  // ══════════════════════════════════════════════════════════════
+
+  // FROM ACTUAL MOCK
+  { k:"ph_m01", r:"Phonetics", q:"Choose the silent letter in: FOREIGN /ˈfɒr.ɪn/", o:["g","i","e","r"], a:0, e:"The 'g' in foreign is silent. We say 'FOR-in' not 'FOR-ig-n'." },
+  { k:"ph_m02", r:"Phonetics", q:"Are these homophones? STRAIGHT – STRAIT", o:["Yes","No"], a:0, e:"Yes! Both sound like /streɪt/. Straight=not curved, Strait=narrow water passage." },
+  { k:"ph_m03", r:"Phonetics", q:"Are these homophones? DUEL – DUAL", o:["Yes","No"], a:0, e:"Yes! Both sound like /djuːəl/. Duel=fight, Dual=two/double." },
+  { k:"ph_m04", r:"Phonetics", q:"Choose the word for this pronunciation: /ˈev.rɪ.θɪŋ/", o:["everything","evening","everlasting","everyone"], a:0, e:"/ˈev.rɪ.θɪŋ/ = EVERYTHING. The /θ/ is the 'th' sound." },
+  { k:"ph_m05", r:"Phonetics", q:"Choose the word for this pronunciation: /suː.pɜːb/", o:["superb","suburb","super","submerge"], a:0, e:"/suː.pɜːb/ = SUPERB. Means excellent, outstanding." },
+  { k:"ph_m06", r:"Phonetics", q:"Choose the word for this pronunciation: /ˈaɪ.braʊz/", o:["eyebrows","eyelash","icebergs","eyesight"], a:0, e:"/ˈaɪ.braʊz/ = EYEBROWS. The hair above your eyes." },
+  { k:"ph_m07", r:"Phonetics", q:"Choose the word for this pronunciation: /sɪn/", o:["sin","scene","sign","seen"], a:0, e:"/sɪn/ = SIN. Short 'i' sound. Scene = /siːn/ (long 'ee')." },
+
+  // GENERATED similar
+  { k:"ph_g01", r:"Phonetics", q:"Choose the silent letter in: KNIGHT /naɪt/", o:["k","n","g","both k and g"], a:3, e:"Both 'k' and 'g' are silent in knight. We say 'NITE'." },
+  { k:"ph_g02", r:"Phonetics", q:"Choose the silent letter in: ISLAND /ˈaɪ.lənd/", o:["s","i","d","l"], a:0, e:"The 's' in island is silent. We say 'EYE-land'." },
+  { k:"ph_g03", r:"Phonetics", q:"Are these homophones? FLOWER – FLOUR", o:["Yes","No"], a:0, e:"Yes! Both sound like /flaʊər/. Flower=plant, Flour=powder for baking." },
+  { k:"ph_g04", r:"Phonetics", q:"Are these homophones? HEAR – HERE", o:["Yes","No"], a:0, e:"Yes! Both sound like /hɪər/. Hear=listen, Here=this place." },
+  { k:"ph_g05", r:"Phonetics", q:"Choose the word for this pronunciation: /ˈbʌt.ə.flaɪ/", o:["butterfly","battlefly","bottlefly","butterflew"], a:0, e:"/ˈbʌt.ə.flaɪ/ = BUTTERFLY." },
+  { k:"ph_g06", r:"Phonetics", q:"Choose the silent letter in: COMB /kəʊm/", o:["b","c","o","m"], a:0, e:"The 'b' in comb is silent. We say 'KOHM'." },
+  { k:"ph_g07", r:"Phonetics", q:"Are these homophones? WRITE – RIGHT", o:["Yes","No"], a:0, e:"Yes! Both sound like /raɪt/. Write=put words, Right=correct." },
+  { k:"ph_g08", r:"Phonetics", q:"Choose the word for this pronunciation: /ˈkæŋ.ɡə.ruː/", o:["kangaroo","kanguru","cangaroo","kangroo"], a:0, e:"/ˈkæŋ.ɡə.ruː/ = KANGAROO." },
+  { k:"ph_g09", r:"Phonetics", q:"Choose the silent letter in: LAMB /læm/", o:["b","l","a","m"], a:0, e:"The 'b' in lamb is silent. We say 'LAM'." },
+  { k:"ph_g10", r:"Phonetics", q:"Are these homophones? BARE – BEAR", o:["Yes","No"], a:0, e:"Yes! Both sound like /beər/. Bare=uncovered, Bear=animal." },
+
+  // ══════════════════════════════════════════════════════════════
+  // READING COMPREHENSION — Poem-based
+  // ══════════════════════════════════════════════════════════════
+
+  // FROM ACTUAL MOCK (The Caterpillar by Christina Rossetti)
+  { k:"rc_m01", r:"Reading Comprehension", q:"Read the poem 'The Caterpillar':\n'Brown and Furry, Caterpillar in a hurry;\nTake your walk, To the shady leaf or stalk.\nMay no toad spy you, May the little birds pass by you;\nSpin and die, To live again a butterfly.'\n\nWhere should the caterpillar go to protect itself?", o:["To a shady leaf or stalk","To the nearest nest","To a tall tree","Under a rock"], a:0, e:"The poem says 'Take your walk / To the shady leaf or stalk.'" },
+  { k:"rc_m02", r:"Reading Comprehension", q:"From the same poem:\nWhich line rhymes with 'May the little birds pass by you'?", o:["May no toad spy you","Spin and die","Take your walk","Brown and Furry"], a:0, e:"'spy you' and 'by you' rhyme. /aɪ juː/ ending in both." },
+  { k:"rc_m03", r:"Reading Comprehension", q:"From the same poem:\nHow many couplets are there? (A couplet = two rhyming lines)", o:["4","8","2","6"], a:0, e:"4 couplets: (hurry/stalk is not a perfect couplet but the poem has 8 lines = 4 pairs)." },
+  { k:"rc_m04", r:"Reading Comprehension", q:"From the same poem:\nWhat does 'Spin and die, To live again a butterfly' mean?", o:["The transformation of a caterpillar to a butterfly","The death of a caterpillar","A butterfly spinning in the air","A caterpillar dying"], a:0, e:"It describes metamorphosis — the caterpillar 'dies' in its cocoon and is reborn as a butterfly." },
+  { k:"rc_m05", r:"Reading Comprehension", q:"From the same poem:\nWhat does 'stalk' mean?", o:["Stem of a plant","Root of a plant","Leaf of a plant","Flower of a plant"], a:0, e:"STALK = the stem of a plant. The main upright part." },
+
+  // GENERATED similar (different poem/passage)
+  { k:"rc_g01", r:"Reading Comprehension", q:"Read:\n'Twinkle, twinkle, little star, How I wonder what you are!\nUp above the world so high, Like a diamond in the sky.'\n\nWhat is the star compared to?", o:["A diamond","A candle","The moon","A firefly"], a:0, e:"The poem says 'Like a diamond in the sky.' This is a simile." },
+  { k:"rc_g02", r:"Reading Comprehension", q:"From the same poem:\nWhich word rhymes with 'star'?", o:["are","sky","high","wonder"], a:0, e:"'Star' and 'are' rhyme (/ɑːr/ ending)." },
+  { k:"rc_g03", r:"Reading Comprehension", q:"Read:\n'The owl is a bird that comes out at night. It has large eyes that help it see in the dark. Owls can turn their heads almost all the way around. A baby owl is called an owlet.'\n\nWhat helps the owl see at night?", o:["Large eyes","Big wings","Sharp claws","Long beak"], a:0, e:"'It has large eyes that help it see in the dark.'" },
+
+  // ══════════════════════════════════════════════════════════════
+  // CROSSWORD — Correct vs misspelled, with clues
+  // ══════════════════════════════════════════════════════════════
+
+  // FROM ACTUAL MOCK
+  { k:"cw_m01", r:"Crossword", q:"Plural of COOKIE:", o:["COOKIES","COOKEES","COOKEYS","COOKEIS"], a:0, e:"COOKIE → COOKIES. Just add 's'." },
+  { k:"cw_m02", r:"Crossword", q:"Food item (popcorn image clue):", o:["POPCORN","POPCAN","POPCOAN","POPCRN"], a:0, e:"POPCORN — pop + corn." },
+  { k:"cw_m03", r:"Crossword", q:"Household thing (clock image clue):", o:["CLOCK","CLOAK","CLOACK","CLOKC"], a:0, e:"CLOCK — tells the time." },
+  { k:"cw_m04", r:"Crossword", q:"A thing that lasts long:", o:["DURABLE","DURABEL","DURBLE","DUARABLE"], a:0, e:"DURABLE — able to last a long time." },
+  { k:"cw_m05", r:"Crossword", q:"Something that can fit or match rightly:", o:["SUITABLE","SUTABLE","SUTEABLE","SUITIBLE"], a:0, e:"SUITABLE — suit + able." },
+
+  // GENERATED similar
+  { k:"cw_g01", r:"Crossword", q:"Plural of BUTTERFLY:", o:["BUTTERFLIES","BUTTERFLYS","BUTTERFLIS","BUTTERFLYES"], a:0, e:"Butterfly → BUTTERFLIES. Change 'y' to 'ies'." },
+  { k:"cw_g02", r:"Crossword", q:"A person who does magic tricks:", o:["MAGICIAN","MAGISION","MAJICIAN","MAGICAIN"], a:0, e:"MAGICIAN — ends in '-cian'." },
+  { k:"cw_g03", r:"Crossword", q:"The opposite of difficult:", o:["COMFORTABLE","COMFARTABLE","COMFOTABLE","CUMFORTABLE"], a:0, e:"COMFORTABLE — comfort + able." },
+  { k:"cw_g04", r:"Crossword", q:"Plural of KNIFE:", o:["KNIVES","KNIFES","KNIFS","KNIVS"], a:0, e:"Knife → KNIVES. Change 'fe' to 'ves'." },
+  { k:"cw_g05", r:"Crossword", q:"A place where books are kept:", o:["LIBRARY","LIBARY","LIBERRY","LIBERY"], a:0, e:"LIBRARY — has two 'r's." },
+
+  // ══════════════════════════════════════════════════════════════
+  // WORD WEAVING — Word stairs, word wheel, word combo
+  // ══════════════════════════════════════════════════════════════
+
+  // FROM ACTUAL MOCK
+  { k:"ww_m01", r:"Word Weaving", q:"Word Wheel letters: F, T, O, L, B, A, L\nForm the word:", o:["FOOTBALL","FOOTBAL","FALLBOT","BOTFALL"], a:0, e:"F-O-O-T-B-A-L-L = FOOTBALL." },
+  { k:"ww_m02", r:"Word Weaving", q:"Word Stairs starting with Y:\nHints: 1) Greeting 2) A pronoun 3) Exercise for health 4) Not yet old\n\nY → Y_ → Y__ → Y___ → Y____", o:["YO, YOU, YOGA, YOUNG","YO, YOA, YOGA, YOUNG","YO, YOU, YOGA, YOUMG","YO, YOE, YOGA, YOUNG"], a:0, e:"YO (greeting), YOU (pronoun), YOGA (exercise), YOUNG (not old)." },
+  { k:"ww_m03", r:"Word Weaving", q:"Word Stairs starting with S:\nHints: 1) Abbrev. of southwest 2) Past of 'see' 3) Opposite of fast 4) Tool with spiral blade\n\nS → S_ → S__ → S___ → S____", o:["SW, SAW, SLOW, SCREW","SW, SEW, SLAW, SCREW","SW, SAW, SLAW, SCEW","SW, SOW, SLOW, SAREW"], a:0, e:"SW (southwest), SAW (past of see), SLOW (opposite of fast), SCREW (spiral tool)." },
+
+  // GENERATED similar
+  { k:"ww_g01", r:"Word Weaving", q:"Word Wheel letters: M, U, S, H, R, O, O, M\nForm the word:", o:["MUSHROOM","MUHSROOM","SHOOMRUM","ROOMHUMS"], a:0, e:"M-U-S-H-R-O-O-M = MUSHROOM." },
+  { k:"ww_g02", r:"Word Weaving", q:"Word Stairs starting with B:\nHints: 1) Past of 'be' 2) Writing instrument 3) Bench in a park 4) Under/beneath\n\nB → B__ → B___ → B____", o:["BE, PEN, BENCH, BELOW","WAS, PEN, BENCH, BELOW","BE, PEN, BENCH, BELOW","BE, PAN, BENCH, BELOW"], a:0, e:"Hmm — this doesn't start with B properly. Let me fix: Hints should all start with B." },
+  { k:"ww_g03", r:"Word Weaving", q:"Word Combo: Combine Column A + AS (middle) + Column H\n\nColumn A: K, E, G → Middle: AS → Column C: H\nForm TWO words:", o:["EASE, GASH","KASH, GASH","EASH, KASH","KASE, GASE"], a:0, e:"E+AS+E = EASE, G+AS+H = GASH. Two valid words!" },
+
+  // ══════════════════════════════════════════════════════════════
+  // COMPOUND WORDS AND TYPES
+  // ══════════════════════════════════════════════════════════════
+
+  // FROM ACTUAL MOCK
+  { k:"ct_m01", r:"Compound Words and Types", q:"Is VOLCANO a singular noun or collective noun?", o:["Singular noun","Collective noun"], a:0, e:"VOLCANO is a singular noun (one volcano). A collective noun names a group (flock, team)." },
+  { k:"ct_m02", r:"Compound Words and Types", q:"What is the correct past tense of GIVE UP?", o:["GAVE UP","GIVEN UP","GIVING UP"], a:0, e:"Give up → GAVE UP (past tense). 'Given up' is past participle (has given up)." },
+  { k:"ct_m03", r:"Compound Words and Types", q:"What is the adjective form?\n'They donated to the (NEED).'", o:["NEEDY","NEEDFUL","NEEDLESS"], a:0, e:"NEEDY = in need, poor. 'They donated to the needy.' Needy is the adjective." },
+  { k:"ct_m04", r:"Compound Words and Types", q:"Find the full form of the contraction:\n\"I've got it,\" said he.", o:["I HAVE","I AM","I WILL"], a:0, e:"I've = I HAVE. I've got it = I have got it." },
+  { k:"ct_m05", r:"Compound Words and Types", q:"Choose: regular word or capitonym?\n'A town in France.'", o:["Nice (capitonym)","nice (regular word)"], a:0, e:"Nice (capital N) is a city in France. nice (lowercase) means pleasant. A capitonym changes meaning with capitalisation!" },
+
+  // GENERATED similar
+  { k:"ct_g01", r:"Compound Words and Types", q:"Is ARMY a singular noun or collective noun?", o:["Collective noun","Singular noun"], a:0, e:"ARMY is a collective noun — it names a group of soldiers." },
+  { k:"ct_g02", r:"Compound Words and Types", q:"What is the correct past tense of LOOK UP?", o:["LOOKED UP","LOOKING UP","LOOK UPPED"], a:0, e:"Look up → LOOKED UP. Regular past tense." },
+  { k:"ct_g03", r:"Compound Words and Types", q:"Find the full form:\n\"She's coming tomorrow.\"", o:["She is","She has","She was"], a:0, e:"She's = SHE IS. She's coming = She is coming." },
+  { k:"ct_g04", r:"Compound Words and Types", q:"Choose: regular word or capitonym?\n'A month of the year.'", o:["March (capitonym)","march (regular word)"], a:0, e:"March (capital) = month. march (lowercase) = walk in step. Capitonym!" },
+  { k:"ct_g05", r:"Compound Words and Types", q:"What is the adjective form?\n'She looked (beauty) in her dress.'", o:["BEAUTIFUL","BEAUTIFY","BEAUTILESS"], a:0, e:"Beauty → BEAUTIFUL (adjective). 'She looked beautiful.'" },
+
+  // ══════════════════════════════════════════════════════════════
+  // SYNONYMS AND ANTONYMS — In-context sentence, 2 options
+  // ══════════════════════════════════════════════════════════════
+
+  // FROM ACTUAL MOCK - SYNONYMS
+  { k:"sa_m01", r:"Synonyms and Antonyms", q:"SYNONYM: Replace the bracketed word:\n'Strong pillars were used to (strengthen) the old building.'", o:["Support","Weaken"], a:0, e:"Strengthen → SUPPORT. Both mean to make/keep strong." },
+  { k:"sa_m02", r:"Synonyms and Antonyms", q:"SYNONYM: Replace the bracketed word:\n'The car came to a (halt) and could not be restarted.'", o:["Stop","Start"], a:0, e:"Halt → STOP. Both mean to cease moving." },
+  { k:"sa_m03", r:"Synonyms and Antonyms", q:"SYNONYM: Replace the bracketed word:\n'The tidal waves began to (ebb) slowly.'", o:["Recede","Come in"], a:0, e:"Ebb → RECEDE. Both mean to flow back/decrease." },
+  { k:"sa_m04", r:"Synonyms and Antonyms", q:"SYNONYM: Replace the bracketed word:\n'There was pin-drop (silence) in the auditorium.'", o:["Quiet","Speech"], a:0, e:"Silence → QUIET. Both mean no noise." },
+  { k:"sa_m05", r:"Synonyms and Antonyms", q:"SYNONYM: Replace the bracketed word:\n'Vasco da Gama set out to India and other (foreign) lands.'", o:["Distant","Familiar"], a:0, e:"Foreign → DISTANT. Both mean far away, not local." },
+
+  // FROM ACTUAL MOCK - ANTONYMS
+  { k:"sa_m06", r:"Synonyms and Antonyms", q:"ANTONYM: Replace the bracketed word with its OPPOSITE:\n'The peanuts tasted (crisp) and crunchy.'", o:["Soft","Firm"], a:0, e:"Crisp ↔ SOFT. Crisp=hard/crunchy, soft=not hard." },
+  { k:"sa_m07", r:"Synonyms and Antonyms", q:"ANTONYM: Replace with OPPOSITE:\n'A (foul) smell came from the drains.'", o:["Fragrant","Offensive"], a:0, e:"Foul ↔ FRAGRANT. Foul=bad smell, fragrant=sweet smell." },
+  { k:"sa_m08", r:"Synonyms and Antonyms", q:"ANTONYM: Replace with OPPOSITE:\n'She blended (raw) carrots to make soup.'", o:["Processed","Uncooked"], a:0, e:"Raw ↔ PROCESSED. Raw=uncooked, processed=treated/cooked." },
+  { k:"sa_m09", r:"Synonyms and Antonyms", q:"ANTONYM: Replace with OPPOSITE:\n'The silk cloth was (smooth) and soft.'", o:["Rough","Even"], a:0, e:"Smooth ↔ ROUGH. Smooth=even surface, rough=uneven." },
+  { k:"sa_m10", r:"Synonyms and Antonyms", q:"ANTONYM: Replace with OPPOSITE:\n'The Mughal king faced a (defeat) at the hands of Chhatrapati Shivaji Maharaj.'", o:["Conquer","Lose"], a:0, e:"Defeat ↔ CONQUER. Defeat=loss, conquer=victory/win." },
+
+  // GENERATED similar
+  { k:"sa_g01", r:"Synonyms and Antonyms", q:"SYNONYM: Replace the bracketed word:\n'The children were (glad) to see the circus.'", o:["Happy","Sad"], a:0, e:"Glad → HAPPY. Both mean feeling pleased." },
+  { k:"sa_g02", r:"Synonyms and Antonyms", q:"SYNONYM: Replace the bracketed word:\n'The (enormous) whale swam past our boat.'", o:["Huge","Tiny"], a:0, e:"Enormous → HUGE. Both mean very large." },
+  { k:"sa_g03", r:"Synonyms and Antonyms", q:"ANTONYM: Replace with OPPOSITE:\n'The road was very (narrow) and winding.'", o:["Wide","Thin"], a:0, e:"Narrow ↔ WIDE. Narrow=not much space, wide=lots of space." },
+  { k:"sa_g04", r:"Synonyms and Antonyms", q:"ANTONYM: Replace with OPPOSITE:\n'She gave a (brave) speech on stage.'", o:["Cowardly","Courageous"], a:0, e:"Brave ↔ COWARDLY. Brave=fearless, cowardly=full of fear." },
+  { k:"sa_g05", r:"Synonyms and Antonyms", q:"SYNONYM: Replace the bracketed word:\n'The old house looked (gloomy) and dark.'", o:["Dreary","Cheerful"], a:0, e:"Gloomy → DREARY. Both mean dark and depressing." },
+  { k:"sa_g06", r:"Synonyms and Antonyms", q:"ANTONYM: Replace with OPPOSITE:\n'The new student was very (shy) on the first day.'", o:["Bold","Timid"], a:0, e:"Shy ↔ BOLD. Shy=nervous/quiet, bold=confident/fearless." },
+
+  // ══════════════════════════════════════════════════════════════
+  // IDIOMS AND PHRASES — Fill idiom into sentence from pool
+  // ══════════════════════════════════════════════════════════════
+
+  // FROM ACTUAL MOCK
+  { k:"id_m01", r:"Idioms and Phrases", q:"Fill in the idiom:\n'My mother would ___ if I don't reach home before four.'\n\nOptions: crack of dawn | go bananas | bolt from the blue | tickled pink | time and again | eat like a horse", o:["go bananas","crack of dawn","bolt from the blue","tickled pink"], a:0, e:"GO BANANAS = become very angry/crazy. Mother would go bananas!" },
+  { k:"id_m02", r:"Idioms and Phrases", q:"Fill in the idiom:\n'I have told my sister ___ not to touch my books.'\n\nOptions: crack of dawn | go bananas | bolt from the blue | tickled pink | time and again | eat like a horse", o:["time and again","crack of dawn","go bananas","bolt from the blue"], a:0, e:"TIME AND AGAIN = repeatedly, over and over." },
+  { k:"id_m03", r:"Idioms and Phrases", q:"Fill in the idiom:\n'The farmers get to work at the ___.'\n\nOptions: crack of dawn | go bananas | bolt from the blue | tickled pink | time and again | eat like a horse", o:["crack of dawn","go bananas","time and again","tickled pink"], a:0, e:"CRACK OF DAWN = very early morning, when sun first appears." },
+  { k:"id_m04", r:"Idioms and Phrases", q:"Fill in the idiom:\n'The little girls were ___ by the tricks of the buffoon.'\n\nOptions: crack of dawn | go bananas | bolt from the blue | tickled pink | time and again | eat like a horse", o:["tickled pink","go bananas","crack of dawn","time and again"], a:0, e:"TICKLED PINK = very pleased/delighted." },
+  { k:"id_m05", r:"Idioms and Phrases", q:"What does this proverb mean?\n'A rotten apple spoils the barrel.'", o:["One bad person can badly influence the whole group","You needn't wait for a special time to begin","A friend in need is a real friend"], a:0, e:"One dishonest/bad person can spoil the whole group. Like one rotten apple making others rot." },
+
+  // GENERATED similar
+  { k:"id_g01", r:"Idioms and Phrases", q:"Fill in the idiom:\n'The news of his transfer was a ___.'\n\nOptions: crack of dawn | go bananas | bolt from the blue | tickled pink | time and again", o:["bolt from the blue","crack of dawn","tickled pink","go bananas"], a:0, e:"BOLT FROM THE BLUE = a sudden, unexpected surprise." },
+  { k:"id_g02", r:"Idioms and Phrases", q:"What does this proverb mean?\n'A stitch in time saves nine.'", o:["Fix small problems early before they become big","Sewing is important","Time passes quickly","Nine is enough"], a:0, e:"Fix a problem when it's small, or it will get much worse later." },
+  { k:"id_g03", r:"Idioms and Phrases", q:"Fill in the idiom:\n'Though I ___, I never get fat.'\n\nOptions: crack of dawn | go bananas | bolt from the blue | tickled pink | time and again | eat like a horse", o:["eat like a horse","go bananas","crack of dawn","time and again"], a:0, e:"EAT LIKE A HORSE = eat a very large amount of food." },
+  { k:"id_g04", r:"Idioms and Phrases", q:"What does this proverb mean?\n'Don't count your chickens before they hatch.'", o:["Don't assume success before it actually happens","Chickens are hard to count","Eggs are fragile","Always be prepared"], a:0, e:"Don't plan based on something that hasn't happened yet." },
+
+  // ══════════════════════════════════════════════════════════════
+  // PRESENTING AN ARGUMENT — Long passage reordering
+  // ══════════════════════════════════════════════════════════════
+
+  // FROM ACTUAL MOCK
+  { k:"pa_m01", r:"Presenting an Argument", q:"'I DON'T NEED A SNOOZE BUTTON' — Arrange in correct order:\n\n1. Happy throughout school day\n2. Didn't feel like sleeping again - unusual\n3. Helped granddad, finished school work quickly\n4. Took mom by surprise - was already fresh!\n5. Stirred from sleep at 5:45 am\n6. Early to bathe, breakfast, didn't run after bus\n7. Knew mom would come at 6 am\n8. Realised this is how I want all days to be\n9. Splashed water, brushed teeth\n10. During dinner, thought how different today was", o:["5, 7, 2, 9, 4, 6, 1, 3, 10, 8","5, 3, 4, 8, 5, 1, 7, 2, 10, 8","6, 7, 2, 9, 4, 5, 1, 3, 10, 8"], a:0, e:"Woke at 5:45(5)→knew mom comes at 6(7)→didn't feel sleepy(2)→washed up(9)→surprised mom(4)→early for everything(6)→happy at school(1)→helped at home(3)→reflected at dinner(10)→decided to continue(8)." },
+
+  // GENERATED similar
+  { k:"pa_g01", r:"Presenting an Argument", q:"'MY FIRST PET' — Arrange in correct order:\n\n1. I named him Buddy and we became best friends.\n2. One day, my father brought home a small puppy.\n3. I promised to take care of him every day.\n4. I was so excited that I jumped with joy.\n5. Now, Buddy follows me everywhere I go.", o:["2, 4, 3, 1, 5","4, 2, 1, 3, 5","2, 3, 4, 1, 5","1, 2, 3, 4, 5"], a:0, e:"Father brought puppy(2)→excited(4)→promised to care(3)→named Buddy(1)→follows everywhere(5). Cause→effect chain!" },
+  { k:"pa_g02", r:"Presenting an Argument", q:"'THE SCHOOL FAIR' — Arrange in correct order:\n\n1. We set up colourful stalls in the playground.\n2. Our teacher announced the annual school fair.\n3. Parents and children enjoyed the games and food.\n4. We planned different activities and food items.\n5. It was the best fair our school ever had.", o:["2, 4, 1, 3, 5","1, 2, 3, 4, 5","2, 1, 4, 3, 5","4, 2, 1, 3, 5"], a:0, e:"Announced(2)→planned(4)→set up(1)→enjoyed(3)→best fair(5). Planning→execution→result!" },
+  { k:"pa_g03", r:"Presenting an Argument", q:"'LEARNING TO RIDE' — Arrange in correct order:\n\n1. I fell down many times but did not give up.\n2. My uncle bought me a new bicycle for my birthday.\n3. After two weeks of practice, I could ride without help.\n4. My father held the seat and ran beside me.\n5. I decided to learn to ride it that very day.", o:["2, 5, 4, 1, 3","5, 2, 4, 1, 3","2, 4, 5, 1, 3","2, 5, 1, 4, 3"], a:0, e:"Got bicycle(2)→decided to learn(5)→father helped(4)→fell but persisted(1)→success(3)." },
 ];
 
+// ─── ENGINE ─────────────────────────────────────────────────────
+function shuffle(a){var b=[].concat(a);for(var i=b.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=b[i];b[i]=b[j];b[j]=t;}return b;}
 
-
-// ─── EXAM GENERATOR ─────────────────────────────────────────────
-function shuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-function generateExam(missedKeys = {}, perRound = 3) {
-  const sections = [];
-  for (const round of ROUNDS) {
-    const meta = RMETA[round];
-    const pool = Q.filter(q => q.r === round);
+function generateExam(missed, qPerRound) {
+  missed = missed || {};
+  // Real exam distribution
+  var distribution = {
+    "Spell It Right": 6, "Word Analysis": 4, "Inflections & Collocations": 6,
+    "Find the Correct Sentence": 4, "General Knowledge": 4, "Words and Meanings": 4,
+    "Form the Correct Sentence": 4, "Phonetics": 6, "Reading Comprehension": 4,
+    "Crossword": 4, "Word Weaving": 3, "Compound Words and Types": 4,
+    "Synonyms and Antonyms": 6, "Idioms and Phrases": 4, "Presenting an Argument": 2
+  };
+  var sections = [];
+  for (var ri = 0; ri < ROUNDS.length; ri++) {
+    var round = ROUNDS[ri];
+    var meta = RMETA[round];
+    var pool = Q.filter(function(q){return q.r === round;});
     if (!pool.length) continue;
-    const weighted = pool.map(q => ({ ...q, weight: missedKeys[q.k] ? 3 : 1 }));
-    const selected = [];
-    const avail = [...weighted];
-    const count = Math.min(perRound, avail.length);
-    for (let i = 0; i < count; i++) {
-      const tw = avail.reduce((s, q) => s + q.weight, 0);
-      let r = Math.random() * tw;
-      let ci = 0;
-      for (let j = 0; j < avail.length; j++) { r -= avail[j].weight; if (r <= 0) { ci = j; break; } }
-      selected.push(avail[ci]);
+    var count = Math.min(distribution[round] || 3, pool.length);
+    var weighted = pool.map(function(q){return {q:q, w: missed[q.k] ? 3 : 1};});
+    var selected = [];
+    var avail = [].concat(weighted);
+    for (var i = 0; i < count; i++) {
+      var tw = avail.reduce(function(s,x){return s+x.w;},0);
+      var r2 = Math.random()*tw, ci = 0;
+      for (var j = 0; j < avail.length; j++) { r2 -= avail[j].w; if (r2 <= 0){ci=j;break;} }
+      selected.push(avail[ci].q);
       avail.splice(ci, 1);
     }
-    const questions = selected.map(q => {
-      const idx = shuffle([0,1,2,3]);
-      return { k: q.k, q: q.q, options: idx.map(i => q.o[i]), answer: idx.indexOf(q.a), explain: q.e };
+    // Shuffle options for non-complex questions (skip ones with only 2 options or complex formatting)
+    var questions = selected.map(function(q) {
+      if (q.o.length <= 2) return {k:q.k, q:q.q, options:q.o, answer:q.a, explain:q.e};
+      var idx = shuffle([0,1,2,3].slice(0, q.o.length));
+      return {k:q.k, q:q.q, options:idx.map(function(i){return q.o[i];}), answer:idx.indexOf(q.a), explain:q.e};
     });
-    sections.push({ name: round, icon: meta.icon, teach: meta.teach, questions });
+    sections.push({name:round, icon:meta.icon, teach:meta.teach, questions:questions, marks: count});
   }
   return sections;
 }
 
+// ─── STORAGE ────────────────────────────────────────────────────
+var SK = "spellbee-v3";
+function loadData(){try{var d=localStorage.getItem(SK);return d?JSON.parse(d):{attempts:[],answerLog:{}};}catch(e){return {attempts:[],answerLog:{}};}}
+function saveData(d){try{localStorage.setItem(SK,JSON.stringify(d));}catch(e){}}
 
-
-// ─── STORAGE (localStorage) ─────────────────────────────────────
-const STORE_KEY = "spellbee-data";
-function loadData() {
-  try { const d = localStorage.getItem(STORE_KEY); return d ? JSON.parse(d) : { attempts: [], answerLog: {} }; }
-  catch { return { attempts: [], answerLog: {} }; }
-}
-function saveData(data) {
-  try { localStorage.setItem(STORE_KEY, JSON.stringify(data)); } catch(e) { console.error("Save failed:", e); }
-}
-
-// ─── THEME ──────────────────────────────────────────────────────
-const T = {
-  bg:"#FFFBF0",card:"#FFF",pri:"#6C63FF",priL:"#E8E6FF",ok:"#22C55E",okL:"#DCFCE7",
-  err:"#EF4444",errL:"#FEE2E2",warn:"#F59E0B",warnL:"#FEF3C7",txt:"#1E293B",
-  txtL:"#64748B",bdr:"#E2E8F0",ac1:"#EC4899",ac3:"#8B5CF6",
-};
+// ─── THEME (closer to TCS iON blue) ────────────────────────────
+var T={bg:"#F0F7FF",card:"#FFF",pri:"#0078D4",priL:"#E1EBF5",ok:"#22C55E",okL:"#DCFCE7",err:"#EF4444",errL:"#FEE2E2",warn:"#F59E0B",warnL:"#FEF3C7",txt:"#1E293B",txtL:"#64748B",bdr:"#D1D9E6",ac1:"#EC4899",ac3:"#6366F1",hdr:"#003C71"};
 
 // ─── APP ────────────────────────────────────────────────────────
-const e = React.createElement;
-const { useState, useCallback, useMemo, useEffect, useRef } = React;
+var e = React.createElement;
+var useState=React.useState, useMemo=React.useMemo, useRef=React.useRef, useEffect=React.useEffect, useCallback=React.useCallback;
 
-function App() {
-  const [screen, setScreen] = useState("home");
-  const [exam, setExam] = useState(null);
-  const [curQ, setCurQ] = useState(0);
-  const [ans, setAns] = useState({});
-  const [data, setData] = useState(loadData());
-  const [retestSec, setRetestSec] = useState(null);
-  const [retestAns, setRetestAns] = useState({});
-  const [retestDone, setRetestDone] = useState(false);
-  const startRef = useRef(null);
-  const [dashPin, setDashPin] = useState("");
-  const [dashAuth, setDashAuth] = useState(false);
+function App(){
+  var _s=useState("home"),screen=_s[0],setScreen=_s[1];
+  var _e=useState(null),exam=_e[0],setExam=_e[1];
+  var _q=useState(0),curQ=_q[0],setCurQ=_q[1];
+  var _a=useState({}),ans=_a[0],setAns=_a[1];
+  var _d=useState(loadData()),data=_d[0],setData=_d[1];
+  var _rs=useState(null),retestSec=_rs[0],setRetestSec=_rs[1];
+  var _ra=useState({}),retestAns=_ra[0],setRetestAns=_ra[1];
+  var _rd=useState(false),retestDone=_rd[0],setRetestDone=_rd[1];
+  var startRef=useRef(null);
+  var _timer=useState(3600),timeLeft=_timer[0],setTimeLeft=_timer[1];
+  var timerRef=useRef(null);
+  var _dp=useState(""),dashPin=_dp[0],setDashPin=_dp[1];
+  var _da=useState(false),dashAuth=_da[0],setDashAuth=_da[1];
 
-  const allQ = useMemo(function() {
-    if (!exam) return [];
-    return exam.reduce(function(acc, s, si) {
-      return acc.concat(s.questions.map(function(q) { return Object.assign({}, q, {si:si, sn:s.name, sic:s.icon}); }));
-    }, []);
-  }, [exam]);
-  const totQ = allQ.length;
+  var allQ=useMemo(function(){
+    if(!exam)return[];
+    return exam.reduce(function(acc,s,si){
+      return acc.concat(s.questions.map(function(q){return Object.assign({},q,{si:si,sn:s.name,sic:s.icon});}));
+    },[]);
+  },[exam]);
+  var totQ=allQ.length;
 
-  function startExam() {
-    var missed = {};
-    Object.keys(data.answerLog).forEach(function(k) { var v = data.answerLog[k]; if (v.wrong > 0) missed[k] = v.wrong; });
-    var sections = generateExam(missed, 3);
-    setExam(sections); setCurQ(0); setAns({}); startRef.current = Date.now(); setScreen("exam");
+  function startExam(){
+    var missed={};
+    Object.keys(data.answerLog).forEach(function(k){var v=data.answerLog[k];if(v.wrong>0)missed[k]=v.wrong;});
+    var sections=generateExam(missed);
+    setExam(sections);setCurQ(0);setAns({});startRef.current=Date.now();setTimeLeft(3600);setScreen("exam");
+    if(timerRef.current)clearInterval(timerRef.current);
+    timerRef.current=setInterval(function(){setTimeLeft(function(t){if(t<=1){clearInterval(timerRef.current);return 0;}return t-1;});},1000);
   }
 
-  function pick(qi, oi) { setAns(function(p) { var n = Object.assign({}, p); n[qi] = oi; return n; }); }
+  function pick(qi,oi){setAns(function(p){var n=Object.assign({},p);n[qi]=oi;return n;});}
 
-  function submitExam() {
-    var dur = Math.round((Date.now() - (startRef.current || Date.now())) / 1000);
-    var correct = 0;
-    var newLog = Object.assign({}, data.answerLog);
-    allQ.forEach(function(q, i) {
-      var ua = ans[i]; var ic = ua === q.answer;
-      if (ic) correct++;
-      if (!newLog[q.k]) newLog[q.k] = { seen: 0, correct: 0, wrong: 0, round: q.sn };
-      newLog[q.k].seen++;
-      if (ic) newLog[q.k].correct++; else newLog[q.k].wrong++;
+  function submitExam(){
+    if(timerRef.current)clearInterval(timerRef.current);
+    var dur=Math.round((Date.now()-(startRef.current||Date.now()))/1000);
+    var correct=0;var newLog=Object.assign({},data.answerLog);
+    allQ.forEach(function(q,i){
+      var ua=ans[i],ic=ua===q.answer;if(ic)correct++;
+      if(!newLog[q.k])newLog[q.k]={seen:0,correct:0,wrong:0,round:q.sn};
+      newLog[q.k].seen++;if(ic)newLog[q.k].correct++;else newLog[q.k].wrong++;
     });
-    var pct = Math.round((correct / totQ) * 100);
-    var attempt = { date: new Date().toISOString(), score: correct, total: totQ, pct: pct, duration: dur };
-    var newData = { attempts: data.attempts.concat([attempt]), answerLog: newLog };
-    setData(newData);
-    saveData(newData);
-    setScreen("results");
+    var pct=Math.round(correct/totQ*100);
+    var attempt={date:new Date().toISOString(),score:correct,total:totQ,pct:pct,duration:dur};
+    var nd={attempts:data.attempts.concat([attempt]),answerLog:newLog};
+    setData(nd);saveData(nd);setScreen("results");
   }
 
-  function getResults() {
-    if (!exam) return { total: 0, correct: 0, sections: [] };
-    var correct = 0;
-    var sr = exam.map(function(sec, si) {
-      var sc = 0;
-      var qd = sec.questions.map(function(q, qi) {
-        var gi = exam.slice(0, si).reduce(function(a, s) { return a + s.questions.length; }, 0) + qi;
-        var ua = ans[gi], ic = ua === q.answer;
-        if (ic) { sc++; correct++; }
-        return Object.assign({}, q, { userAnswer: ua, isCorrect: ic });
+  function getResults(){
+    if(!exam)return{total:0,correct:0,sections:[]};
+    var correct=0;
+    var sr=exam.map(function(sec,si){
+      var sc=0;
+      var qd=sec.questions.map(function(q,qi){
+        var gi=exam.slice(0,si).reduce(function(a,s){return a+s.questions.length;},0)+qi;
+        var ua=ans[gi],ic=ua===q.answer;if(ic){sc++;correct++;}
+        return Object.assign({},q,{userAnswer:ua,isCorrect:ic});
       });
-      return Object.assign({}, sec, { correct: sc, total: sec.questions.length, questions: qd });
+      return Object.assign({},sec,{correct:sc,total:sec.questions.length,questions:qd});
     });
-    return { total: totQ, correct: correct, sections: sr };
+    return{total:totQ,correct:correct,sections:sr};
   }
 
-  // Helper to create styled elements
-  function d(tag, style, props, children) {
-    var p = Object.assign({style: style}, props || {});
-    return e.apply(null, [tag, p].concat(children || []));
-  }
+  function fmtTime(s){return Math.floor(s/60)+":"+(s%60<10?"0":"")+s%60;}
 
   // ─── DASHBOARD ────────────────────────────────────────────────
-  if (screen === "dashboard") {
-    if (!dashAuth) {
-      return e("div", {style:{minHeight:"100vh",background:T.bg,display:"flex",alignItems:"center",justifyContent:"center"}},
-        e("div", {style:{background:T.card,borderRadius:20,padding:32,maxWidth:340,width:"100%",textAlign:"center",border:"1px solid "+T.bdr}},
-          e("div", {style:{fontSize:40,marginBottom:8}}, "🔒"),
-          e("h2", {style:{margin:"0 0 4px",fontSize:20,fontWeight:700,color:T.txt}}, "Parent Dashboard"),
-          e("p", {style:{margin:"0 0 16px",fontSize:13,color:T.txtL}}, "Enter PIN"),
-          e("input", {type:"password",value:dashPin,onChange:function(ev){setDashPin(ev.target.value);},
-            onKeyDown:function(ev){if(ev.key==="Enter"&&dashPin==="1234")setDashAuth(true);},
-            placeholder:"PIN",style:{width:"100%",padding:12,borderRadius:12,border:"2px solid "+T.bdr,fontSize:16,textAlign:"center",outline:"none",boxSizing:"border-box",marginBottom:12}}),
-          e("button", {onClick:function(){if(dashPin==="1234")setDashAuth(true);else alert("Wrong PIN");},
-            style:{width:"100%",padding:12,borderRadius:12,border:"none",background:T.pri,color:"#fff",fontSize:15,fontWeight:600,cursor:"pointer"}}, "View"),
-          e("p", {style:{margin:"12px 0 0",fontSize:11,color:T.txtL}}, "PIN: 1234"),
-          e("button", {onClick:function(){setScreen("home");},style:{marginTop:12,background:"none",border:"none",color:T.pri,cursor:"pointer",fontSize:13}}, "← Back")
-        )
-      );
+  if(screen==="dashboard"){
+    if(!dashAuth){
+      return e("div",{style:{minHeight:"100vh",background:T.bg,display:"flex",alignItems:"center",justifyContent:"center"}},
+        e("div",{style:{background:T.card,borderRadius:16,padding:32,maxWidth:340,width:"100%",textAlign:"center",border:"1px solid "+T.bdr}},
+          e("div",{style:{fontSize:40,marginBottom:8}},"🔒"),
+          e("h2",{style:{margin:"0 0 4px",fontSize:20,fontWeight:700,color:T.txt}},"Parent Dashboard"),
+          e("input",{type:"password",value:dashPin,onChange:function(ev){setDashPin(ev.target.value);},onKeyDown:function(ev){if(ev.key==="Enter"&&dashPin==="1234")setDashAuth(true);},placeholder:"PIN",style:{width:"100%",padding:12,borderRadius:10,border:"2px solid "+T.bdr,fontSize:16,textAlign:"center",outline:"none",boxSizing:"border-box",margin:"16px 0 12px"}}),
+          e("button",{onClick:function(){if(dashPin==="1234")setDashAuth(true);else alert("Wrong PIN");},style:{width:"100%",padding:12,borderRadius:10,border:"none",background:T.pri,color:"#fff",fontSize:15,fontWeight:600,cursor:"pointer"}},"View"),
+          e("button",{onClick:function(){setScreen("home");},style:{marginTop:12,background:"none",border:"none",color:T.pri,cursor:"pointer",fontSize:13}},"← Back")));
     }
+    var atts=data.attempts,avg=atts.length?Math.round(atts.reduce(function(s,a){return s+a.pct;},0)/atts.length):0,best=atts.length?Math.max.apply(null,atts.map(function(a){return a.pct;})):0;
+    var rs={};Object.keys(data.answerLog).forEach(function(k){var v=data.answerLog[k];if(!rs[v.round])rs[v.round]={t:0,c:0};rs[v.round].t+=v.seen;rs[v.round].c+=v.correct;});
+    var ra=Object.keys(rs).map(function(n){return{name:n,pct:Math.round(rs[n].c/rs[n].t*100)};}).sort(function(a,b){return a.pct-b.pct;});
 
-    var atts = data.attempts;
-    var avg = atts.length ? Math.round(atts.reduce(function(s,a){return s+a.pct;},0)/atts.length) : 0;
-    var best = atts.length ? Math.max.apply(null, atts.map(function(a){return a.pct;})) : 0;
-    var roundStats = {};
-    Object.keys(data.answerLog).forEach(function(k) {
-      var v = data.answerLog[k];
-      if (!roundStats[v.round]) roundStats[v.round] = {total:0,correct:0};
-      roundStats[v.round].total += v.seen;
-      roundStats[v.round].correct += v.correct;
-    });
-    var roundArr = Object.keys(roundStats).map(function(name) {
-      var s = roundStats[name];
-      return {name:name, pct:Math.round(s.correct/s.total*100)};
-    }).sort(function(a,b){return a.pct-b.pct;});
-
-    return e("div", {style:{minHeight:"100vh",background:T.bg}},
-      e("div", {style:{maxWidth:650,margin:"0 auto",padding:"24px 16px"}},
-        e("div", {style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}},
-          e("h1", {style:{margin:0,fontSize:22,fontWeight:800,color:T.txt}}, "📊 Dashboard"),
-          e("button", {onClick:function(){setDashAuth(false);setDashPin("");setScreen("home");},
-            style:{padding:"8px 16px",borderRadius:10,background:T.priL,color:T.pri,fontWeight:600,fontSize:13,border:"none",cursor:"pointer"}}, "← Home")
-        ),
-        // Stats cards
-        e("div", {style:{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:20}},
+    return e("div",{style:{minHeight:"100vh",background:T.bg}},
+      e("div",{style:{maxWidth:650,margin:"0 auto",padding:"24px 16px"}},
+        e("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}},
+          e("h1",{style:{margin:0,fontSize:20,fontWeight:800,color:T.hdr}},"📊 Progress Dashboard"),
+          e("button",{onClick:function(){setDashAuth(false);setDashPin("");setScreen("home");},style:{padding:"8px 16px",borderRadius:8,background:T.priL,color:T.pri,fontWeight:600,fontSize:13,border:"none",cursor:"pointer"}},"← Home")),
+        e("div",{style:{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:20}},
           [{l:"Attempts",v:atts.length,c:T.pri},{l:"Average",v:avg+"%",c:T.warn},{l:"Best",v:best+"%",c:T.ok}].map(function(s,i){
-            return e("div", {key:i,style:{background:T.card,borderRadius:12,padding:16,border:"1px solid "+T.bdr,textAlign:"center"}},
-              e("div", {style:{fontSize:28,fontWeight:800,color:s.c}}, s.v),
-              e("div", {style:{fontSize:11,color:T.txtL,marginTop:4}}, s.l)
-            );
-          })
-        ),
-        // Score history bars
-        atts.length > 0 && e("div", {style:{background:T.card,borderRadius:14,padding:16,border:"1px solid "+T.bdr,marginBottom:20}},
-          e("h2", {style:{margin:"0 0 12px",fontSize:15,fontWeight:700,color:T.txt}}, "📈 Score History"),
-          e("div", {style:{display:"flex",alignItems:"flex-end",gap:4,height:120}},
-            atts.slice(-20).map(function(a,i){
-              return e("div", {key:i,style:{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2}},
-                e("span", {style:{fontSize:9,color:T.txtL,fontWeight:600}}, a.pct+"%"),
-                e("div", {style:{width:"100%",background:a.pct>=70?T.ok:a.pct>=50?T.warn:T.err,borderRadius:"4px 4px 0 0",height:Math.max(a.pct,5)+"%",minHeight:4}}),
-                e("span", {style:{fontSize:8,color:T.txtL}}, "#"+(atts.indexOf(a)+1))
-              );
-            })
-          )
-        ),
-        // Round accuracy
-        roundArr.length > 0 && e("div", {style:{background:T.card,borderRadius:14,padding:16,border:"1px solid "+T.bdr,marginBottom:20}},
-          e("h2", {style:{margin:"0 0 12px",fontSize:15,fontWeight:700,color:T.txt}}, "🎯 Accuracy by Round"),
-          roundArr.map(function(r,i){
-            return e("div", {key:i,style:{marginBottom:8}},
-              e("div", {style:{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:3}},
-                e("span", {style:{color:T.txt}}, r.name.length>25?r.name.slice(0,23)+"..":r.name),
-                e("span", {style:{fontWeight:700,color:r.pct>=70?T.ok:r.pct>=50?T.warn:T.err}}, r.pct+"%")
-              ),
-              e("div", {style:{height:8,background:"#F1F5F9",borderRadius:99}},
-                e("div", {style:{height:"100%",borderRadius:99,width:r.pct+"%",background:r.pct>=70?T.ok:r.pct>=50?T.warn:T.err}})
-              )
-            );
-          })
-        ),
-        // All attempts list
-        atts.length > 0 && e("div", {style:{background:T.card,borderRadius:14,padding:16,border:"1px solid "+T.bdr,marginBottom:20}},
-          e("h2", {style:{margin:"0 0 12px",fontSize:15,fontWeight:700,color:T.txt}}, "📋 All Attempts"),
-          atts.slice().reverse().map(function(a,i){
-            return e("div", {key:i,style:{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid "+T.bdr,fontSize:13}},
-              e("span", {style:{color:T.txtL}}, new Date(a.date).toLocaleDateString("en-IN",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})),
-              e("span", {style:{fontWeight:700,color:a.pct>=70?T.ok:a.pct>=50?T.warn:T.err}}, a.score+"/"+a.total+" ("+a.pct+"%)")
-            );
-          })
-        ),
-        atts.length === 0 && e("div", {style:{textAlign:"center",padding:40,color:T.txtL}},
-          e("div", {style:{fontSize:48}}, "📝"), e("p", null, "No attempts yet!")
-        ),
-        e("button", {onClick:function(){if(confirm("Erase ALL progress?")){saveData({attempts:[],answerLog:{}});setData({attempts:[],answerLog:{}});}},
-          style:{display:"block",margin:"20px auto",padding:"8px 16px",borderRadius:8,border:"1px solid "+T.err,background:"transparent",color:T.err,fontSize:12,cursor:"pointer"}}, "🗑️ Reset All Data")
-      )
-    );
+            return e("div",{key:i,style:{background:T.card,borderRadius:10,padding:14,border:"1px solid "+T.bdr,textAlign:"center"}},
+              e("div",{style:{fontSize:26,fontWeight:800,color:s.c}},s.v),e("div",{style:{fontSize:11,color:T.txtL,marginTop:4}},s.l));})),
+        atts.length>0&&e("div",{style:{background:T.card,borderRadius:12,padding:16,border:"1px solid "+T.bdr,marginBottom:20}},
+          e("h2",{style:{margin:"0 0 12px",fontSize:14,fontWeight:700,color:T.txt}},"📈 Score History"),
+          e("div",{style:{display:"flex",alignItems:"flex-end",gap:3,height:100}},
+            atts.slice(-20).map(function(a,i){return e("div",{key:i,style:{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2}},
+              e("span",{style:{fontSize:8,color:T.txtL,fontWeight:600}},a.pct+"%"),
+              e("div",{style:{width:"100%",background:a.pct>=70?T.ok:a.pct>=50?T.warn:T.err,borderRadius:"3px 3px 0 0",height:Math.max(a.pct,5)+"%",minHeight:4}}),
+              e("span",{style:{fontSize:7,color:T.txtL}},"#"+(atts.indexOf(a)+1)));}))),
+        ra.length>0&&e("div",{style:{background:T.card,borderRadius:12,padding:16,border:"1px solid "+T.bdr,marginBottom:20}},
+          e("h2",{style:{margin:"0 0 12px",fontSize:14,fontWeight:700,color:T.txt}},"🎯 Accuracy by Round (weakest first)"),
+          ra.map(function(r,i){return e("div",{key:i,style:{marginBottom:7}},
+            e("div",{style:{display:"flex",justifyContent:"space-between",fontSize:11,marginBottom:2}},
+              e("span",{style:{color:T.txt}},r.name.length>28?r.name.slice(0,26)+"..":r.name),
+              e("span",{style:{fontWeight:700,color:r.pct>=70?T.ok:r.pct>=50?T.warn:T.err}},r.pct+"%")),
+            e("div",{style:{height:7,background:"#F1F5F9",borderRadius:99}},
+              e("div",{style:{height:"100%",borderRadius:99,width:r.pct+"%",background:r.pct>=70?T.ok:r.pct>=50?T.warn:T.err}})));})),
+        atts.length>0&&e("div",{style:{background:T.card,borderRadius:12,padding:16,border:"1px solid "+T.bdr,marginBottom:20}},
+          e("h2",{style:{margin:"0 0 10px",fontSize:14,fontWeight:700,color:T.txt}},"📋 All Attempts"),
+          atts.slice().reverse().map(function(a,i){return e("div",{key:i,style:{display:"flex",justifyContent:"space-between",padding:"5px 0",borderBottom:"1px solid "+T.bdr,fontSize:12}},
+            e("span",{style:{color:T.txtL}},new Date(a.date).toLocaleDateString("en-IN",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})),
+            e("span",{style:{fontWeight:700,color:a.pct>=70?T.ok:a.pct>=50?T.warn:T.err}},a.score+"/"+a.total+" ("+a.pct+"%)"));})),
+        atts.length===0&&e("div",{style:{textAlign:"center",padding:40,color:T.txtL}},e("div",{style:{fontSize:48}},"📝"),e("p",null,"No attempts yet!")),
+        e("button",{onClick:function(){if(confirm("Erase ALL data?")){saveData({attempts:[],answerLog:{}});setData({attempts:[],answerLog:{}});}},style:{display:"block",margin:"16px auto",padding:"6px 14px",borderRadius:6,border:"1px solid "+T.err,background:"transparent",color:T.err,fontSize:11,cursor:"pointer"}},"🗑 Reset Data")));
   }
 
   // ─── HOME ─────────────────────────────────────────────────────
-  if (screen === "home") {
-    return e("div", {style:{minHeight:"100vh",background:T.bg}},
-      e("div", {style:{maxWidth:600,margin:"0 auto",padding:"32px 16px"}},
-        e("div", {style:{textAlign:"center",marginBottom:28}},
-          e("div", {style:{fontSize:48,marginBottom:4}}, "🐝"),
-          e("h1", {style:{fontSize:26,fontWeight:800,color:T.txt,margin:0}}, "SpellBee International"),
-          e("p", {style:{color:T.pri,fontWeight:600,fontSize:14,margin:"4px 0"}}, "Level 4 (International) • Grade 2"),
-          e("p", {style:{color:T.txtL,fontSize:12}}, "15 SLEP Rounds • Fresh questions every attempt!")
-        ),
-        e("div", {onClick:startExam,style:{background:"linear-gradient(135deg,"+T.pri+","+T.ac3+")",borderRadius:16,padding:24,textAlign:"center",cursor:"pointer",color:"#fff",marginBottom:16,boxShadow:"0 4px 16px rgba(108,99,255,0.3)"}},
-          e("div", {style:{fontSize:32,marginBottom:8}}, "▶"),
-          e("h2", {style:{margin:0,fontSize:20,fontWeight:700}}, "Start New Exam"),
-          e("p", {style:{margin:"8px 0 0",opacity:0.9,fontSize:13}}, "45 questions • 15 rounds • Adapts to weak areas")
-        ),
-        data.attempts.length > 0 && e("div", {style:{background:T.card,borderRadius:12,padding:16,border:"1px solid "+T.bdr,marginBottom:16}},
-          e("h3", {style:{margin:"0 0 8px",fontSize:14,fontWeight:700,color:T.txt}}, "📊 Recent ("+data.attempts.length+" total)"),
-          data.attempts.slice().reverse().slice(0,5).map(function(a,i){
-            return e("div", {key:i,style:{display:"flex",justifyContent:"space-between",padding:"5px 0",borderBottom:i<4?"1px solid "+T.bdr:"none",fontSize:13}},
-              e("span", {style:{color:T.txtL}}, new Date(a.date).toLocaleDateString("en-IN",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})),
-              e("span", {style:{fontWeight:700,color:a.pct>=70?T.ok:a.pct>=50?T.warn:T.err}}, a.score+"/"+a.total+" ("+a.pct+"%)")
-            );
-          })
-        ),
-        e("button", {onClick:function(){setScreen("dashboard");},style:{display:"block",width:"100%",textAlign:"center",padding:12,background:T.card,borderRadius:12,border:"1px solid "+T.bdr,color:T.pri,fontWeight:600,fontSize:14,cursor:"pointer",marginBottom:16}}, "📊 Parent Dashboard"),
-        e("div", {style:{padding:12,background:T.warnL,borderRadius:12,fontSize:12,color:"#92400E",lineHeight:"1.6",textAlign:"center"}},
-          "💡 Each exam has fresh questions from a pool of "+Q.length+". Wrong answers appear more often next time!"
-        )
-      )
-    );
+  if(screen==="home"){
+    return e("div",{style:{minHeight:"100vh",background:T.bg}},
+      e("div",{style:{maxWidth:600,margin:"0 auto",padding:"28px 16px"}},
+        // Header bar similar to TCS iON
+        e("div",{style:{background:T.hdr,borderRadius:12,padding:"16px 20px",color:"#fff",marginBottom:20,textAlign:"center"}},
+          e("div",{style:{fontSize:12,opacity:0.8,marginBottom:4}},"SpellBee International – Remote Assessment Practice"),
+          e("h1",{style:{margin:0,fontSize:22,fontWeight:700}},"SPIN MOCK GRADE 2"),
+          e("p",{style:{margin:"4px 0 0",fontSize:13,opacity:0.9}},"Level 4 (International) • 15 Sections • ~65 Questions")),
+        e("div",{onClick:startExam,style:{background:"linear-gradient(135deg,"+T.pri+",#005a9e)",borderRadius:12,padding:22,textAlign:"center",cursor:"pointer",color:"#fff",marginBottom:16,boxShadow:"0 4px 16px rgba(0,120,212,0.3)"}},
+          e("div",{style:{fontSize:28,marginBottom:6}},"▶"),
+          e("h2",{style:{margin:0,fontSize:18,fontWeight:700}},"Start Practice Exam"),
+          e("p",{style:{margin:"6px 0 0",opacity:0.9,fontSize:12}},"Fresh questions each time • Wrong answers reappear more • 60 min timer")),
+        data.attempts.length>0&&e("div",{style:{background:T.card,borderRadius:10,padding:14,border:"1px solid "+T.bdr,marginBottom:14}},
+          e("h3",{style:{margin:"0 0 8px",fontSize:13,fontWeight:700,color:T.txt}},"📊 Recent ("+data.attempts.length+" total)"),
+          data.attempts.slice().reverse().slice(0,5).map(function(a,i){return e("div",{key:i,style:{display:"flex",justifyContent:"space-between",padding:"4px 0",borderBottom:i<4?"1px solid "+T.bdr:"none",fontSize:12}},
+            e("span",{style:{color:T.txtL}},new Date(a.date).toLocaleDateString("en-IN",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})),
+            e("span",{style:{fontWeight:700,color:a.pct>=70?T.ok:a.pct>=50?T.warn:T.err}},a.score+"/"+a.total+" ("+a.pct+"%)"));})),
+        e("button",{onClick:function(){setScreen("dashboard");},style:{display:"block",width:"100%",textAlign:"center",padding:12,background:T.card,borderRadius:10,border:"1px solid "+T.bdr,color:T.pri,fontWeight:600,fontSize:13,cursor:"pointer",marginBottom:14}},"📊 Parent Dashboard (PIN: 1234)"),
+        e("div",{style:{padding:10,background:T.warnL,borderRadius:10,fontSize:11,color:"#92400E",lineHeight:"1.6",textAlign:"center"}},"💡 Questions match the real SPIN Mock format: phonemic spelling, odd-one-out inflections, in-context synonyms/antonyms, poem comprehension, passage reordering, and more.")));
   }
 
   // ─── EXAM ─────────────────────────────────────────────────────
-  if (screen === "exam" && exam) {
-    var q = allQ[curQ]; var ac = Object.keys(ans).length;
-    return e("div", {style:{minHeight:"100vh",background:T.bg}},
-      e("div", {style:{maxWidth:600,margin:"0 auto",padding:16}},
-        // Header
-        e("div", {style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}},
-          e("button", {onClick:function(){if(confirm("Leave?"))setScreen("home");},style:{background:"none",border:"none",color:T.txtL,cursor:"pointer",fontSize:14}}, "← Back"),
-          e("span", {style:{fontSize:14,fontWeight:600,color:T.txt}}, "Practice Exam"),
-          e("span", {style:{padding:"3px 10px",borderRadius:99,fontSize:12,fontWeight:600,color:T.pri,background:T.priL}}, ac+"/"+totQ)
-        ),
-        // Progress bar
-        e("div", {style:{marginBottom:16}},
-          e("div", {style:{display:"flex",justifyContent:"space-between",marginBottom:6,fontSize:13,color:T.txtL}},
-            e("span", null, q.sic+" "+q.sn), e("span", null, "Q"+(curQ+1)+"/"+totQ)
-          ),
-          e("div", {style:{height:8,background:T.bdr,borderRadius:99}},
-            e("div", {style:{height:"100%",background:"linear-gradient(90deg,"+T.pri+","+T.ac3+")",borderRadius:99,width:((curQ+1)/totQ*100)+"%",transition:"width 0.4s"}})
-          )
-        ),
-        // Section tabs
-        e("div", {style:{display:"flex",gap:3,marginBottom:12,overflowX:"auto",paddingBottom:4}},
-          exam.map(function(s,i){
-            var st = exam.slice(0,i).reduce(function(a,sec){return a+sec.questions.length;},0);
-            return e("button", {key:i,onClick:function(){setCurQ(st);},
-              style:{flexShrink:0,padding:"4px 8px",borderRadius:8,fontSize:11,border:"none",cursor:"pointer",
-                background:i===q.si?T.pri:T.card,color:i===q.si?"#fff":T.txtL,fontWeight:i===q.si?600:400}}, s.icon);
-          })
-        ),
-        // Question card
-        e("div", {style:{background:T.card,borderRadius:16,padding:20,border:"1px solid "+T.bdr,marginBottom:12}},
-          e("div", {style:{display:"flex",justifyContent:"space-between",marginBottom:14}},
-            e("span", {style:{padding:"3px 10px",borderRadius:99,fontSize:12,fontWeight:600,color:T.ac3,background:"#F3E8FF"}}, "Q"+(curQ+1)),
-            e("span", {style:{fontSize:11,color:T.txtL}}, q.sic+" "+q.sn)
-          ),
-          e("p", {style:{fontSize:15,fontWeight:600,color:T.txt,lineHeight:"1.6",margin:"0 0 16px",whiteSpace:"pre-line"}}, q.q),
-          e("div", {style:{display:"flex",flexDirection:"column",gap:8}},
-            q.options.map(function(opt,i){
-              var sel = ans[curQ]===i;
-              return e("button", {key:i,onClick:function(){pick(curQ,i);},
-                style:{display:"flex",alignItems:"center",gap:12,padding:"11px 14px",borderRadius:12,
-                  border:"2px solid "+(sel?T.pri:T.bdr),background:sel?T.priL:T.card,cursor:"pointer",textAlign:"left"}},
-                e("span", {style:{width:28,height:28,borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",
-                  fontSize:13,fontWeight:700,background:sel?T.pri:"#F1F5F9",color:sel?"#fff":T.txtL}}, "ABCD"[i]),
-                e("span", {style:{fontSize:14,color:T.txt,fontWeight:sel?600:400}}, opt)
-              );
-            })
-          )
-        ),
-        // Nav buttons
-        e("div", {style:{display:"flex",gap:8,marginBottom:12}},
-          e("button", {onClick:function(){setCurQ(Math.max(0,curQ-1));},disabled:curQ===0,
-            style:{flex:1,padding:12,borderRadius:12,border:"1px solid "+T.bdr,background:T.card,
-              color:curQ===0?T.bdr:T.txt,cursor:curQ===0?"default":"pointer",fontWeight:600,fontSize:14}}, "← Prev"),
-          curQ<totQ-1 ?
-            e("button", {onClick:function(){setCurQ(curQ+1);},
-              style:{flex:1,padding:12,borderRadius:12,border:"none",background:"linear-gradient(135deg,"+T.pri+","+T.ac3+")",
-                color:"#fff",cursor:"pointer",fontWeight:600,fontSize:14}}, "Next →") :
-            e("button", {onClick:submitExam,
-              style:{flex:1,padding:12,borderRadius:12,border:"none",
-                background:ac<totQ?"linear-gradient(135deg,"+T.warn+",#D97706)":"linear-gradient(135deg,"+T.ok+",#16A34A)",
-                color:"#fff",cursor:"pointer",fontWeight:600,fontSize:14}},
-              ac<totQ ? "Submit ("+(totQ-ac)+" left)" : "✓ Submit")
-        ),
-        // Jump grid
-        e("div", {style:{background:T.card,borderRadius:10,padding:10,border:"1px solid "+T.bdr}},
-          e("p", {style:{fontSize:11,color:T.txtL,margin:"0 0 6px",fontWeight:600}}, "Jump:"),
-          e("div", {style:{display:"flex",flexWrap:"wrap",gap:3}},
-            allQ.map(function(_,i){
-              return e("button", {key:i,onClick:function(){setCurQ(i);},
-                style:{width:28,height:28,borderRadius:6,fontSize:10,fontWeight:600,
-                  border:i===curQ?"2px solid "+T.pri:"1px solid transparent",
-                  background:ans[i]!==undefined?T.priL:"#F1F5F9",color:ans[i]!==undefined?T.pri:T.txtL,cursor:"pointer"}}, i+1);
-            })
-          )
-        )
-      )
-    );
+  if(screen==="exam"&&exam){
+    var q=allQ[curQ],ac=Object.keys(ans).length;
+    // Get current section's question index
+    var secStart=exam.slice(0,q.si).reduce(function(a,s){return a+s.questions.length;},0);
+    var qInSec=curQ-secStart;
+    return e("div",{style:{minHeight:"100vh",background:T.bg,display:"flex",flexDirection:"column"}},
+      // ── Top header bar (full width)
+      e("div",{style:{background:T.hdr,padding:"10px 20px",color:"#fff",display:"flex",justifyContent:"space-between",alignItems:"center",flexShrink:0}},
+        e("span",{style:{fontSize:14,fontWeight:700}},"SPIN MOCK GRADE 2"),
+        e("span",{style:{fontSize:14,fontWeight:700,background:"rgba(255,255,255,0.15)",padding:"4px 14px",borderRadius:20}},"⏱ "+fmtTime(timeLeft)),
+        e("span",{style:{fontSize:13}},ac+"/"+totQ+" answered")),
+      // ── Section tabs (full width, scrollable)
+      e("div",{className:"tab-bar"},
+        exam.map(function(s,i){
+          var st=exam.slice(0,i).reduce(function(a,sec){return a+sec.questions.length;},0);
+          var isCur=i===q.si;
+          // Show checkmark if all answered in section
+          var secEnd=st+s.questions.length;
+          var allDone=true;for(var j=st;j<secEnd;j++){if(ans[j]===undefined)allDone=false;}
+          var label=s.icon+" "+s.name;
+          if(label.length>18)label=s.icon+" "+s.name.split(" ").slice(0,2).join(" ");
+          return e("button",{key:i,onClick:function(){setCurQ(st);},className:isCur?"tab-active":"tab-inactive"},
+            (allDone?"✅ ":"")+label);})),
+      // ── Section sub-header
+      e("div",{style:{background:T.priL,padding:"8px 20px",fontSize:13,color:T.hdr,fontWeight:600,borderBottom:"1px solid "+T.bdr}},
+        exam[q.si].icon+" "+exam[q.si].name.toUpperCase()+" – ("+exam[q.si].questions.length+"×1 = "+exam[q.si].questions.length+" Marks)"),
+      // ── Two-panel body
+      e("div",{className:"exam-panels",style:{flex:1}},
+        // LEFT PANEL: Question + options
+        e("div",{className:"exam-left"},
+          // Section teaching hint (collapsible feel)
+          e("div",{style:{background:T.warnL,borderRadius:8,padding:"8px 12px",marginBottom:14,fontSize:11,color:"#92400E",lineHeight:"1.5"}},"💡 "+exam[q.si].teach),
+          // Question card
+          e("div",{style:{background:T.card,borderRadius:10,padding:20,border:"1px solid "+T.bdr,marginBottom:14}},
+            e("div",{style:{fontSize:13,color:T.hdr,marginBottom:10,fontWeight:700}},"Question No. "+(curQ+1)),
+            e("p",{style:{fontSize:15,fontWeight:600,color:T.txt,lineHeight:"1.8",whiteSpace:"pre-line",margin:"0 0 20px"}},q.q),
+            // Options with radio buttons
+            e("div",{style:{display:"flex",flexDirection:"column",gap:10}},
+              q.options.map(function(opt,i){
+                var sel=ans[curQ]===i;
+                return e("label",{key:i,onClick:function(){pick(curQ,i);},style:{display:"flex",alignItems:"center",gap:12,padding:"12px 16px",borderRadius:8,border:"2px solid "+(sel?T.pri:T.bdr),background:sel?T.priL:"#FAFCFF",cursor:"pointer",transition:"all 0.15s"}},
+                  e("span",{style:{width:20,height:20,borderRadius:20,border:"2px solid "+(sel?T.pri:"#aaa"),background:sel?T.pri:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}},
+                    sel&&e("span",{style:{width:8,height:8,borderRadius:8,background:"#fff"}})),
+                  e("span",{style:{fontSize:14,color:T.txt,lineHeight:"1.5"}},opt));}))),
+          // Navigation buttons
+          e("div",{style:{display:"flex",gap:10,marginTop:16,paddingBottom:20}},
+            curQ>0&&e("button",{onClick:function(){setCurQ(curQ-1);},style:{padding:"11px 24px",borderRadius:8,border:"1px solid "+T.bdr,background:T.card,color:T.txt,cursor:"pointer",fontWeight:600,fontSize:13}},"Previous"),
+            curQ<totQ-1?
+              e("button",{onClick:function(){setCurQ(curQ+1);},style:{padding:"11px 24px",borderRadius:8,border:"none",background:T.pri,color:"#fff",cursor:"pointer",fontWeight:600,fontSize:13}},"Save & Next"):
+              e("button",{onClick:submitExam,style:{padding:"11px 24px",borderRadius:8,border:"none",background:T.ok,color:"#fff",cursor:"pointer",fontWeight:700,fontSize:14}},"Submit"),
+            e("button",{onClick:function(){if(confirm("Submit exam now?"))submitExam();},style:{marginLeft:"auto",padding:"11px 20px",borderRadius:8,border:"2px solid "+T.err,background:"transparent",color:T.err,cursor:"pointer",fontWeight:600,fontSize:13}},"Submit"))),
+        // RIGHT PANEL: Section navigator + status
+        e("div",{className:"exam-right"},
+          // Status summary
+          e("div",{style:{display:"flex",gap:8,marginBottom:14}},
+            e("div",{style:{flex:1,textAlign:"center",padding:6,background:T.okL,borderRadius:6}},
+              e("div",{style:{fontSize:16,fontWeight:800,color:T.ok}},ac),
+              e("div",{style:{fontSize:9,color:T.ok}},"Answered")),
+            e("div",{style:{flex:1,textAlign:"center",padding:6,background:T.errL,borderRadius:6}},
+              e("div",{style:{fontSize:16,fontWeight:800,color:T.err}},totQ-ac),
+              e("div",{style:{fontSize:9,color:T.err}},"Remaining"))),
+          // Current section navigator
+          e("div",{style:{background:T.hdr,color:"#fff",padding:"8px 10px",borderRadius:"6px 6px 0 0",fontSize:12,fontWeight:600}},exam[q.si].name),
+          e("div",{style:{border:"1px solid "+T.bdr,borderTop:"none",borderRadius:"0 0 6px 6px",padding:10,marginBottom:14}},
+            e("div",{style:{fontSize:10,color:T.txtL,marginBottom:6}},"Choose a Question"),
+            e("div",{className:"q-nav"},
+              exam[q.si].questions.map(function(qq,qi){
+                var gi=secStart+qi;
+                var answered=ans[gi]!==undefined;var isCur=gi===curQ;
+                return e("button",{key:qi,onClick:function(){setCurQ(gi);},
+                  style:{border:isCur?"2px solid "+T.pri:"1px solid "+T.bdr,
+                    background:answered?"#22C55E":isCur?T.priL:T.card,
+                    color:answered?"#fff":T.txt}},qi+1);}))),
+          // Full exam jump grid
+          e("div",{style:{marginTop:8}},
+            e("div",{style:{fontSize:10,color:T.txtL,marginBottom:6,fontWeight:600}},"All Questions"),
+            e("div",{style:{display:"flex",flexWrap:"wrap",gap:3}},
+              allQ.map(function(_,i){
+                var answered=ans[i]!==undefined;var isCur=i===curQ;
+                return e("button",{key:i,onClick:function(){setCurQ(i);},
+                  style:{width:28,height:28,borderRadius:4,fontSize:9,fontWeight:600,border:isCur?"2px solid "+T.pri:"1px solid transparent",
+                    background:answered?T.priL:"#F1F5F9",color:answered?T.pri:T.txtL,cursor:"pointer"}},i+1);}))))));
   }
 
   // ─── RESULTS ──────────────────────────────────────────────────
-  if (screen === "results" && exam) {
-    var r = getResults();
-    var pct = Math.round((r.correct/r.total)*100);
-    var emoji = pct>=90?"🏆":pct>=70?"🌟":pct>=50?"💪":"🌱";
-    var msg = pct>=90?"Outstanding!":pct>=70?"Great job!":pct>=50?"Good effort!":"Keep practising!";
-
-    return e("div", {style:{minHeight:"100vh",background:T.bg}},
-      e("div", {style:{maxWidth:600,margin:"0 auto",padding:"24px 16px"}},
-        // Score card
-        e("div", {style:{background:"linear-gradient(135deg,"+T.pri+","+T.ac3+")",borderRadius:20,padding:28,textAlign:"center",color:"#fff",marginBottom:20}},
-          e("div", {style:{fontSize:52}}, emoji),
-          e("h1", {style:{margin:"4px 0",fontSize:24,fontWeight:800}}, msg),
-          e("div", {style:{fontSize:44,fontWeight:800,margin:"4px 0"}}, pct+"%"),
-          e("p", {style:{margin:0,opacity:0.9}}, r.correct+" / "+r.total+" correct")
-        ),
-        // Round by round
-        e("h2", {style:{fontSize:16,fontWeight:700,color:T.txt,margin:"0 0 10px"}}, "📊 Round-by-Round"),
+  if(screen==="results"&&exam){
+    var r=getResults(),pct=Math.round(r.correct/r.total*100);
+    var emoji=pct>=90?"🏆":pct>=70?"🌟":pct>=50?"💪":"🌱";
+    var msg=pct>=90?"Outstanding!":pct>=70?"Great job!":pct>=50?"Good effort!":"Keep practising!";
+    return e("div",{style:{minHeight:"100vh",background:T.bg}},
+      e("div",{style:{maxWidth:600,margin:"0 auto",padding:"24px 16px"}},
+        e("div",{style:{background:"linear-gradient(135deg,"+T.hdr+",#005a9e)",borderRadius:16,padding:24,textAlign:"center",color:"#fff",marginBottom:20}},
+          e("div",{style:{fontSize:48}},emoji),e("h1",{style:{margin:"4px 0",fontSize:22,fontWeight:800}},msg),
+          e("div",{style:{fontSize:40,fontWeight:800,margin:"4px 0"}},pct+"%"),
+          e("p",{style:{margin:0,opacity:0.9,fontSize:14}},r.correct+" / "+r.total+" correct")),
+        e("h2",{style:{fontSize:15,fontWeight:700,color:T.txt,margin:"0 0 10px"}},"📊 Section Results"),
         r.sections.map(function(s,i){
-          var sp = Math.round(s.correct/s.total*100);
-          var perf = s.correct===s.total;
-          var sc = perf?T.ok:sp>=50?T.warn:T.err;
-          return e("div", {key:i,style:{background:T.card,borderRadius:10,padding:14,marginBottom:6,border:"1px solid "+T.bdr,borderLeft:"4px solid "+sc}},
-            e("div", {style:{display:"flex",justifyContent:"space-between",alignItems:"center"}},
-              e("div", null,
-                e("span", {style:{fontSize:13,fontWeight:600,color:T.txt}}, s.icon+" "+s.name),
-                e("span", {style:{fontSize:11,color:T.txtL,marginLeft:6}}, s.correct+"/"+s.total)
-              ),
-              perf ? e("span", {style:{fontSize:10,color:T.ok,fontWeight:600}}, "⭐") :
-                e("button", {onClick:function(){setRetestSec(s);setRetestAns({});setRetestDone(false);setScreen("retest");},
-                  style:{padding:"3px 8px",borderRadius:6,border:"none",fontSize:10,background:T.priL,color:T.pri,cursor:"pointer",fontWeight:600}}, "Practice")
-            ),
-            e("div", {style:{height:5,background:"#F1F5F9",borderRadius:99,marginTop:6}},
-              e("div", {style:{height:"100%",background:sc,borderRadius:99,width:sp+"%"}})
-            )
-          );
-        }),
-        // Mistakes review
-        e("h2", {style:{fontSize:16,fontWeight:700,color:T.txt,margin:"20px 0 10px"}}, "📝 Review Mistakes"),
+          var sp=Math.round(s.correct/s.total*100),perf=s.correct===s.total,sc=perf?T.ok:sp>=50?T.warn:T.err;
+          return e("div",{key:i,style:{background:T.card,borderRadius:8,padding:12,marginBottom:5,border:"1px solid "+T.bdr,borderLeft:"4px solid "+sc}},
+            e("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center"}},
+              e("div",null,e("span",{style:{fontSize:12,fontWeight:600,color:T.txt}},s.icon+" "+s.name),e("span",{style:{fontSize:11,color:T.txtL,marginLeft:6}},s.correct+"/"+s.total)),
+              perf?e("span",{style:{fontSize:10,color:T.ok,fontWeight:600}},"⭐"):
+                e("button",{onClick:function(){setRetestSec(s);setRetestAns({});setRetestDone(false);setScreen("retest");},style:{padding:"3px 8px",borderRadius:5,border:"none",fontSize:10,background:T.priL,color:T.pri,cursor:"pointer",fontWeight:600}},"Practice")),
+            e("div",{style:{height:4,background:"#F1F5F9",borderRadius:99,marginTop:5}},e("div",{style:{height:"100%",background:sc,borderRadius:99,width:sp+"%"}})));}),
+        e("h2",{style:{fontSize:15,fontWeight:700,color:T.txt,margin:"18px 0 10px"}},"📝 Review Mistakes"),
         r.sections.filter(function(s){return s.correct<s.total;}).map(function(s,si){
-          return e("div", {key:si,style:{marginBottom:16}},
-            e("h3", {style:{fontSize:14,fontWeight:700,color:T.ac3,margin:"0 0 6px"}}, s.icon+" "+s.name),
-            e("div", {style:{background:T.warnL,borderRadius:8,padding:10,marginBottom:8,fontSize:12,color:"#92400E",lineHeight:"1.5"}}, "💡 "+s.teach),
-            s.questions.filter(function(q){return !q.isCorrect;}).map(function(q,qi){
-              return e("div", {key:qi,style:{background:T.card,borderRadius:8,padding:12,marginBottom:5,borderLeft:"3px solid "+T.err,border:"1px solid "+T.errL}},
-                e("p", {style:{margin:0,fontSize:12,fontWeight:600,color:T.txt,whiteSpace:"pre-line"}}, q.q),
-                e("div", {style:{marginTop:4,fontSize:11}},
-                  q.userAnswer!==undefined ?
-                    e("span", {style:{color:T.err,fontWeight:600}}, "You: "+"ABCD"[q.userAnswer]+" — "+q.options[q.userAnswer]) :
-                    e("span", {style:{color:T.txtL}}, "Not answered")
-                ),
-                e("div", {style:{marginTop:3,fontSize:11,color:T.ok,fontWeight:600}}, "✓ "+"ABCD"[q.answer]+" — "+q.options[q.answer]),
-                e("div", {style:{marginTop:6,padding:8,background:"#F0F9FF",borderRadius:6,fontSize:11,color:"#0369A1",lineHeight:"1.5"}}, "📖 "+q.explain)
-              );
-            })
-          );
-        }),
-        // Action buttons
-        e("div", {style:{display:"flex",gap:8,marginTop:20,marginBottom:32}},
-          e("button", {onClick:function(){setScreen("home");},
-            style:{flex:1,padding:12,borderRadius:12,border:"1px solid "+T.bdr,background:T.card,color:T.txt,cursor:"pointer",fontWeight:600,fontSize:14}}, "🏠 Home"),
-          e("button", {onClick:startExam,
-            style:{flex:1,padding:12,borderRadius:12,border:"none",background:"linear-gradient(135deg,"+T.pri+","+T.ac3+")",color:"#fff",cursor:"pointer",fontWeight:600,fontSize:14}}, "🔄 New Exam")
-        )
-      )
-    );
+          return e("div",{key:si,style:{marginBottom:14}},
+            e("h3",{style:{fontSize:13,fontWeight:700,color:T.hdr,margin:"0 0 5px"}},s.icon+" "+s.name),
+            e("div",{style:{background:T.warnL,borderRadius:6,padding:8,marginBottom:6,fontSize:11,color:"#92400E",lineHeight:"1.5"}},"💡 "+s.teach),
+            s.questions.filter(function(q){return!q.isCorrect;}).map(function(q,qi){
+              return e("div",{key:qi,style:{background:T.card,borderRadius:6,padding:10,marginBottom:4,borderLeft:"3px solid "+T.err,border:"1px solid "+T.errL}},
+                e("p",{style:{margin:0,fontSize:11,fontWeight:600,color:T.txt,whiteSpace:"pre-line"}},q.q),
+                e("div",{style:{marginTop:3,fontSize:10}},
+                  q.userAnswer!==undefined?e("span",{style:{color:T.err,fontWeight:600}},"Your answer: "+q.options[q.userAnswer]):e("span",{style:{color:T.txtL}},"Not answered")),
+                e("div",{style:{marginTop:2,fontSize:10,color:T.ok,fontWeight:600}},"✓ Correct: "+q.options[q.answer]),
+                e("div",{style:{marginTop:5,padding:6,background:"#F0F7FF",borderRadius:5,fontSize:10,color:"#0369A1",lineHeight:"1.5"}},"📖 "+q.explain));}));}),
+        e("div",{style:{display:"flex",gap:8,marginTop:18,marginBottom:30}},
+          e("button",{onClick:function(){setScreen("home");},style:{flex:1,padding:12,borderRadius:10,border:"1px solid "+T.bdr,background:T.card,color:T.txt,cursor:"pointer",fontWeight:600,fontSize:13}},"🏠 Home"),
+          e("button",{onClick:startExam,style:{flex:1,padding:12,borderRadius:10,border:"none",background:T.pri,color:"#fff",cursor:"pointer",fontWeight:600,fontSize:13}},"🔄 New Exam"))));
   }
 
   // ─── RETEST ───────────────────────────────────────────────────
-  if (screen === "retest" && retestSec) {
-    var wq = retestSec.questions.filter(function(q){return !q.isCorrect;});
-    if (!wq.length) return e("div",{style:{minHeight:"100vh",background:T.bg,display:"flex",alignItems:"center",justifyContent:"center"}},
-      e("div",{style:{textAlign:"center"}},e("div",{style:{fontSize:56}},"⭐"),e("h2",null,"All correct!"),
-        e("button",{onClick:function(){setScreen("results");},style:{padding:"12px 24px",borderRadius:12,border:"none",background:T.pri,color:"#fff",cursor:"pointer",fontWeight:600}},"Back")));
-
-    return e("div", {style:{minHeight:"100vh",background:T.bg}},
-      e("div", {style:{maxWidth:600,margin:"0 auto",padding:"24px 16px"}},
-        e("button", {onClick:function(){setScreen("results");},style:{background:"none",border:"none",color:T.txtL,cursor:"pointer",fontSize:14,marginBottom:12}}, "← Results"),
-        e("div", {style:{background:"linear-gradient(135deg,"+T.ac1+","+T.ac3+")",borderRadius:16,padding:18,color:"#fff",marginBottom:16,textAlign:"center"}},
-          e("h2", {style:{margin:0,fontSize:18,fontWeight:700}}, "🎯 "+retestSec.icon+" "+retestSec.name)
-        ),
-        e("div", {style:{background:T.warnL,borderRadius:10,padding:12,marginBottom:16,fontSize:12,color:"#92400E",lineHeight:"1.5"}}, "💡 "+retestSec.teach),
+  if(screen==="retest"&&retestSec){
+    var wq=retestSec.questions.filter(function(q){return!q.isCorrect;});
+    if(!wq.length)return e("div",{style:{minHeight:"100vh",background:T.bg,display:"flex",alignItems:"center",justifyContent:"center"}},
+      e("div",{style:{textAlign:"center"}},e("div",{style:{fontSize:48}},"⭐"),e("h2",null,"All correct!"),
+        e("button",{onClick:function(){setScreen("results");},style:{padding:"10px 20px",borderRadius:8,border:"none",background:T.pri,color:"#fff",cursor:"pointer",fontWeight:600,marginTop:12}},"Back")));
+    return e("div",{style:{minHeight:"100vh",background:T.bg}},
+      e("div",{style:{maxWidth:600,margin:"0 auto",padding:"20px 16px"}},
+        e("button",{onClick:function(){setScreen("results");},style:{background:"none",border:"none",color:T.txtL,cursor:"pointer",fontSize:13,marginBottom:10}},"← Results"),
+        e("div",{style:{background:T.hdr,borderRadius:10,padding:14,color:"#fff",marginBottom:14,textAlign:"center"}},
+          e("h2",{style:{margin:0,fontSize:16,fontWeight:700}},"🎯 "+retestSec.icon+" "+retestSec.name)),
+        e("div",{style:{background:T.warnL,borderRadius:8,padding:10,marginBottom:14,fontSize:11,color:"#92400E",lineHeight:"1.5"}},"💡 "+retestSec.teach),
         wq.map(function(q,i){
           var ua=retestAns[i],sh=retestDone,ok=sh&&ua===q.answer;
-          return e("div", {key:i,style:{background:T.card,borderRadius:12,padding:16,marginBottom:10,
-            border:"1px solid "+(sh?(ok?T.ok:T.errL):T.bdr),borderLeft:sh?"4px solid "+(ok?T.ok:T.err):"4px solid "+T.pri}},
-            e("p", {style:{fontSize:13,fontWeight:600,color:T.txt,lineHeight:"1.5",margin:"0 0 10px",whiteSpace:"pre-line"}}, q.q),
-            e("div", {style:{display:"flex",flexDirection:"column",gap:6}},
+          return e("div",{key:i,style:{background:T.card,borderRadius:10,padding:14,marginBottom:8,border:"1px solid "+(sh?(ok?T.ok:T.errL):T.bdr),borderLeft:sh?"4px solid "+(ok?T.ok:T.err):"4px solid "+T.pri}},
+            e("p",{style:{fontSize:12,fontWeight:600,color:T.txt,lineHeight:"1.6",margin:"0 0 10px",whiteSpace:"pre-line"}},q.q),
+            e("div",{style:{display:"flex",flexDirection:"column",gap:6}},
               q.options.map(function(opt,oi){
-                var sel=ua===oi,cor=oi===q.answer;
-                var bg=T.card,bc=T.bdr;
+                var sel=ua===oi,cor=oi===q.answer,bg=T.card,bc=T.bdr;
                 if(sh&&cor){bg=T.okL;bc=T.ok;}if(sh&&sel&&!cor){bg=T.errL;bc=T.err;}if(!sh&&sel){bg=T.priL;bc=T.pri;}
-                return e("button", {key:oi,onClick:function(){if(!retestDone){var n=Object.assign({},retestAns);n[i]=oi;setRetestAns(n);}},
-                  style:{display:"flex",alignItems:"center",gap:10,padding:"9px 12px",borderRadius:10,border:"2px solid "+bc,background:bg,cursor:retestDone?"default":"pointer",textAlign:"left"}},
-                  e("span", {style:{width:24,height:24,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,
-                    background:(sel&&!sh)?T.pri:(sh&&cor)?T.ok:"#F1F5F9",color:((sel&&!sh)||(sh&&cor))?"#fff":T.txtL}}, "ABCD"[oi]),
-                  e("span", {style:{fontSize:13,color:T.txt}}, opt)
-                );
-              })
-            ),
-            sh && e("div", {style:{marginTop:10,padding:10,background:"#F0F9FF",borderRadius:8,fontSize:12,color:"#0369A1",lineHeight:"1.5"}}, "📖 "+q.explain)
-          );
-        }),
-        !retestDone ?
-          e("button", {onClick:function(){setRetestDone(true);},
-            style:{width:"100%",padding:12,borderRadius:12,border:"none",marginTop:8,background:"linear-gradient(135deg,"+T.ok+",#16A34A)",color:"#fff",cursor:"pointer",fontWeight:600,fontSize:14}}, "✓ Check Answers") :
-          e("div", {style:{display:"flex",gap:8,marginTop:12,justifyContent:"center"}},
-            e("button", {onClick:function(){setRetestAns({});setRetestDone(false);},
-              style:{padding:"8px 16px",borderRadius:10,border:"1px solid "+T.bdr,background:T.card,color:T.txt,cursor:"pointer",fontWeight:600,fontSize:12}}, "🔄 Retry"),
-            e("button", {onClick:function(){setScreen("results");},
-              style:{padding:"8px 16px",borderRadius:10,border:"none",background:T.pri,color:"#fff",cursor:"pointer",fontWeight:600,fontSize:12}}, "📊 Results")
-          )
-      )
-    );
+                return e("label",{key:oi,onClick:function(){if(!retestDone){var n=Object.assign({},retestAns);n[i]=oi;setRetestAns(n);}},style:{display:"flex",alignItems:"center",gap:8,padding:"8px 10px",borderRadius:6,border:"2px solid "+bc,background:bg,cursor:retestDone?"default":"pointer"}},
+                  e("span",{style:{width:16,height:16,borderRadius:16,border:"2px solid "+(sel?T.pri:"#999"),background:sel?T.pri:"transparent",display:"inline-block"}}),
+                  e("span",{style:{fontSize:12,color:T.txt}},opt));})),
+            sh&&e("div",{style:{marginTop:8,padding:8,background:"#F0F7FF",borderRadius:6,fontSize:11,color:"#0369A1",lineHeight:"1.5"}},"📖 "+q.explain));}),
+        !retestDone?
+          e("button",{onClick:function(){setRetestDone(true);},style:{width:"100%",padding:12,borderRadius:10,border:"none",marginTop:6,background:T.ok,color:"#fff",cursor:"pointer",fontWeight:600,fontSize:13}},"✓ Check Answers"):
+          e("div",{style:{display:"flex",gap:8,marginTop:10,justifyContent:"center"}},
+            e("button",{onClick:function(){setRetestAns({});setRetestDone(false);},style:{padding:"8px 14px",borderRadius:8,border:"1px solid "+T.bdr,background:T.card,color:T.txt,cursor:"pointer",fontWeight:600,fontSize:12}},"🔄 Retry"),
+            e("button",{onClick:function(){setScreen("results");},style:{padding:"8px 14px",borderRadius:8,border:"none",background:T.pri,color:"#fff",cursor:"pointer",fontWeight:600,fontSize:12}},"📊 Results"))));
   }
-
   return null;
 }
 
-ReactDOM.render(React.createElement(App), document.getElementById("root"));
+ReactDOM.render(React.createElement(App),document.getElementById("root"));
 </script>
 </body>
 </html>
