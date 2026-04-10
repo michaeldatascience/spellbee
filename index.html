@@ -2,725 +2,997 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>SpellBee Practice - Level 4 Grade 2</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz 2 Study — Computer Networks</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#F0F7FF;min-height:100vh}
-#root{min-height:100vh}
-/* Section tab bar */
-.tab-bar{display:flex;gap:2px;overflow-x:auto;padding:4px 8px;background:#E1EBF5;border-radius:0;margin-bottom:0;-webkit-overflow-scrolling:touch}
-.tab-bar::-webkit-scrollbar{height:3px}
-.tab-bar::-webkit-scrollbar-thumb{background:#0078D4;border-radius:3px}
-.tab-bar button{flex-shrink:0;padding:8px 14px;border-radius:20px;font-size:12px;border:none;cursor:pointer;font-weight:500;white-space:nowrap;transition:all 0.2s}
-.tab-active{background:#0078D4;color:#fff!important;box-shadow:0 2px 6px rgba(0,120,212,0.3)}
-.tab-inactive{background:transparent;color:#444}
-.tab-inactive:hover{background:rgba(0,120,212,0.1)}
-/* Two-panel layout for exam */
-.exam-panels{display:flex;gap:0;min-height:calc(100vh - 160px)}
-.exam-left{flex:1;padding:16px 20px;border-right:1px solid #D1D9E6;background:#FAFCFF;overflow-y:auto}
-.exam-right{width:260px;flex-shrink:0;padding:16px;background:#fff;overflow-y:auto}
-@media(max-width:800px){
-  .exam-panels{flex-direction:column}
-  .exam-left{border-right:none;border-bottom:1px solid #D1D9E6}
-  .exam-right{width:100%}
-}
-/* Question nav grid */
-.q-nav{display:flex;flex-wrap:wrap;gap:4px}
-.q-nav button{width:34px;height:34px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.15s}
-/* General containers */
-.container-narrow{max-width:700px;margin:0 auto;padding:24px 16px}
-.container-wide{max-width:1100px;margin:0 auto}
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3350;
+    --text: #e8eaf6;
+    --muted: #7b82a8;
+    --accent: #6c63ff;
+    --accent2: #00d4aa;
+    --warn: #ff6b6b;
+    --gold: #ffd166;
+    --blue: #4fc3f7;
+    --green: #69f0ae;
+    --font: 'Segoe UI', system-ui, sans-serif;
+    --mono: 'Consolas', 'Fira Code', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 15px; line-height: 1.6; }
+
+  /* LAYOUT */
+  .shell { display: flex; min-height: 100vh; }
+  .sidebar { width: 260px; background: var(--surface); border-right: 1px solid var(--border); position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; flex-shrink: 0; }
+  .main { margin-left: 260px; flex: 1; max-width: 860px; padding: 2rem; }
+
+  /* SIDEBAR */
+  .sidebar-header { padding: 1.25rem 1.25rem .75rem; border-bottom: 1px solid var(--border); }
+  .sidebar-title { font-size: 13px; font-weight: 700; letter-spacing: .08em; color: var(--accent); text-transform: uppercase; }
+  .timer-box { background: var(--surface2); border-radius: 8px; padding: .6rem .75rem; margin-top: .75rem; display: flex; align-items: center; gap: .5rem; }
+  .timer-val { font-family: var(--mono); font-size: 18px; font-weight: 700; color: var(--gold); }
+  .timer-lbl { font-size: 11px; color: var(--muted); }
+  .score-box { margin-top: .75rem; }
+  .score-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .score-val { color: var(--green); font-weight: 600; }
+  .progress-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; margin-bottom: 8px; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 2px; transition: width .4s; }
+
+  .nav-section { padding: .75rem 1.25rem .25rem; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+  .nav-item { display: flex; align-items: center; gap: .6rem; padding: .5rem 1.25rem; cursor: pointer; font-size: 13px; color: var(--muted); transition: all .15s; border-left: 3px solid transparent; }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: var(--surface2); color: var(--accent); border-left-color: var(--accent); }
+  .nav-item.done { color: var(--green); }
+  .nav-item.done .nav-dot { background: var(--green); }
+  .nav-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border); flex-shrink: 0; }
+  .nav-marks { margin-left: auto; font-size: 11px; background: var(--surface2); padding: 1px 6px; border-radius: 8px; }
+
+  /* MAIN CONTENT */
+  .block { display: none; }
+  .block.visible { display: block; }
+  .block-header { margin-bottom: 1.75rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+  .block-tag { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; margin-bottom: .4rem; }
+  .block-title { font-size: 26px; font-weight: 700; color: var(--text); line-height: 1.2; }
+  .block-meta { font-size: 13px; color: var(--muted); margin-top: .4rem; }
+
+  /* TOPIC CARDS */
+  .topic { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 1.25rem; overflow: hidden; }
+  .topic-hdr { padding: 1rem 1.25rem; cursor: pointer; display: flex; align-items: center; gap: .75rem; user-select: none; }
+  .topic-hdr:hover { background: var(--surface2); }
+  .topic-num { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+  .topic-name { font-size: 15px; font-weight: 600; flex: 1; }
+  .topic-marks { font-size: 11px; color: var(--muted); }
+  .topic-chev { color: var(--muted); font-size: 12px; transition: transform .2s; }
+  .topic-chev.open { transform: rotate(90deg); }
+  .topic-body { display: none; padding: 0 1.25rem 1.25rem; border-top: 1px solid var(--border); }
+  .topic-body.open { display: block; }
+
+  /* CONTENT COMPONENTS */
+  .formula { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: .85rem 1rem; font-family: var(--mono); font-size: 13px; margin: .75rem 0; line-height: 1.8; color: var(--blue); }
+  .formula .comment { color: var(--muted); }
+  .example { background: var(--surface2); border-left: 3px solid var(--accent2); border-radius: 0 8px 8px 0; padding: .85rem 1rem; margin: .75rem 0; font-size: 13px; line-height: 1.8; }
+  .example .step { color: var(--muted); font-size: 12px; margin-bottom: 2px; }
+  .example .calc { font-family: var(--mono); color: var(--accent2); }
+  .example .answer { font-weight: 700; color: var(--green); margin-top: .5rem; }
+  .trap { background: #2a1a1a; border-left: 3px solid var(--warn); border-radius: 0 8px 8px 0; padding: .75rem 1rem; margin: .75rem 0; font-size: 13px; color: #ffb3b3; }
+  .trap-label { font-size: 11px; font-weight: 700; color: var(--warn); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+  .tip { background: #1a2a1a; border-left: 3px solid var(--green); border-radius: 0 8px 8px 0; padding: .75rem 1rem; margin: .75rem 0; font-size: 13px; color: #b3ffcc; }
+  .section-lbl { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin: 1rem 0 .4rem; }
+
+  /* PRACTICE PROBLEMS */
+  .practice { background: var(--surface2); border: 1px solid var(--accent); border-radius: 10px; margin-top: 1rem; padding: 1rem; }
+  .practice-label { font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .08em; margin-bottom: .6rem; }
+  .practice-q { font-size: 14px; margin-bottom: .85rem; line-height: 1.7; }
+  .practice-input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: .5rem .75rem; color: var(--text); font-size: 14px; font-family: var(--mono); outline: none; transition: border .15s; }
+  .practice-input:focus { border-color: var(--accent); }
+  .practice-btns { display: flex; gap: .5rem; margin-top: .6rem; }
+  .btn { padding: .45rem 1rem; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all .15s; }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: #5a52e0; }
+  .btn-reveal { background: var(--surface); border: 1px solid var(--border); color: var(--text); }
+  .btn-reveal:hover { border-color: var(--accent2); }
+  .btn-done { background: var(--surface); border: 1px solid var(--green); color: var(--green); }
+  .practice-answer { display: none; margin-top: .85rem; padding: .85rem; background: var(--bg); border-radius: 8px; border: 1px solid var(--border); font-size: 13px; line-height: 1.8; }
+  .practice-answer.show { display: block; }
+  .check-result { margin-top: .5rem; font-size: 13px; font-weight: 600; display: none; }
+  .check-result.correct { color: var(--green); }
+  .check-result.wrong { color: var(--warn); }
+
+  /* STEP TABLES */
+  .step-table { width: 100%; border-collapse: collapse; font-size: 12px; font-family: var(--mono); margin: .75rem 0; }
+  .step-table th { background: var(--surface); color: var(--muted); padding: 6px 10px; text-align: left; border: 1px solid var(--border); font-size: 11px; }
+  .step-table td { padding: 6px 10px; border: 1px solid var(--border); }
+  .step-table tr:nth-child(even) td { background: rgba(255,255,255,.02); }
+  .step-table .highlight td { background: rgba(108,99,255,.15); color: var(--accent); }
+
+  /* NAV BUTTONS */
+  .nav-btns { display: flex; gap: .75rem; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+  .btn-nav { padding: .6rem 1.25rem; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--text); transition: all .15s; }
+  .btn-nav:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-nav.next { background: var(--accent); color: white; border-color: var(--accent); }
+  .btn-nav.next:hover { background: #5a52e0; }
+
+  /* COLORS PER BLOCK */
+  .c-purple .topic-num { background: rgba(108,99,255,.2); color: var(--accent); }
+  .c-teal .topic-num { background: rgba(0,212,170,.15); color: var(--accent2); }
+  .c-blue .topic-num { background: rgba(79,195,247,.15); color: var(--blue); }
+  .c-gold .topic-num { background: rgba(255,209,102,.15); color: var(--gold); }
+
+  .tag-purple { color: var(--accent); }
+  .tag-teal { color: var(--accent2); }
+  .tag-blue { color: var(--blue); }
+  .tag-gold { color: var(--gold); }
+
+  /* SUMMARY */
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin: 1rem 0; }
+  .summary-card { background: var(--surface2); border-radius: 10px; padding: 1rem; }
+  .summary-card .lbl { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .summary-card .val { font-size: 22px; font-weight: 700; }
+  .cheatsheet { background: var(--surface2); border-radius: 10px; padding: 1rem 1.25rem; }
+  .cs-row { display: flex; align-items: baseline; gap: .75rem; padding: .35rem 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .cs-row:last-child { border-bottom: none; }
+  .cs-name { color: var(--muted); width: 220px; flex-shrink: 0; }
+  .cs-formula { font-family: var(--mono); color: var(--blue); }
+
+  code { font-family: var(--mono); background: var(--surface2); padding: 1px 5px; border-radius: 4px; font-size: 12px; color: var(--blue); }
+
+  @media (max-width: 768px) {
+    .sidebar { transform: translateX(-260px); }
+    .main { margin-left: 0; }
+  }
 </style>
 </head>
 <body>
-<div id="root"></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<div class="shell">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-title">CN Quiz 2 — Study</div>
+    <div class="timer-box">
+      <div>
+        <div class="timer-val" id="timer">00:00:00</div>
+        <div class="timer-lbl">session time</div>
+      </div>
+      <button class="btn btn-reveal" id="timerBtn" style="margin-left:auto;padding:.3rem .6rem;font-size:12px" onclick="toggleTimer()">Start</button>
+    </div>
+    <div class="score-box">
+      <div class="score-row"><span>Topics done</span><span class="score-val" id="doneCount">0 / 5</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <div class="nav-section">Blocks</div>
+  <div class="nav-item active" id="nav-0" onclick="goto(0)"><div class="nav-dot" id="dot-0"></div><span>TCP Congestion Control</span><span class="nav-marks">~22 m</span></div>
+  <div class="nav-item" id="nav-1" onclick="goto(1)"><div class="nav-dot" id="dot-1"></div><span>IP / Subnetting / NAT</span><span class="nav-marks">~14 m</span></div>
+  <div class="nav-item" id="nav-2" onclick="goto(2)"><div class="nav-dot" id="dot-2"></div><span>Flow Control</span><span class="nav-marks">~6 m</span></div>
+  <div class="nav-item" id="nav-3" onclick="goto(3)"><div class="nav-dot" id="dot-3"></div><span>Dijkstra</span><span class="nav-marks">~4 m</span></div>
+  <div class="nav-item" id="nav-4" onclick="goto(4)"><div class="nav-dot" id="dot-4"></div><span>Full Formula Sheet</span><span class="nav-marks">ref</span></div>
+
+  <div class="nav-section" style="margin-top:.5rem">Exam stats</div>
+  <div style="padding:.5rem 1.25rem;font-size:12px;color:var(--muted);line-height:1.8">
+    15 questions<br>
+    50 marks total<br>
+    W5–8 only<br>
+    No W1–4 in Q2 PYQ
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+<!-- ============================================================ BLOCK 0: TCP -->
+<div class="block visible c-purple" id="block-0">
+  <div class="block-header">
+    <div class="block-tag tag-purple">Block 1 · Hours 1–5 · ~22 marks</div>
+    <div class="block-title">TCP Congestion Control</div>
+    <div class="block-meta">W5–W6 · Slow start · Congestion avoidance · Fast retransmit · Fast recovery · Jain's FI · TCP throughput</div>
+  </div>
+
+  <!-- TOPIC 1: Slow Start + CA cwnd tracing -->
+  <div class="topic">
+    <div class="topic-hdr" onclick="toggleTopic(this)">
+      <div class="topic-num">1</div>
+      <div class="topic-name">Slow start → congestion avoidance: cwnd tracing</div>
+      <div class="topic-marks">Q34 type · 4 marks</div>
+      <div class="topic-chev">▶</div>
+    </div>
+    <div class="topic-body">
+      <div class="section-lbl">How it works</div>
+      <p style="font-size:14px;color:var(--muted);margin-bottom:.5rem">TCP starts in <strong style="color:var(--text)">Slow Start</strong>: cwnd doubles each RTT. When cwnd hits ssthresh, it switches to <strong style="color:var(--text)">Congestion Avoidance</strong>: +1 MSS per RTT. On RTO (timeout): reset cwnd=1, new ssthresh = old cwnd/2.</p>
+      <div class="formula">
+<span class="comment">-- Slow Start (cwnd &lt; ssthresh) --</span>
+cwnd(n+1) = cwnd(n) × 2   <span class="comment">// doubles each RTT</span>
+
+<span class="comment">-- Congestion Avoidance (cwnd ≥ ssthresh) --</span>
+cwnd(n+1) = cwnd(n) + 1 MSS   <span class="comment">// +1 per RTT</span>
+
+<span class="comment">-- On RTO --</span>
+ssthresh = max(cwnd/2, 2·MSS)
+cwnd = 1 MSS   <span class="comment">// restart slow start</span></div>
+
+      <div class="section-lbl">Exact Q2 PYQ — Q34 worked solution</div>
+      <div class="example">
+        <div class="step">Given: cwnd=1 MSS, MSS=2KB, ssthresh=32KB. No loss for 4 RTTs. After SS ends at 32KB, 3 more RTTs of CA. Find final cwnd in KB.</div>
+        <div class="calc">SS starts: cwnd = 1 MSS = 2 KB</div>
+        <div class="calc">RTT1: 2×2 = 4 KB &nbsp; RTT2: 4×2 = 8 KB</div>
+        <div class="calc">RTT3: 8×2 = 16 KB &nbsp; RTT4: 16×2 = 32 KB = ssthresh → enter CA</div>
+        <div class="calc">CA RTT5: 32+2 = 34 KB</div>
+        <div class="calc">CA RTT6: 34+2 = 36 KB</div>
+        <div class="calc">CA RTT7: 36+2 = 38 KB</div>
+        <div class="answer">Answer: 38 KB ✓</div>
+      </div>
+      <div class="trap">
+        <div class="trap-label">⚠ Trap</div>
+        When cwnd reaches ssthresh it does NOT double again. It adds exactly 1 MSS in CA. Also: count RTTs carefully — the problem said "4 RTTs no loss, then slow start ENDS at 32KB, then 3 more RTTs". The 4 RTTs take you TO ssthresh, not past it.
+      </div>
+
+      <div class="practice">
+        <div class="practice-label">Practice — attempt before revealing</div>
+        <div class="practice-q">A TCP connection starts with cwnd = 1 MSS = 1 KB, ssthresh = 16 KB. There is no packet loss for 6 RTTs. What is the cwnd (in KB) after those 6 RTTs?</div>
+        <input class="practice-input" id="p1-ans" placeholder="Enter answer in KB" />
+        <div class="practice-btns">
+          <button class="btn btn-primary" onclick="checkAns('p1', '19', 'After 6 RTTs')">Check</button>
+          <button class="btn btn-reveal" onclick="revealAns('p1')">Reveal solution</button>
+        </div>
+        <div class="check-result" id="p1-result"></div>
+        <div class="practice-answer" id="p1-sol">
+          <strong style="color:var(--accent2)">Worked solution:</strong><br>
+          SS: RTT1=2, RTT2=4, RTT3=8, RTT4=16KB → hits ssthresh, enter CA<br>
+          CA: RTT5=16+1=17KB, RTT6=17+1=18KB... wait — MSS=1KB so +1KB per RTT<br>
+          RTT5: 17 KB, RTT6: 18 KB... hmm, but the question says 6 RTTs total.<br>
+          RTT1:2, RTT2:4, RTT3:8, RTT4:16(=ssthresh, enter CA), RTT5:17, RTT6:18, but that's 6 RTTs and answer = <strong style="color:var(--green)">18 KB</strong>.<br><br>
+          Wait — at RTT4 cwnd reaches 16=ssthresh. Does RTT4 end at 16 (entering CA) or does SS go to 16 and then CA adds? Entering CA means next RTT uses +1. So RTT5=17, RTT6=18. <strong style="color:var(--green)">Answer: 18 KB</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOPIC 2: cwnd after N ACKs in CA -->
+  <div class="topic">
+    <div class="topic-hdr" onclick="toggleTopic(this)">
+      <div class="topic-num">2</div>
+      <div class="topic-name">cwnd in bytes after N ACKs in congestion avoidance</div>
+      <div class="topic-marks">Q31 type · 4 marks</div>
+      <div class="topic-chev">▶</div>
+    </div>
+    <div class="topic-body">
+      <div class="section-lbl">The formula</div>
+      <p style="font-size:14px;color:var(--muted);margin-bottom:.5rem">In CA, each individual ACK increments cwnd by a fraction. After one full RTT (cwnd many ACKs), the net gain is exactly 1 MSS.</p>
+      <div class="formula">
+<span class="comment">-- Per-ACK increment in CA --</span>
+Δcwnd_per_ack = MSS² / cwnd_bytes
+
+<span class="comment">-- After one RTT (cwnd ACKs received) --</span>
+new_cwnd = cwnd + 1 MSS     <span class="comment">// net = 1 MSS per RTT</span>
+new_cwnd_bytes = (cwnd_MSS + 1) × MSS_bytes</div>
+
+      <div class="section-lbl">Exact Q2 PYQ — Q31 worked solution</div>
+      <div class="example">
+        <div class="step">cwnd = 15 MSS, MSS = 1200 bytes, in CA, 15 ACKs arrive (1 RTT worth). Find new cwnd in bytes.</div>
+        <div class="calc">Each ACK: Δ = 1200² / (15×1200) = 1200/15 = 80 bytes</div>
+        <div class="calc">15 ACKs: total gain = 15 × 80 = 1200 bytes = 1 MSS</div>
+        <div class="calc">new cwnd = (15+1) × 1200 = 16 × 1200</div>
+        <div class="answer">Answer: 19200 bytes ✓</div>
+      </div>
+      <div class="trap">
+        <div class="trap-label">⚠ Trap</div>
+        Do NOT just add 1200. You must convert to bytes: (cwnd_MSS + 1) × MSS_bytes. The number of ACKs in 1 RTT = cwnd (in MSS).
+      </div>
+
+      <div class="practice">
+        <div class="practice-label">Practice</div>
+        <div class="practice-q">cwnd = 20 MSS, MSS = 500 bytes, TCP is in congestion avoidance. After receiving 20 ACKs (one RTT), what is the new cwnd in bytes?</div>
+        <input class="practice-input" id="p2-ans" placeholder="Enter answer in bytes" />
+        <div class="practice-btns">
+          <button class="btn btn-primary" onclick="checkAns('p2', '10500', '')">Check</button>
+          <button class="btn btn-reveal" onclick="revealAns('p2')">Reveal</button>
+        </div>
+        <div class="check-result" id="p2-result"></div>
+        <div class="practice-answer" id="p2-sol">
+          After 1 RTT in CA: new cwnd = (20+1) × 500 = 21 × 500 = <strong style="color:var(--green)">10500 bytes</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOPIC 3: TCP Throughput -->
+  <div class="topic">
+    <div class="topic-hdr" onclick="toggleTopic(this)">
+      <div class="topic-num">3</div>
+      <div class="topic-name">TCP throughput from steady-state cwnd</div>
+      <div class="topic-marks">Q32 type · 4 marks</div>
+      <div class="topic-chev">▶</div>
+    </div>
+    <div class="topic-body">
+      <div class="formula">
+throughput = (cwnd × MSS_bytes) / RTT_seconds
+
+<span class="comment">-- Unit conversions --</span>
+RTT: ms → s (÷ 1000)
+Result in B/s → Mbps (÷ 10⁶)
+Result in B/s → KB/s (÷ 1024)</div>
+
+      <div class="section-lbl">Exact Q2 PYQ — Q32 worked solution</div>
+      <div class="example">
+        <div class="step">cwnd = 50 MSS, MSS = 1200 bytes, RTT = 80 ms. Find throughput in Mbps.</div>
+        <div class="calc">Data per RTT = 50 × 1200 = 60,000 bytes</div>
+        <div class="calc">RTT = 80 ms = 0.080 s</div>
+        <div class="calc">Throughput = 60,000 / 0.080 = 750,000 B/s</div>
+        <div class="calc">= 750,000 / 10⁶ Mbps = 0.75 Mbps... wait</div>
+        <div class="calc">= 750,000 × 8 bits/s = 6,000,000 bps = 6 Mbps</div>
+        <div class="answer">Answer: 6.00 Mbps ✓ (range: 5.90–6.10)</div>
+      </div>
+      <div class="trap">
+        <div class="trap-label">⚠ Trap</div>
+        The formula gives bytes/second. To convert to Mbps multiply by 8 (bits per byte) then divide by 10⁶. Do NOT just divide B/s by 10⁶ — that gives Megabytes/s not Megabits/s.
+      </div>
+
+      <div class="practice">
+        <div class="practice-label">Practice</div>
+        <div class="practice-q">A TCP connection has cwnd = 40 MSS, MSS = 1500 bytes, RTT = 100 ms. What is the maximum achievable throughput in Mbps?</div>
+        <input class="practice-input" id="p3-ans" placeholder="e.g. 4.80" />
+        <div class="practice-btns">
+          <button class="btn btn-primary" onclick="checkAns('p3', '4.8', '')">Check</button>
+          <button class="btn btn-reveal" onclick="revealAns('p3')">Reveal</button>
+        </div>
+        <div class="check-result" id="p3-result"></div>
+        <div class="practice-answer" id="p3-sol">
+          Data = 40×1500 = 60,000 B/RTT<br>
+          Throughput = 60,000/0.1 = 600,000 B/s<br>
+          = 600,000 × 8 / 10⁶ = <strong style="color:var(--green)">4.8 Mbps</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOPIC 4: Jain's Fairness Index -->
+  <div class="topic">
+    <div class="topic-hdr" onclick="toggleTopic(this)">
+      <div class="topic-num">4</div>
+      <div class="topic-name">Jain's Fairness Index</div>
+      <div class="topic-marks">Q33 type · 4 marks</div>
+      <div class="topic-chev">▶</div>
+    </div>
+    <div class="topic-body">
+      <div class="formula">
+JFI = (Σxᵢ)² / (n × Σxᵢ²)
+
+<span class="comment">-- Where --</span>
+xᵢ = bandwidth of flow i
+n  = number of flows
+Range: 1/n (most unfair) to 1.0 (perfect fairness)</div>
+
+      <div class="section-lbl">Exact Q2 PYQ — Q33 worked solution</div>
+      <div class="example">
+        <div class="step">3 flows: x₁=50 Mbps, x₂=30 Mbps, x₃=40 Mbps. Find JFI.</div>
+        <div class="calc">Σxᵢ = 50+30+40 = 120</div>
+        <div class="calc">(Σxᵢ)² = 120² = 14,400</div>
+        <div class="calc">Σxᵢ² = 50²+30²+40² = 2500+900+1600 = 5000</div>
+        <div class="calc">n × Σxᵢ² = 3 × 5000 = 15,000</div>
+        <div class="calc">JFI = 14,400 / 15,000 = 0.96</div>
+        <div class="answer">Answer: 0.96 ✓ (range: 0.94–0.98)</div>
+      </div>
+      <div class="tip">
+        Perfect fairness: all flows equal → JFI = 1.0. If one flow hogs all bandwidth → JFI = 1/n. UDP flows don't back off → can reduce JFI of TCP flows.
+      </div>
+
+      <div class="practice">
+        <div class="practice-label">Practice</div>
+        <div class="practice-q">Two TCP flows share a 100 Mbps link: Flow 1 gets 60 Mbps, Flow 2 gets 40 Mbps. What is the Jain's Fairness Index? (2 decimal places)</div>
+        <input class="practice-input" id="p4-ans" placeholder="e.g. 0.96" />
+        <div class="practice-btns">
+          <button class="btn btn-primary" onclick="checkAns('p4', '0.98', '')">Check</button>
+          <button class="btn btn-reveal" onclick="revealAns('p4')">Reveal</button>
+        </div>
+        <div class="check-result" id="p4-result"></div>
+        <div class="practice-answer" id="p4-sol">
+          Σxᵢ = 100, (Σxᵢ)² = 10,000<br>
+          Σxᵢ² = 3600+1600 = 5200<br>
+          n×Σxᵢ² = 2×5200 = 10,400<br>
+          JFI = 10,000/10,400 = <strong style="color:var(--green)">0.96</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOPIC 5: Fast Retransmit / Fast Recovery -->
+  <div class="topic">
+    <div class="topic-hdr" onclick="toggleTopic(this)">
+      <div class="topic-num">5</div>
+      <div class="topic-name">Fast retransmit & fast recovery cwnd</div>
+      <div class="topic-marks">Q24 + Q37 type · 3+5 marks</div>
+      <div class="topic-chev">▶</div>
+    </div>
+    <div class="topic-body">
+      <div class="formula">
+<span class="comment">-- On triple duplicate ACK (fast retransmit) --</span>
+ssthresh = inflight / 2
+cwnd     = ssthresh + 3×MSS   <span class="comment">// RFC 2581</span>
+
+<span class="comment">-- During fast recovery (each dup ACK) --</span>
+cwnd += 1 MSS   <span class="comment">// inflates cwnd</span>
+
+<span class="comment">-- When new ACK arrives (fast recovery ends) --</span>
+cwnd = ssthresh   <span class="comment">// deflate back to ssthresh</span>
+<span class="comment">// then continue with additive increase</span></div>
+
+      <div class="section-lbl">Exact Q2 PYQ — Q37 worked solution</div>
+      <div class="example">
+        <div class="step">MSS=2KB, inflight=80KB (just before triple dup ACK). Find cwnd immediately after fast retransmit (cwnd = ssthresh + 3×MSS).</div>
+        <div class="calc">ssthresh = inflight/2 = 80/2 = 40 KB</div>
+        <div class="calc">cwnd = ssthresh + 3×MSS = 40 + 3×2 = 40+6 = 46 KB</div>
+        <div class="answer">Answer: 46 KB ✓</div>
+      </div>
+
+      <div class="section-lbl">Exact Q2 PYQ — Q24 worked solution</div>
+      <div class="example">
+        <div class="step">During fast recovery: cwnd=8 MSS, inflight=4 MSS. 4 dup ACKs arrive. Find cwnd just BEFORE new ACK, and AFTER new ACK (when cwnd and inflight realign).</div>
+        <div class="calc">ssthresh was set = inflight_at_loss/2. Since cwnd starts at ssthresh+3, and cwnd=8, ssthresh=5... but given inflight=4 → ssthresh = 4/2 = 2... the question gives the state DURING recovery.</div>
+        <div class="calc">Each dup ACK: cwnd += 1 MSS</div>
+        <div class="calc">After 4 dup ACKs: cwnd = 8+4 = 12 MSS (just before new ACK)</div>
+        <div class="calc">New ACK arrives → cwnd deflates to ssthresh</div>
+        <div class="calc">ssthresh from the original loss = inflight/2 = 8/2 = 4 MSS (original cwnd=inflight=8)</div>
+        <div class="answer">Answer: 12 MSS before new ACK, 4 MSS after ✓ (Option C)</div>
+      </div>
+      <div class="trap">
+        <div class="trap-label">⚠ Trap — Q24 key insight</div>
+        The question says "cwnd=8, inflight=4" at the START of this observation. This means the fast retransmit ALREADY happened and brought inflight to 4. The original cwnd at time of loss was 8 → ssthresh=8/2=4. During recovery cwnd inflates (+1 per dup ACK). On new ACK it deflates back to ssthresh=4. Remember: ssthresh is set ONCE at the start of fast retransmit, not re-calculated from current inflight.
+      </div>
+
+      <div class="practice">
+        <div class="practice-label">Practice</div>
+        <div class="practice-q">A TCP flow has MSS = 1 KB. Just before a triple dup ACK, cwnd = inflight = 60 KB. What is cwnd immediately after fast retransmit (cwnd = ssthresh + 3×MSS), in KB?</div>
+        <input class="practice-input" id="p5-ans" placeholder="Answer in KB" />
+        <div class="practice-btns">
+          <button class="btn btn-primary" onclick="checkAns('p5', '33', '')">Check</button>
+          <button class="btn btn-reveal" onclick="revealAns('p5')">Reveal</button>
+        </div>
+        <div class="check-result" id="p5-result"></div>
+        <div class="practice-answer" id="p5-sol">
+          ssthresh = 60/2 = 30 KB<br>
+          cwnd = 30 + 3×1 = <strong style="color:var(--green)">33 KB</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-btns">
+    <button class="btn-nav next" onclick="markDone(0)">Mark block done & continue →</button>
+  </div>
+</div>
+
+<!-- ============================================================ BLOCK 1: IP -->
+<div class="block c-blue" id="block-1">
+  <div class="block-header">
+    <div class="block-tag tag-blue">Block 2 · Hours 6–9 · ~14 marks</div>
+    <div class="block-title">IP Addressing, Subnetting & NAT</div>
+    <div class="block-meta">W7–W8 · CIDR · Netmask · LPM · NAT</div>
+  </div>
+
+  <!-- Topic: CIDR usable hosts -->
+  <div class="topic">
+    <div class="topic-hdr" onclick="toggleTopic(this)">
+      <div class="topic-num">1</div>
+      <div class="topic-name">CIDR: usable host count from prefix</div>
+      <div class="topic-marks">Q28 type · 3 marks</div>
+      <div class="topic-chev">▶</div>
+    </div>
+    <div class="topic-body">
+      <div class="formula">
+usable_hosts = 2^(32 − prefix) − 2
+
+<span class="comment">-- Subtract 2 for: network address + broadcast address --</span>
+/26 → 2^6 − 2 = 64 − 2 = 62
+/24 → 2^8 − 2 = 254
+/30 → 2^2 − 2 = 2   <span class="comment">// minimum usable</span></div>
+
+      <div class="example">
+        <div class="step">Q28: Block = 10.25.4.0/26. How many usable hosts?</div>
+        <div class="calc">host bits h = 32−26 = 6</div>
+        <div class="calc">usable = 2^6 − 2 = 64 − 2 = 62</div>
+        <div class="answer">Answer: 62 ✓</div>
+      </div>
+
+      <div class="practice">
+        <div class="practice-label">Practice</div>
+        <div class="practice-q">How many usable host addresses are in the block 192.168.10.0/28?</div>
+        <input class="practice-input" id="p6-ans" placeholder="Number of hosts" />
+        <div class="practice-btns">
+          <button class="btn btn-primary" onclick="checkAns('p6', '14', '')">Check</button>
+          <button class="btn btn-reveal" onclick="revealAns('p6')">Reveal</button>
+        </div>
+        <div class="check-result" id="p6-result"></div>
+        <div class="practice-answer" id="p6-sol">
+          h = 32−28 = 4 → 2^4−2 = 16−2 = <strong style="color:var(--green)">14</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Topic: Min prefix for N hosts -->
+  <div class="topic">
+    <div class="topic-hdr" onclick="toggleTopic(this)">
+      <div class="topic-num">2</div>
+      <div class="topic-name">Find smallest prefix to support N hosts</div>
+      <div class="topic-marks">Q30 type · 3 marks</div>
+      <div class="topic-chev">▶</div>
+    </div>
+    <div class="topic-body">
+      <div class="formula">
+<span class="comment">-- You need: 2^h − 2 ≥ N --</span>
+h = ⌈log₂(N + 2)⌉
+prefix = 32 − h
+
+<span class="comment">-- Memory trick --</span>
+Round N up to next power of 2, then add 2 buffer.
+For N=500: need 2^h ≥ 502 → h=9 (2^9=512) → prefix=23</div>
+
+      <div class="example">
+        <div class="step">Q30: Need ≥500 hosts per subnet. Smallest prefix?</div>
+        <div class="calc">2^h − 2 ≥ 500 → 2^h ≥ 502</div>
+        <div class="calc">2^8 = 256 (too small), 2^9 = 512 ≥ 502 ✓</div>
+        <div class="calc">h = 9, prefix = 32−9 = 23</div>
+        <div class="answer">Answer: /23 ✓</div>
+      </div>
+      <div class="trap">
+        <div class="trap-label">⚠ Trap</div>
+        Always test 2^h − 2 ≥ N (not just 2^h ≥ N). For N=500: 2^9−2=510 ≥ 500 ✓. If N=510: 2^9−2=510 ✓ still /23. If N=511: 2^9−2=510 &lt; 511, need h=10 → /22.
+      </div>
+
+      <div class="practice">
+        <div class="practice-label">Practice</div>
+        <div class="practice-q">An admin needs subnets that each support at least 1000 hosts. What is the smallest CIDR prefix length they can use?</div>
+        <input class="practice-input" id="p7-ans" placeholder="Enter prefix number (e.g. 22)" />
+        <div class="practice-btns">
+          <button class="btn btn-primary" onclick="checkAns('p7', '22', '')">Check</button>
+          <button class="btn btn-reveal" onclick="revealAns('p7')">Reveal</button>
+        </div>
+        <div class="check-result" id="p7-result"></div>
+        <div class="practice-answer" id="p7-sol">
+          2^h − 2 ≥ 1000 → 2^h ≥ 1002<br>
+          2^10=1024 ≥ 1002 ✓, h=10<br>
+          prefix = 32−10 = <strong style="color:var(--green)">/22</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Topic: Network address from netmask -->
+  <div class="topic">
+    <div class="topic-hdr" onclick="toggleTopic(this)">
+      <div class="topic-num">3</div>
+      <div class="topic-name">Network address: bitwise AND with netmask</div>
+      <div class="topic-marks">Q35 type · 4 marks</div>
+      <div class="topic-chev">▶</div>
+    </div>
+    <div class="topic-body">
+      <div class="formula">
+network_address = IP_address AND netmask
+<span class="comment">// Apply byte by byte in binary or use shortcut</span>
+
+<span class="comment">-- Shortcut rules --</span>
+byte AND 255 = byte unchanged
+byte AND 0   = 0
+byte AND 240 = zero out lower 4 bits  <span class="comment">// 240 = 11110000</span>
+byte AND 128 = zero out lower 7 bits  <span class="comment">// 128 = 10000000</span></div>
+
+      <div class="example">
+        <div class="step">Q35: IP=172.25.50.22, Mask=255.255.240.0. Network address of A?</div>
+        <div class="calc">Byte 1: 172 AND 255 = 172</div>
+        <div class="calc">Byte 2: 25 AND 255 = 25</div>
+        <div class="calc">Byte 3: 50 AND 240 = ?</div>
+        <div class="calc">  50 = 0011 0010</div>
+        <div class="calc"> 240 = 1111 0000</div>
+        <div class="calc"> AND = 0011 0000 = 48</div>
+        <div class="calc">Byte 4: 22 AND 0 = 0</div>
+        <div class="answer">Network address: 172.25.48.0 ✓</div>
+      </div>
+      <div class="trap">
+        <div class="trap-label">⚠ Trap</div>
+        Do NOT assume the third byte is unchanged. 50 AND 240 = 48, not 50. Always convert the non-trivial byte to binary and AND carefully.
+      </div>
+
+      <div class="practice">
+        <div class="practice-label">Practice</div>
+        <div class="practice-q">IP = 10.45.130.77, Netmask = 255.255.128.0. What is the network address?</div>
+        <input class="practice-input" id="p8-ans" placeholder="e.g. 10.45.0.0" />
+        <div class="practice-btns">
+          <button class="btn btn-primary" onclick="checkAns('p8', '10.45.128.0', '')">Check</button>
+          <button class="btn btn-reveal" onclick="revealAns('p8')">Reveal</button>
+        </div>
+        <div class="check-result" id="p8-result"></div>
+        <div class="practice-answer" id="p8-sol">
+          10 AND 255 = 10<br>
+          45 AND 255 = 45<br>
+          130 AND 128: 130=10000010, 128=10000000 → AND=10000000=128<br>
+          77 AND 0 = 0<br>
+          Network: <strong style="color:var(--green)">10.45.128.0</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Topic: LPM -->
+  <div class="topic">
+    <div class="topic-hdr" onclick="toggleTopic(this)">
+      <div class="topic-num">4</div>
+      <div class="topic-name">Longest prefix matching</div>
+      <div class="topic-marks">Q25 type · 3 marks</div>
+      <div class="topic-chev">▶</div>
+    </div>
+    <div class="topic-body">
+      <div class="formula">
+<span class="comment">-- Algorithm --</span>
+1. For each table entry, check if dst IP matches the prefix
+2. A match means: IP AND mask == network_address
+3. Among ALL matching entries, pick the LONGEST prefix
+4. 0.0.0.0/0 (default) always matches — use ONLY if nothing else matches</div>
+
+      <div class="example">
+        <div class="step">Q25: dst=128.20.15.7, table: 128.0.0.0/8→P1, 128.20.0.0/16→P2, 128.20.15.0/24→P3, 0.0.0.0/0→P4</div>
+        <div class="calc">128.0.0.0/8:  128.20.15.7 starts with 128 ✓ (matches)</div>
+        <div class="calc">128.20.0.0/16: starts with 128.20 ✓ (matches)</div>
+        <div class="calc">128.20.15.0/24: starts with 128.20.15 ✓ (matches)</div>
+        <div class="calc">0.0.0.0/0: always matches ✓</div>
+        <div class="calc">Longest match = /24 → Port 3</div>
+        <div class="answer">Answer: Port 3 ✓</div>
+      </div>
+
+      <div class="practice">
+        <div class="practice-label">Practice</div>
+        <div class="practice-q">Destination IP: 192.168.5.200. Forwarding table: 192.0.0.0/8→P1, 192.168.0.0/16→P2, 192.168.5.0/24→P3, 192.168.5.192/26→P4. Which port?</div>
+        <input class="practice-input" id="p9-ans" placeholder="Port number (1-4)" />
+        <div class="practice-btns">
+          <button class="btn btn-primary" onclick="checkAns('p9', '4', '')">Check</button>
+          <button class="btn btn-reveal" onclick="revealAns('p9')">Reveal</button>
+        </div>
+        <div class="check-result" id="p9-result"></div>
+        <div class="practice-answer" id="p9-sol">
+          All 4 entries match (192.168.5.200 is inside all those networks).<br>
+          Longest match = /26. Check: 192.168.5.192/26 means .192–.255.<br>
+          200 is in that range ✓ → <strong style="color:var(--green)">Port 4</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Topic: NAT -->
+  <div class="topic">
+    <div class="topic-hdr" onclick="toggleTopic(this)">
+      <div class="topic-num">5</div>
+      <div class="topic-name">NAT — number of public IPs required</div>
+      <div class="topic-marks">Q29 type · 3 marks</div>
+      <div class="topic-chev">▶</div>
+    </div>
+    <div class="topic-body">
+      <div class="formula">
+routers_needed = ⌈total_devices / devices_per_router⌉
+public_IPs = routers_needed   <span class="comment">// 1 public IP per NAT router</span>
+
+<span class="comment">-- Always ceiling divide --</span>
+1800 / 300 = 6.0 → ⌈6.0⌉ = 6
+1801 / 300 = 6.003 → ⌈6.003⌉ = 7</div>
+
+      <div class="example">
+        <div class="step">Q29: 1800 devices, 300 devices/router. How many public IPs?</div>
+        <div class="calc">routers = ⌈1800/300⌉ = ⌈6⌉ = 6</div>
+        <div class="answer">Answer: 6 public IPs ✓</div>
+      </div>
+
+      <div class="practice">
+        <div class="practice-label">Practice</div>
+        <div class="practice-q">An org has 2500 devices. Each NAT router serves 400 devices. How many public IP addresses are needed?</div>
+        <input class="practice-input" id="p10-ans" placeholder="Number of public IPs" />
+        <div class="practice-btns">
+          <button class="btn btn-primary" onclick="checkAns('p10', '7', '')">Check</button>
+          <button class="btn btn-reveal" onclick="revealAns('p10')">Reveal</button>
+        </div>
+        <div class="check-result" id="p10-result"></div>
+        <div class="practice-answer" id="p10-sol">
+          ⌈2500/400⌉ = ⌈6.25⌉ = <strong style="color:var(--green)">7</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-btns">
+    <button class="btn-nav" onclick="goto(0)">← Back</button>
+    <button class="btn-nav next" onclick="markDone(1)">Mark done & continue →</button>
+  </div>
+</div>
+
+<!-- ============================================================ BLOCK 2: FLOW CONTROL -->
+<div class="block c-teal" id="block-2">
+  <div class="block-header">
+    <div class="block-tag tag-teal">Block 3 · Hours 10–11 · ~6 marks</div>
+    <div class="block-title">Flow Control</div>
+    <div class="block-meta">W5 · Buffer fill time · Advertised window throughput</div>
+  </div>
+
+  <div class="topic">
+    <div class="topic-hdr" onclick="toggleTopic(this)">
+      <div class="topic-num">1</div>
+      <div class="topic-name">Buffer fill time</div>
+      <div class="topic-marks">Q26 type · 3 marks</div>
+      <div class="topic-chev">▶</div>
+    </div>
+    <div class="topic-body">
+      <div class="formula">
+net_fill_rate = send_rate − read_rate   <span class="comment">// KB/s</span>
+time_to_fill  = buffer_size / net_fill_rate   <span class="comment">// seconds</span></div>
+
+      <div class="example">
+        <div class="step">Q26: buffer=30KB, send=10KB/s, read=6KB/s. When does buffer fill?</div>
+        <div class="calc">net rate = 10 − 6 = 4 KB/s</div>
+        <div class="calc">time = 30 / 4 = 7.5 s</div>
+        <div class="answer">Answer: 7.50 s ✓ (range: 7.40–7.60)</div>
+      </div>
+      <div class="trap">
+        <div class="trap-label">⚠ Trap</div>
+        Do NOT use the send rate alone. The receiver app drains the buffer simultaneously. Only the NET inflow rate (send minus read) fills the buffer.
+      </div>
+
+      <div class="practice">
+        <div class="practice-label">Practice</div>
+        <div class="practice-q">Buffer = 50 KB. Sender writes at 15 KB/s, app reads at 8 KB/s. How many seconds until the buffer is full?</div>
+        <input class="practice-input" id="p11-ans" placeholder="Seconds (2 decimal places)" />
+        <div class="practice-btns">
+          <button class="btn btn-primary" onclick="checkAns('p11', '7.14', '')">Check</button>
+          <button class="btn btn-reveal" onclick="revealAns('p11')">Reveal</button>
+        </div>
+        <div class="check-result" id="p11-result"></div>
+        <div class="practice-answer" id="p11-sol">
+          net = 15−8 = 7 KB/s<br>
+          time = 50/7 = <strong style="color:var(--green)">7.14 s</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="topic">
+    <div class="topic-hdr" onclick="toggleTopic(this)">
+      <div class="topic-num">2</div>
+      <div class="topic-name">Flow-control throughput from advertised window</div>
+      <div class="topic-marks">Q27 type · 3 marks</div>
+      <div class="topic-chev">▶</div>
+    </div>
+    <div class="topic-body">
+      <div class="formula">
+throughput = advertised_window / RTT
+
+<span class="comment">-- Units --</span>
+window in KB: convert to bytes (×1024) first
+RTT in ms: convert to seconds (÷1000) first
+Result in B/s → KB/s (÷1024)</div>
+
+      <div class="example">
+        <div class="step">Q27: adv_window=32KB, RTT=80ms. Throughput in KB/s?</div>
+        <div class="calc">window = 32 × 1024 = 32,768 bytes</div>
+        <div class="calc">RTT = 80 ms = 0.080 s</div>
+        <div class="calc">throughput = 32,768 / 0.080 = 409,600 B/s</div>
+        <div class="calc">= 409,600 / 1024 ≈ 400 KB/s</div>
+        <div class="answer">Answer: ≈400 KB/s ✓ (range: 340–410)</div>
+      </div>
+
+      <div class="practice">
+        <div class="practice-label">Practice</div>
+        <div class="practice-q">TCP connection: advertised window = 64 KB, RTT = 200 ms. What is the max throughput in KB/s?</div>
+        <input class="practice-input" id="p12-ans" placeholder="Answer in KB/s" />
+        <div class="practice-btns">
+          <button class="btn btn-primary" onclick="checkAns('p12', '320', '')">Check</button>
+          <button class="btn btn-reveal" onclick="revealAns('p12')">Reveal</button>
+        </div>
+        <div class="check-result" id="p12-result"></div>
+        <div class="practice-answer" id="p12-sol">
+          64×1024 = 65,536 B<br>
+          65,536 / 0.2 = 327,680 B/s<br>
+          / 1024 = <strong style="color:var(--green)">320 KB/s</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-btns">
+    <button class="btn-nav" onclick="goto(1)">← Back</button>
+    <button class="btn-nav next" onclick="markDone(2)">Mark done & continue →</button>
+  </div>
+</div>
+
+<!-- ============================================================ BLOCK 3: DIJKSTRA -->
+<div class="block c-gold" id="block-3">
+  <div class="block-header">
+    <div class="block-tag tag-gold">Block 4 · Hours 12–13 · ~4 marks</div>
+    <div class="block-title">Dijkstra's Algorithm</div>
+    <div class="block-meta">W8 · Link state routing · Shortest path · Forwarding tables</div>
+  </div>
+
+  <div class="topic">
+    <div class="topic-hdr" onclick="toggleTopic(this)">
+      <div class="topic-num">1</div>
+      <div class="topic-name">Dijkstra step-by-step + forwarding table</div>
+      <div class="topic-marks">Q36 type · 4 marks</div>
+      <div class="topic-chev">▶</div>
+    </div>
+    <div class="topic-body">
+      <div class="formula">
+<span class="comment">-- Initialise --</span>
+N' = {src}
+D(src) = 0
+D(neighbour) = c(src, neighbour)
+D(non-neighbour) = ∞
+
+<span class="comment">-- Repeat until all nodes in N' --</span>
+1. Pick w ∉ N' with minimum D(w) → add to N'
+2. For each neighbour v of w not in N':
+   D(v) = min(D(v), D(w) + c(w,v))
+   If updated: p(v) = w   <span class="comment">// predecessor</span></div>
+
+      <div class="section-lbl">Exact Q2 PYQ — Q36 worked solution</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:.75rem">Graph: U–V=3, U–W=6, U–X=2, X–Y=2, X–W=4, Y–W=3, Y–Z=1. Find shortest path cost from U to Z.</p>
+
+      <table class="step-table">
+        <thead><tr><th>Step</th><th>N'</th><th>D(V)</th><th>D(W)</th><th>D(X)</th><th>D(Y)</th><th>D(Z)</th><th>Pick</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td>{U}</td><td>3,U</td><td>6,U</td><td>2,U</td><td>∞</td><td>∞</td><td>—</td></tr>
+          <tr class="highlight"><td>1</td><td>{U,X}</td><td>3,U</td><td>min(6,2+4)=6,U</td><td>—</td><td>2+2=4,X</td><td>∞</td><td>X(D=2)</td></tr>
+          <tr><td>2</td><td>{U,X,V}</td><td>—</td><td>6,U</td><td>—</td><td>4,X</td><td>∞</td><td>V(D=3)</td></tr>
+          <tr class="highlight"><td>3</td><td>{U,X,V,Y}</td><td>—</td><td>min(6,4+3)=6,U</td><td>—</td><td>—</td><td>4+1=5,Y</td><td>Y(D=4)</td></tr>
+          <tr><td>4</td><td>{U,X,V,Y,Z}</td><td>—</td><td>6,U</td><td>—</td><td>—</td><td>—</td><td>Z(D=5) ✓</td></tr>
+        </tbody>
+      </table>
+
+      <div class="example">
+        <div class="answer">Shortest path U→Z = U→X→Y→Z, total cost = 2+2+1 = 5 ✓</div>
+      </div>
+      <div class="tip">
+        To find forwarding table entry for Z: trace back p(Z)=Y, p(Y)=X, p(X)=U. First hop from U is X → forward to port connected to X.
+      </div>
+
+      <div class="practice">
+        <div class="practice-label">Practice</div>
+        <div class="practice-q">Graph (undirected): A–B=4, A–C=2, B–D=3, C–B=1, C–D=5. Using Dijkstra from A, what is the shortest path cost from A to D?</div>
+        <input class="practice-input" id="p13-ans" placeholder="Total cost" />
+        <div class="practice-btns">
+          <button class="btn btn-primary" onclick="checkAns('p13', '6', '')">Check</button>
+          <button class="btn btn-reveal" onclick="revealAns('p13')">Reveal</button>
+        </div>
+        <div class="check-result" id="p13-result"></div>
+        <div class="practice-answer" id="p13-sol">
+          Init: D(B)=4, D(C)=2, D(D)=∞<br>
+          Step1: pick C(2). Relax: D(B)=min(4,2+1)=3,C. D(D)=min(∞,2+5)=7,C<br>
+          Step2: pick B(3). Relax: D(D)=min(7,3+3)=6,B<br>
+          Step3: pick D(6) ✓<br>
+          Path: A→C→B→D, cost = <strong style="color:var(--green)">6</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-btns">
+    <button class="btn-nav" onclick="goto(2)">← Back</button>
+    <button class="btn-nav next" onclick="markDone(3)">Mark done & continue →</button>
+  </div>
+</div>
+
+<!-- ============================================================ BLOCK 4: FORMULA SHEET -->
+<div class="block" id="block-4">
+  <div class="block-header">
+    <div class="block-tag" style="color:var(--gold)">Reference · All formulas in one place</div>
+    <div class="block-title">Complete Formula Cheatsheet</div>
+    <div class="block-meta">Everything you need, one glance before the exam</div>
+  </div>
+
+  <div class="summary-grid">
+    <div class="summary-card"><div class="lbl">Topics covered</div><div class="val" style="color:var(--accent)">13</div></div>
+    <div class="summary-card"><div class="lbl">Total marks</div><div class="val" style="color:var(--green)">50</div></div>
+    <div class="summary-card"><div class="lbl">Weeks tested</div><div class="val" style="color:var(--blue)">5–8</div></div>
+    <div class="summary-card"><div class="lbl">W1–4 in Q2</div><div class="val" style="color:var(--warn)">0</div></div>
+  </div>
+
+  <div class="section-lbl" style="margin-top:1.25rem">All formulas — W5–8</div>
+  <div class="cheatsheet">
+    <div class="cs-row"><span class="cs-name">TCP throughput</span><span class="cs-formula">cwnd × MSS / RTT → × 8 for Mbps</span></div>
+    <div class="cs-row"><span class="cs-name">cwnd after 1 RTT in CA</span><span class="cs-formula">(cwnd_MSS + 1) × MSS_bytes</span></div>
+    <div class="cs-row"><span class="cs-name">Fast retransmit cwnd</span><span class="cs-formula">ssthresh = inflight/2 ; cwnd = ssthresh + 3×MSS</span></div>
+    <div class="cs-row"><span class="cs-name">Fast recovery inflation</span><span class="cs-formula">each dup ACK: cwnd += 1 MSS</span></div>
+    <div class="cs-row"><span class="cs-name">After new ACK in FR</span><span class="cs-formula">cwnd = ssthresh (deflates)</span></div>
+    <div class="cs-row"><span class="cs-name">RTO reaction</span><span class="cs-formula">ssthresh = cwnd/2 ; cwnd = 1 MSS</span></div>
+    <div class="cs-row"><span class="cs-name">Jain's Fairness Index</span><span class="cs-formula">(Σxᵢ)² / (n × Σxᵢ²)</span></div>
+    <div class="cs-row"><span class="cs-name">Buffer fill time</span><span class="cs-formula">buffer / (send_rate − read_rate)</span></div>
+    <div class="cs-row"><span class="cs-name">Flow control throughput</span><span class="cs-formula">adv_window / RTT</span></div>
+    <div class="cs-row"><span class="cs-name">Usable hosts from /x</span><span class="cs-formula">2^(32−x) − 2</span></div>
+    <div class="cs-row"><span class="cs-name">Min prefix for N hosts</span><span class="cs-formula">prefix = 32 − ⌈log₂(N+2)⌉</span></div>
+    <div class="cs-row"><span class="cs-name">Network address</span><span class="cs-formula">IP AND netmask (bitwise, byte by byte)</span></div>
+    <div class="cs-row"><span class="cs-name">Longest prefix match</span><span class="cs-formula">all matching entries → pick longest prefix</span></div>
+    <div class="cs-row"><span class="cs-name">NAT router count</span><span class="cs-formula">⌈total_devices / devices_per_router⌉</span></div>
+    <div class="cs-row"><span class="cs-name">Dijkstra relaxation</span><span class="cs-formula">D(v) = min(D(v), D(w) + c(w,v))</span></div>
+  </div>
+
+  <div class="section-lbl" style="margin-top:1.25rem">Unit conversion quick reference</div>
+  <div class="formula">
+ms → s:   divide by 1000     (80 ms = 0.080 s)
+μs → s:   divide by 10⁶     (100 μs = 0.0001 s)
+KB → B:   multiply by 1024   (32 KB = 32768 B)
+B/s → Mbps: multiply by 8, divide by 10⁶
+B/s → KB/s: divide by 1024
+km → m:   multiply by 1000  (650 km = 650,000 m)</div>
+
+  <div class="nav-btns">
+    <button class="btn-nav" onclick="goto(3)">← Back</button>
+  </div>
+</div>
+
+</main>
+</div>
+
 <script>
-// ─── DATA ───────────────────────────────────────────────────────
-// New question pool matching REAL SpellBee International Level 4 Grade 2 format
-// Based on actual SPIN MOCK exam screenshots and extracted questions
+let current = 0;
+let done = new Set();
+let timerRunning = false;
+let timerSeconds = 0;
+let timerInterval;
 
-const ROUNDS = [
-  "Spell It Right",
-  "Word Analysis", 
-  "Inflections & Collocations",
-  "Find the Correct Sentence",
-  "General Knowledge",
-  "Words and Meanings",
-  "Form the Correct Sentence",
-  "Phonetics",
-  "Reading Comprehension",
-  "Crossword",
-  "Word Weaving",
-  "Compound Words and Types",
-  "Synonyms and Antonyms",
-  "Idioms and Phrases",
-  "Presenting an Argument",
-];
-
-const RMETA = {
-  "Spell It Right": { icon: "✏️", teach: "Fill in the missing letters by reading the phonemic transcription (pronunciation guide). Sound out the word, then pick the letters that complete it. Example: APP___ /ə.pɔːl/ → EAR (APPEAR)", count: 10 },
-  "Word Analysis": { icon: "🔍", teach: "Choose the correct word part (prefix or suffix) to complete the word. Common parts: -ment (refreshment), -able (comfortable), -ful (beautiful), -est (shortest), -form (uniform), -face (surface)", count: 5 },
-  "Inflections & Collocations": { icon: "🔗", teach: "Part A: Spot the odd one out — find which word is NOT an inflection (change in form) of the base word. Part B: Choose the correct verb form or match adjective-noun pairs that naturally go together.", count: 10 },
-  "Find the Correct Sentence": { icon: "✅", teach: "Choose between two sentences. Watch for: a/an usage (a public, an apple), adverb vs adjective (easily not easy), punctuation marks, homophones (too/two, there/their).", count: 5 },
-  "General Knowledge": { icon: "🌍", teach: "Includes alphabetical ordering, word scrambles with clues, famous books/authors (literary world), and literary devices (poem, proverb, anecdote, simile).", count: 5 },
-  "Words and Meanings": { icon: "📖", teach: "Match each word to its correct meaning from a shared pool of definitions. Read ALL definitions first, then match carefully. Watch for (n)=noun and (v)=verb markers.", count: 5 },
-  "Form the Correct Sentence": { icon: "📝", teach: "Part A: Put word groups in correct order to form a sentence. Part B: Fill in the blank with the correct word from a shared pool.", count: 5 },
-  "Phonetics": { icon: "🔊", teach: "Tests: silent letters (foreign→g is silent), phonetic symbols, homophones (words that sound the same: straight/strait), and matching words to their pronunciation.", count: 10 },
-  "Reading Comprehension": { icon: "📚", teach: "Read a poem or passage carefully. Questions test: meaning, rhyming lines, couplets (pairs of rhyming lines), vocabulary from context, and transformation themes.", count: 5 },
-  "Crossword": { icon: "🧩", teach: "Spell words correctly based on clues. Watch for tricky plurals (COOKIES not COOKEES), and choose between correct and misspelled versions.", count: 5 },
-  "Word Weaving": { icon: "🧶", teach: "Three types: Word Wheel (unscramble letters in a circle), Word Stairs (build words letter by letter using hints), Word Combo (combine columns to form words).", count: 5 },
-  "Compound Words and Types": { icon: "🏗️", teach: "Tests: singular vs collective nouns, past tense of phrasal verbs (give up→gave up), adjective forms (need→needy), contraction full forms (I've=I have), and capitonyms (Nice=city in France).", count: 5 },
-  "Synonyms and Antonyms": { icon: "🔄", teach: "Replace the bracketed word in a sentence with its synonym (same meaning) or antonym (opposite meaning). Read the full sentence to understand context. Only 2 options.", count: 10 },
-  "Idioms and Phrases": { icon: "💬", teach: "Fill the correct idiom into a sentence from a shared pool. Know: crack of dawn (very early), go bananas (go crazy), bolt from the blue (unexpected), tickled pink (very happy), time and again (repeatedly).", count: 5 },
-  "Presenting an Argument": { icon: "🎤", teach: "Arrange 8-10 sentences in logical order. Look for: opening/setting → cause → sequence of events → reflection/conclusion. Time words and cause-effect help.", count: 10 },
-};
-
-const Q = [
-  // ══════════════════════════════════════════════════════════════
-  // SPELL IT RIGHT — Fill missing letters using phonemic transcription
-  // Real format: ___UPY /ɒk.jə.paɪ/ → OCC (OCCUPY)
-  // 3 options each
-  // ══════════════════════════════════════════════════════════════
-
-  // FROM ACTUAL MOCK
-  { k:"sir_m01", r:"Spell It Right", q:"_ _ _ UPY /ɒk.jə.paɪ/", o:["OCC","PKA","ACU"], a:0, e:"OCC + UPY = OCCUPY. The /ɒk/ sound = OCC." },
-  { k:"sir_m02", r:"Spell It Right", q:"_ _ _ EZE /sniːz/", o:["SNE","SNI","SAI"], a:0, e:"SNE + EZE = SNEEZE. The /sniː/ sound = SNE." },
-  { k:"sir_m03", r:"Spell It Right", q:"_ _ _ CK /klɒk/", o:["CLO","KLO","KLA"], a:0, e:"CLO + CK = CLOCK. The /klɒ/ sound = CLO." },
-  { k:"sir_m04", r:"Spell It Right", q:"JETTL _ _ _ /ˈdʒet.ɪ.sən/", o:["SON","SEN","SIN"], a:0, e:"JETTL + SON = JETTISON. The /sən/ sound = SON." },
-  { k:"sir_m05", r:"Spell It Right", q:"MU _ _ _ /mjuː.zɪk/", o:["SIC","ZIC","ZIK"], a:0, e:"MU + SIC = MUSIC. The /zɪk/ sound is spelled SIC." },
-  { k:"sir_m06", r:"Spell It Right", q:"SYM _ _ _ _ ISE /ˈsɪm.pə.θaɪz/", o:["PATH","PAOA","PADH"], a:0, e:"SYM + PATH + ISE = SYMPATHISE. /pə.θ/ = PATH." },
-  { k:"sir_m07", r:"Spell It Right", q:"_ _ _ ONNAISE /ˌmæj.əˈneɪz/", o:["MAY","MEI","MEY"], a:0, e:"MAY + ONNAISE = MAYONNAISE. /mæj/ = MAY." },
-  { k:"sir_m08", r:"Spell It Right", q:"WIN _ _ _ /ˈwɪn.dəʊ/", o:["DOW","DAW","DEW"], a:0, e:"WIN + DOW = WINDOW. /dəʊ/ = DOW." },
-  { k:"sir_m09", r:"Spell It Right", q:"_ _ _ MITE /ˈtɜː.maɪt/", o:["TER","TAR","TOR"], a:0, e:"TER + MITE = TERMITE. /tɜː/ = TER." },
-  { k:"sir_m10", r:"Spell It Right", q:"_ _ _ CINATE /ˈvæk.sɪ.neɪt/", o:["VAC","VEC","VAK"], a:0, e:"VAC + CINATE = VACCINATE. /væk/ = VAC." },
-
-  // GENERATED similar format
-  { k:"sir_g01", r:"Spell It Right", q:"_ _ _ TURE /ˈpɪk.tʃər/", o:["PIC","PIK","PKC"], a:0, e:"PIC + TURE = PICTURE. /pɪk/ = PIC." },
-  { k:"sir_g02", r:"Spell It Right", q:"_ _ _ CUIT /ˈbɪs.kɪt/", o:["BIS","BES","BUS"], a:0, e:"BIS + CUIT = BISCUIT. /bɪs/ = BIS." },
-  { k:"sir_g03", r:"Spell It Right", q:"_ _ _ CESS /sək.ˈsɛs/", o:["SUC","SEC","SAC"], a:0, e:"SUC + CESS = SUCCESS. /sək/ = SUC." },
-  { k:"sir_g04", r:"Spell It Right", q:"BEAU _ _ _ _ _ /ˈbjuː.tɪ.fʊl/", o:["TIFUL","TYFUL","TIFEL"], a:0, e:"BEAU + TIFUL = BEAUTIFUL. /tɪ.fʊl/ = TIFUL." },
-  { k:"sir_g05", r:"Spell It Right", q:"_ _ _ WICH /ˈsæn.wɪdʒ/", o:["SAND","SEND","SOND"], a:0, e:"SAND + WICH = SANDWICH. /sæn/ → SAND (d is part of it)." },
-  { k:"sir_g06", r:"Spell It Right", q:"_ _ _ PHIN /ˈdɒl.fɪn/", o:["DOL","DAL","DEL"], a:0, e:"DOL + PHIN = DOLPHIN. /dɒl/ = DOL." },
-  { k:"sir_g07", r:"Spell It Right", q:"KIT _ _ _ _ /ˈkɪtʃ.ən/", o:["CHEN","CHAN","CHIN"], a:0, e:"KIT + CHEN = KITCHEN. /tʃən/ = CHEN." },
-  { k:"sir_g08", r:"Spell It Right", q:"_ _ _ THER /ˈwɛð.ər/", o:["WEA","WEE","WAE"], a:0, e:"WEA + THER = WEATHER. /wɛð/ = WEA." },
-  { k:"sir_g09", r:"Spell It Right", q:"MOUN _ _ _ _ /ˈmaʊn.tɪn/", o:["TAIN","TANE","TEIN"], a:0, e:"MOUN + TAIN = MOUNTAIN. /tɪn/ → TAIN." },
-  { k:"sir_g10", r:"Spell It Right", q:"_ _ _ CKEN /ˈtʃɪk.ɪn/", o:["CHI","CHA","CHE"], a:0, e:"CHI + CKEN = CHICKEN. /tʃɪk/ = CHI+CK." },
-
-  // ══════════════════════════════════════════════════════════════
-  // WORD ANALYSIS — Choose word part to complete the word
-  // Shared option pool format
-  // ══════════════════════════════════════════════════════════════
-
-  // FROM ACTUAL MOCK (options: form, moral, able, face, est, ment)
-  { k:"wa_m01", r:"Word Analysis", q:"Choose the correct word part to complete:\nRefresh ___\n\nOptions: form | moral | able | face | est | ment", o:["ment","able","est","form"], a:0, e:"Refresh + MENT = REFRESHMENT. A drink or snack." },
-  { k:"wa_m02", r:"Word Analysis", q:"Choose the correct word part to complete:\nLaugh ___\n\nOptions: form | moral | able | face | est | ment", o:["able","ment","est","form"], a:0, e:"Laugh + ABLE = LAUGHABLE. Something so silly it makes you laugh." },
-  { k:"wa_m03", r:"Word Analysis", q:"Choose the correct word part to complete:\nUni ___\n\nOptions: form | moral | able | face | est | ment", o:["form","face","moral","est"], a:0, e:"Uni + FORM = UNIFORM. Clothes that look the same." },
-  { k:"wa_m04", r:"Word Analysis", q:"Choose the correct word part to complete:\nIm ___\n\nOptions: form | moral | able | face | est | ment", o:["moral","able","ment","form"], a:0, e:"Im + MORAL = IMMORAL. Not moral, wrong behaviour." },
-  { k:"wa_m05", r:"Word Analysis", q:"Choose the correct word part to complete:\nSur ___\n\nOptions: form | moral | able | face | est | ment", o:["face","form","able","ment"], a:0, e:"Sur + FACE = SURFACE. The top or outside of something." },
-
-  // GENERATED similar
-  { k:"wa_g01", r:"Word Analysis", q:"Choose the correct word part to complete:\nEnjoy ___\n\nOptions: ness | ful | less | ment | able | ward", o:["ment","ful","ness","less"], a:0, e:"Enjoy + MENT = ENJOYMENT." },
-  { k:"wa_g02", r:"Word Analysis", q:"Choose the correct word part to complete:\nComfort ___\n\nOptions: ness | ful | less | ment | able | ward", o:["able","ful","ment","less"], a:0, e:"Comfort + ABLE = COMFORTABLE." },
-  { k:"wa_g03", r:"Word Analysis", q:"Choose the correct word part to complete:\nBack ___\n\nOptions: ness | ful | less | ment | able | ward", o:["ward","ful","ment","ness"], a:0, e:"Back + WARD = BACKWARD. Moving towards the back." },
-  { k:"wa_g04", r:"Word Analysis", q:"Choose the correct word part to complete:\nCare ___\n\nOptions: ness | ful | less | ment | able | ward", o:["less","ful","ment","ness"], a:0, e:"Care + LESS = CARELESS. Without care." },
-  { k:"wa_g05", r:"Word Analysis", q:"Choose the correct word part to complete:\nThank ___\n\nOptions: ness | ful | less | ment | able | ward", o:["ful","less","ment","ness"], a:0, e:"Thank + FUL = THANKFUL. Full of thanks." },
-  { k:"wa_g06", r:"Word Analysis", q:"Choose the correct word part to complete:\nDark ___\n\nOptions: ness | ful | less | ment | able | ward", o:["ness","ful","ment","able"], a:0, e:"Dark + NESS = DARKNESS." },
-  { k:"wa_g07", r:"Word Analysis", q:"Choose the correct word part to complete:\n___ happy\n\nOptions: un | re | dis | pre | mis | over", o:["un","re","dis","mis"], a:0, e:"UN + happy = UNHAPPY. Not happy." },
-  { k:"wa_g08", r:"Word Analysis", q:"Choose the correct word part to complete:\n___ place\n\nOptions: un | re | dis | pre | mis | over", o:["re","un","dis","over"], a:0, e:"RE + place = REPLACE. Put back again." },
-
-  // ══════════════════════════════════════════════════════════════
-  // INFLECTIONS & COLLOCATIONS
-  // Part A: Spot the odd one out (not an inflection)
-  // Part B: Fill verb form + Match adjective-noun
-  // ══════════════════════════════════════════════════════════════
-
-  // FROM ACTUAL MOCK
-  { k:"ic_m01", r:"Inflections & Collocations", q:"Spot the odd one out — which is NOT an inflection of the base word?\n\nA. EXTRACTS\nB. EXTRACT\nC. EXTRACTION\nD. EXTRACTED", o:["EXTRACTS","EXTRACTION","EXTRACT","EXTRACTED"], a:1, e:"EXTRACTION is a derivation (new word), not an inflection. Extracts/extract/extracted are all forms of the verb 'extract'." },
-  { k:"ic_m02", r:"Inflections & Collocations", q:"Spot the odd one out — which is NOT an inflection?\n\nA. CHANT\nB. CHANTING\nC. CHANTER\nD. CHANTED", o:["CHANT","CHANTING","CHANTER","CHANTED"], a:2, e:"CHANTER is a different word (a person who chants). Chant/chanting/chanted are inflections." },
-  { k:"ic_m03", r:"Inflections & Collocations", q:"Fill in: It will not ___ again.", o:["happen","happens","happening"], a:0, e:"After 'will not', use base form: will not HAPPEN." },
-  { k:"ic_m04", r:"Inflections & Collocations", q:"Fill in: Did you ___ the airport on time?", o:["reach","reached","reaching"], a:0, e:"After 'did', use base form: Did you REACH." },
-  { k:"ic_m05", r:"Inflections & Collocations", q:"Fill in: The humming bird ___ from one flower to another.", o:["flitted","flit","fliting"], a:0, e:"Past tense: The bird FLITTED (flew quickly)." },
-  { k:"ic_m06", r:"Inflections & Collocations", q:"Choose the word that goes with:\nHighest ___\n\nOptions: peak | age | security | people | rule | vegetable", o:["peak","age","rule","people"], a:0, e:"Highest PEAK. A mountain's highest point." },
-  { k:"ic_m07", r:"Inflections & Collocations", q:"Choose the word that goes with:\nGolden ___\n\nOptions: peak | age | security | people | rule | vegetable", o:["age","peak","rule","security"], a:0, e:"Golden AGE. A period of great achievement." },
-  { k:"ic_m08", r:"Inflections & Collocations", q:"Choose the word that goes with:\nYoung ___\n\nOptions: peak | age | security | people | rule | vegetable", o:["people","age","peak","rule"], a:0, e:"Young PEOPLE. A natural word pair." },
-  { k:"ic_m09", r:"Inflections & Collocations", q:"Choose the word that goes with:\nLeafy ___\n\nOptions: peak | age | security | people | rule | vegetable", o:["vegetable","peak","age","people"], a:0, e:"Leafy VEGETABLE. Like spinach or lettuce." },
-  { k:"ic_m10", r:"Inflections & Collocations", q:"Choose the word that goes with:\nTop ___\n\nOptions: peak | age | security | people | rule | vegetable", o:["security","peak","age","people"], a:0, e:"Top SECURITY. Highest level of protection." },
-
-  // GENERATED similar
-  { k:"ic_g01", r:"Inflections & Collocations", q:"Spot the odd one out — which is NOT an inflection?\n\nA. WALKS\nB. WALKED\nC. WALKING\nD. WALKWAY", o:["WALKS","WALKED","WALKWAY","WALKING"], a:2, e:"WALKWAY is a compound word, not an inflection of 'walk'." },
-  { k:"ic_g02", r:"Inflections & Collocations", q:"Spot the odd one out — which is NOT an inflection?\n\nA. PLAYED\nB. PLAYS\nC. PLAYING\nD. PLAYFUL", o:["PLAYED","PLAYS","PLAYFUL","PLAYING"], a:2, e:"PLAYFUL is a derivation (adjective), not an inflection of 'play'." },
-  { k:"ic_g03", r:"Inflections & Collocations", q:"Spot the odd one out — which is NOT an inflection?\n\nA. JUMPED\nB. JUMPS\nC. JUMPING\nD. JUMPER", o:["JUMPED","JUMPS","JUMPER","JUMPING"], a:2, e:"JUMPER is a noun (person/thing), not an inflection of 'jump'." },
-  { k:"ic_g04", r:"Inflections & Collocations", q:"Fill in: She ___ not want to go.", o:["does","do","doing"], a:0, e:"She DOES not want to go. He/she/it → does." },
-  { k:"ic_g05", r:"Inflections & Collocations", q:"Choose the word that goes with:\nHeavy ___\n\nOptions: rain | light | thin | soft | quiet | small", o:["rain","light","thin","quiet"], a:0, e:"Heavy RAIN. Natural collocation." },
-  { k:"ic_g06", r:"Inflections & Collocations", q:"Choose the word that goes with:\nBright ___\n\nOptions: rain | light | thin | soft | quiet | small", o:["light","rain","thin","quiet"], a:0, e:"Bright LIGHT. Natural collocation." },
-
-  // ══════════════════════════════════════════════════════════════
-  // FIND THE CORRECT SENTENCE — 2 options only (a/b)
-  // ══════════════════════════════════════════════════════════════
-
-  // FROM ACTUAL MOCK
-  { k:"fcs_m01", r:"Find the Correct Sentence", q:"Click and choose the correct one:", o:["There is a public park next to my home.","There is an public park next to my home."], a:0, e:"'A public' not 'an public'. Use 'a' before consonant sounds." },
-  { k:"fcs_m02", r:"Find the Correct Sentence", q:"Click and choose the correct one:", o:["But my friend taught me how to score runs easily.","But my friend taught me how to score runs easy."], a:0, e:"'Easily' (adverb) describes HOW, not 'easy' (adjective)." },
-  { k:"fcs_m03", r:"Find the Correct Sentence", q:"Click and choose the correct one:", o:["I am satisfied with my performance.","I'm satisfied with my performance."], a:0, e:"In formal writing, 'I am' is preferred over the contraction 'I'm'." },
-  { k:"fcs_m04", r:"Find the Correct Sentence", q:"Click and choose the correct one:", o:["I am excited but a little nervous too.","I am excited but a little nervous two."], a:0, e:"'Too' (also) not 'two' (number 2). These are homophones!" },
-  { k:"fcs_m05", r:"Find the Correct Sentence", q:"Click and choose the correct one:", o:["\"Are you plucking flowers, grandma?\"","\"Are you plucking flowers, grandma!\""], a:0, e:"A question needs a question mark (?), not exclamation mark (!)." },
-
-  // GENERATED similar
-  { k:"fcs_g01", r:"Find the Correct Sentence", q:"Click and choose the correct one:", o:["She ate an orange for breakfast.","She ate a orange for breakfast."], a:0, e:"'An orange' — use 'an' before vowel sounds (o)." },
-  { k:"fcs_g02", r:"Find the Correct Sentence", q:"Click and choose the correct one:", o:["The children played quiet in the library.","The children played quietly in the library."], a:1, e:"'Quietly' (adverb) describes HOW they played." },
-  { k:"fcs_g03", r:"Find the Correct Sentence", q:"Click and choose the correct one:", o:["We went to the beach, and we built a sandcastle.","We went to the beach and, we built a sandcastle."], a:0, e:"Comma goes BEFORE 'and' joining two sentences, not after." },
-  { k:"fcs_g04", r:"Find the Correct Sentence", q:"Click and choose the correct one:", o:["Their going to the park tomorrow.","They're going to the park tomorrow."], a:1, e:"They're = they are. Their = belonging to them." },
-  { k:"fcs_g05", r:"Find the Correct Sentence", q:"Click and choose the correct one:", o:["\"What a beautiful painting!\" said the teacher.","\"What a beautiful painting.\" said the teacher."], a:0, e:"Exclamation needs '!' not '.'. It shows excitement." },
-  { k:"fcs_g06", r:"Find the Correct Sentence", q:"Click and choose the correct one:", o:["The dog wagged it's tail happily.","The dog wagged its tail happily."], a:1, e:"'Its' (possessive) not 'it's' (it is). The tail belongs to the dog." },
-  { k:"fcs_g07", r:"Find the Correct Sentence", q:"Click and choose the correct one:", o:["He ran quick to catch the bus.","He ran quickly to catch the bus."], a:1, e:"'Quickly' (adverb) describes HOW he ran." },
-
-  // ══════════════════════════════════════════════════════════════
-  // GENERAL KNOWLEDGE — Mixed: alphabetical order, scrambles, literary world
-  // ══════════════════════════════════════════════════════════════
-
-  // FROM ACTUAL MOCK
-  { k:"gk_m01", r:"General Knowledge", q:"Arrange in alphabetical order:\nA) RAINBOW  B) RIBCAGE  C) REASON  D) RUNNING", o:["A, C, B, D","C, D, B, A","A, B, C, D","D, C, B, A"], a:0, e:"R-A (rainbow), R-E (reason), R-I (ribcage), R-U (running). So: A, C, B, D." },
-  { k:"gk_m02", r:"General Knowledge", q:"Unscramble using the clue:\nRUPE → Clue: CLEAN", o:["PURE","REPU","RUPE","PRUE"], a:0, e:"RUPE unscrambled = PURE. Pure means clean!" },
-  { k:"gk_m03", r:"General Knowledge", q:"\"Jumanji\" refers to the name of a:", o:["Game","Palace","Boy","King"], a:0, e:"Jumanji is the name of a magical board GAME in the story." },
-  { k:"gk_m04", r:"General Knowledge", q:"\"They say Aslan is on the move.\" — Who is the author?", o:["C. S. Lewis","J. R. R. Tolkien","Lewis Carroll","J. K. Rowling"], a:0, e:"Aslan is from 'The Chronicles of Narnia' by C. S. Lewis." },
-  { k:"gk_m05", r:"General Knowledge", q:"What literary device is used when someone tells a short personal story about something that happened to them?", o:["Anecdote","Poem","Proverb","Theme"], a:0, e:"An ANECDOTE is a short personal story about a real experience." },
-
-  // GENERATED similar
-  { k:"gk_g01", r:"General Knowledge", q:"Arrange in alphabetical order:\nA) BUTTERFLY  B) BANANA  C) BRIDGE  D) BASKET", o:["B, D, C, A","D, B, A, C","A, B, C, D","B, C, D, A"], a:0, e:"B-A (banana, basket), B-R (bridge), B-U (butterfly). Banana before basket (BAN before BAS). So: B, D, C, A." },
-  { k:"gk_g02", r:"General Knowledge", q:"Unscramble using the clue:\nOLCK → Clue: TIME", o:["LOCK","CLOCK","COLE","OLK"], a:1, e:"OLCK + C = CLOCK. A clock tells time!" },
-  { k:"gk_g03", r:"General Knowledge", q:"Which author wrote 'Charlie and the Chocolate Factory'?", o:["Roald Dahl","J.K. Rowling","Enid Blyton","Dr. Seuss"], a:0, e:"Roald Dahl wrote Charlie and the Chocolate Factory." },
-  { k:"gk_g04", r:"General Knowledge", q:"What is a short, well-known saying that gives advice called?", o:["Proverb","Anecdote","Simile","Poem"], a:0, e:"A PROVERB is a well-known saying. Like 'A stitch in time saves nine.'" },
-  { k:"gk_g05", r:"General Knowledge", q:"Unscramble using the clue:\nIMSUC → Clue: MELODY", o:["MUSIC","MUCIS","SIMUC","MUSCI"], a:0, e:"IMSUC unscrambled = MUSIC. Music is melody!" },
-
-  // ══════════════════════════════════════════════════════════════
-  // WORDS AND MEANINGS — Match word to definition from shared pool
-  // ══════════════════════════════════════════════════════════════
-
-  // FROM ACTUAL MOCK
-  { k:"wm_m01", r:"Words and Meanings", q:"Choose the correct meaning of LOAD:\n\nA) a colourless gas people need to breathe\nB) to put something into a machine\nC) a TV programme with animated characters", o:["to put something into a machine","a colourless gas people breathe","a TV programme"], a:0, e:"LOAD (v) = to put or insert something into a machine." },
-  { k:"wm_m02", r:"Words and Meanings", q:"Choose the correct meaning of OXYGEN:\n\nA) a colourless gas people need to breathe\nB) a tall timber tree for furniture\nC) a person who looks after passengers", o:["a colourless gas people need to breathe","a tall timber tree","a person who looks after passengers"], a:0, e:"OXYGEN (n) = a colourless, odourless gas that people need to breathe." },
-  { k:"wm_m03", r:"Words and Meanings", q:"Choose the correct meaning of STEWARD:\n\nA) a person who looks after passengers on a ship/aircraft\nB) to give something an earlier date\nC) a colourless gas", o:["a person who looks after passengers","to give an earlier date","a colourless gas"], a:0, e:"STEWARD (n) = a person whose job is to take care of passengers." },
-  { k:"wm_m04", r:"Words and Meanings", q:"Choose the correct meaning of BACKDATE:\n\nA) to give something an earlier date than the actual date\nB) a tall timber tree\nC) to put something into a machine", o:["to give something an earlier date","a tall timber tree","to put into a machine"], a:0, e:"BACKDATE (v) = to give something an earlier date than the actual one." },
-  { k:"wm_m05", r:"Words and Meanings", q:"Choose the correct meaning of TEAK:\n\nA) a tall timber tree used in furniture and ships\nB) a colourless gas\nC) a TV programme with animated characters", o:["a tall timber tree for furniture/ships","a colourless gas","a TV programme"], a:0, e:"TEAK (n) = a tall timber tree used in making furniture and building ships." },
-
-  // GENERATED similar
-  { k:"wm_g01", r:"Words and Meanings", q:"Choose the correct meaning of SHELTER:\n\nA) a type of musical instrument\nB) a place giving protection from weather\nC) a kind of fabric used in clothing", o:["a place giving protection from weather","a musical instrument","a kind of fabric"], a:0, e:"SHELTER (n) = a place that gives protection from bad weather or danger." },
-  { k:"wm_g02", r:"Words and Meanings", q:"Choose the correct meaning of TELESCOPE:\n\nA) a device to see faraway things\nB) a machine that washes clothes\nC) a tool for digging holes", o:["a device to see faraway things","a machine that washes clothes","a tool for digging"], a:0, e:"TELESCOPE (n) = a device used to see distant things like stars." },
-  { k:"wm_g03", r:"Words and Meanings", q:"Choose the correct meaning of GRAVITY:\n\nA) a type of music from classical period\nB) the force that pulls things toward the ground\nC) a precious stone found in mines", o:["the force pulling things toward ground","a type of music","a precious stone"], a:0, e:"GRAVITY (n) = the natural force that pulls things down toward the earth." },
-  { k:"wm_g04", r:"Words and Meanings", q:"Choose the correct meaning of ADMIRE:\n\nA) to look at with respect and pleasure\nB) to cook food on an open fire\nC) to clean with a cloth", o:["to look at with respect and pleasure","to cook on fire","to clean with cloth"], a:0, e:"ADMIRE (v) = to respect and look at someone/something with pleasure." },
-  { k:"wm_g05", r:"Words and Meanings", q:"Choose the correct meaning of BACTERIA:\n\nA) tiny living things, some cause disease\nB) a tool used for painting\nC) a type of sweet dessert", o:["tiny living things, some cause disease","a tool for painting","a sweet dessert"], a:0, e:"BACTERIA (n) = very small living things, some of which cause disease." },
-
-  // ══════════════════════════════════════════════════════════════
-  // FORM THE CORRECT SENTENCE — Word order + Fill blanks
-  // ══════════════════════════════════════════════════════════════
-
-  // FROM ACTUAL MOCK
-  { k:"ftcs_m01", r:"Form the Correct Sentence", q:"Put in correct order:\nA. KINDLY DON'T\nB. ANY NOISE\nC. MAKE", o:["A, C, B","C, A, B","B, C, A","A, B, C"], a:0, e:"KINDLY DON'T + MAKE + ANY NOISE = 'Kindly don't make any noise.'" },
-  { k:"ftcs_m02", r:"Form the Correct Sentence", q:"Put in correct order:\nA. BE LATE\nB. DON'T\nC. FOR THE EVENT", o:["B, A, C","B, C, A","A, B, C","C, B, A"], a:0, e:"DON'T + BE LATE + FOR THE EVENT = 'Don't be late for the event.'" },
-  { k:"ftcs_m03", r:"Form the Correct Sentence", q:"Put in correct order:\nA. CHOPPED\nB. MONICA\nC. THE TOMATOES", o:["B, A, C","C, A, B","A, B, C","C, B, A"], a:0, e:"MONICA + CHOPPED + THE TOMATOES = 'Monica chopped the tomatoes.'" },
-  { k:"ftcs_m04", r:"Form the Correct Sentence", q:"Fill in the blank:\nKrish and ___ play in the park every evening.\n\nOptions: buzzing | I | doing | did | fizzed", o:["I","doing","did","buzzing"], a:0, e:"Krish and I play... 'I' is correct with another person as subject." },
-  { k:"ftcs_m05", r:"Form the Correct Sentence", q:"Fill in the blank:\nThe bubbles ___ over the top of the bottle.\n\nOptions: buzzing | I | doing | did | fizzed", o:["fizzed","buzzing","doing","did"], a:0, e:"The bubbles FIZZED over the top. Past tense, bubbles make fizzing sound." },
-
-  // GENERATED similar
-  { k:"ftcs_g01", r:"Form the Correct Sentence", q:"Put in correct order:\nA. THE GARDEN\nB. WATERS\nC. GRANDMOTHER", o:["C, B, A","A, B, C","B, C, A","A, C, B"], a:0, e:"GRANDMOTHER + WATERS + THE GARDEN." },
-  { k:"ftcs_g02", r:"Form the Correct Sentence", q:"Put in correct order:\nA. YOUR SHOES\nB. PLEASE\nC. REMOVE", o:["B, C, A","C, B, A","A, B, C","A, C, B"], a:0, e:"PLEASE + REMOVE + YOUR SHOES." },
-  { k:"ftcs_g03", r:"Form the Correct Sentence", q:"Fill in the blank:\nThe bees were ___ around the flowers.\n\nOptions: buzzing | running | sleeping | eating", o:["buzzing","running","sleeping","eating"], a:0, e:"Bees BUZZ. The bees were buzzing around the flowers." },
-
-  // ══════════════════════════════════════════════════════════════
-  // PHONETICS — Silent letters, phonetic symbols, homophones
-  // ══════════════════════════════════════════════════════════════
-
-  // FROM ACTUAL MOCK
-  { k:"ph_m01", r:"Phonetics", q:"Choose the silent letter in: FOREIGN /ˈfɒr.ɪn/", o:["g","i","e","r"], a:0, e:"The 'g' in foreign is silent. We say 'FOR-in' not 'FOR-ig-n'." },
-  { k:"ph_m02", r:"Phonetics", q:"Are these homophones? STRAIGHT – STRAIT", o:["Yes","No"], a:0, e:"Yes! Both sound like /streɪt/. Straight=not curved, Strait=narrow water passage." },
-  { k:"ph_m03", r:"Phonetics", q:"Are these homophones? DUEL – DUAL", o:["Yes","No"], a:0, e:"Yes! Both sound like /djuːəl/. Duel=fight, Dual=two/double." },
-  { k:"ph_m04", r:"Phonetics", q:"Choose the word for this pronunciation: /ˈev.rɪ.θɪŋ/", o:["everything","evening","everlasting","everyone"], a:0, e:"/ˈev.rɪ.θɪŋ/ = EVERYTHING. The /θ/ is the 'th' sound." },
-  { k:"ph_m05", r:"Phonetics", q:"Choose the word for this pronunciation: /suː.pɜːb/", o:["superb","suburb","super","submerge"], a:0, e:"/suː.pɜːb/ = SUPERB. Means excellent, outstanding." },
-  { k:"ph_m06", r:"Phonetics", q:"Choose the word for this pronunciation: /ˈaɪ.braʊz/", o:["eyebrows","eyelash","icebergs","eyesight"], a:0, e:"/ˈaɪ.braʊz/ = EYEBROWS. The hair above your eyes." },
-  { k:"ph_m07", r:"Phonetics", q:"Choose the word for this pronunciation: /sɪn/", o:["sin","scene","sign","seen"], a:0, e:"/sɪn/ = SIN. Short 'i' sound. Scene = /siːn/ (long 'ee')." },
-
-  // GENERATED similar
-  { k:"ph_g01", r:"Phonetics", q:"Choose the silent letter in: KNIGHT /naɪt/", o:["k","n","g","both k and g"], a:3, e:"Both 'k' and 'g' are silent in knight. We say 'NITE'." },
-  { k:"ph_g02", r:"Phonetics", q:"Choose the silent letter in: ISLAND /ˈaɪ.lənd/", o:["s","i","d","l"], a:0, e:"The 's' in island is silent. We say 'EYE-land'." },
-  { k:"ph_g03", r:"Phonetics", q:"Are these homophones? FLOWER – FLOUR", o:["Yes","No"], a:0, e:"Yes! Both sound like /flaʊər/. Flower=plant, Flour=powder for baking." },
-  { k:"ph_g04", r:"Phonetics", q:"Are these homophones? HEAR – HERE", o:["Yes","No"], a:0, e:"Yes! Both sound like /hɪər/. Hear=listen, Here=this place." },
-  { k:"ph_g05", r:"Phonetics", q:"Choose the word for this pronunciation: /ˈbʌt.ə.flaɪ/", o:["butterfly","battlefly","bottlefly","butterflew"], a:0, e:"/ˈbʌt.ə.flaɪ/ = BUTTERFLY." },
-  { k:"ph_g06", r:"Phonetics", q:"Choose the silent letter in: COMB /kəʊm/", o:["b","c","o","m"], a:0, e:"The 'b' in comb is silent. We say 'KOHM'." },
-  { k:"ph_g07", r:"Phonetics", q:"Are these homophones? WRITE – RIGHT", o:["Yes","No"], a:0, e:"Yes! Both sound like /raɪt/. Write=put words, Right=correct." },
-  { k:"ph_g08", r:"Phonetics", q:"Choose the word for this pronunciation: /ˈkæŋ.ɡə.ruː/", o:["kangaroo","kanguru","cangaroo","kangroo"], a:0, e:"/ˈkæŋ.ɡə.ruː/ = KANGAROO." },
-  { k:"ph_g09", r:"Phonetics", q:"Choose the silent letter in: LAMB /læm/", o:["b","l","a","m"], a:0, e:"The 'b' in lamb is silent. We say 'LAM'." },
-  { k:"ph_g10", r:"Phonetics", q:"Are these homophones? BARE – BEAR", o:["Yes","No"], a:0, e:"Yes! Both sound like /beər/. Bare=uncovered, Bear=animal." },
-
-  // ══════════════════════════════════════════════════════════════
-  // READING COMPREHENSION — Poem-based
-  // ══════════════════════════════════════════════════════════════
-
-  // FROM ACTUAL MOCK (The Caterpillar by Christina Rossetti)
-  { k:"rc_m01", r:"Reading Comprehension", q:"Read the poem 'The Caterpillar':\n'Brown and Furry, Caterpillar in a hurry;\nTake your walk, To the shady leaf or stalk.\nMay no toad spy you, May the little birds pass by you;\nSpin and die, To live again a butterfly.'\n\nWhere should the caterpillar go to protect itself?", o:["To a shady leaf or stalk","To the nearest nest","To a tall tree","Under a rock"], a:0, e:"The poem says 'Take your walk / To the shady leaf or stalk.'" },
-  { k:"rc_m02", r:"Reading Comprehension", q:"From the same poem:\nWhich line rhymes with 'May the little birds pass by you'?", o:["May no toad spy you","Spin and die","Take your walk","Brown and Furry"], a:0, e:"'spy you' and 'by you' rhyme. /aɪ juː/ ending in both." },
-  { k:"rc_m03", r:"Reading Comprehension", q:"From the same poem:\nHow many couplets are there? (A couplet = two rhyming lines)", o:["4","8","2","6"], a:0, e:"4 couplets: (hurry/stalk is not a perfect couplet but the poem has 8 lines = 4 pairs)." },
-  { k:"rc_m04", r:"Reading Comprehension", q:"From the same poem:\nWhat does 'Spin and die, To live again a butterfly' mean?", o:["The transformation of a caterpillar to a butterfly","The death of a caterpillar","A butterfly spinning in the air","A caterpillar dying"], a:0, e:"It describes metamorphosis — the caterpillar 'dies' in its cocoon and is reborn as a butterfly." },
-  { k:"rc_m05", r:"Reading Comprehension", q:"From the same poem:\nWhat does 'stalk' mean?", o:["Stem of a plant","Root of a plant","Leaf of a plant","Flower of a plant"], a:0, e:"STALK = the stem of a plant. The main upright part." },
-
-  // GENERATED similar (different poem/passage)
-  { k:"rc_g01", r:"Reading Comprehension", q:"Read:\n'Twinkle, twinkle, little star, How I wonder what you are!\nUp above the world so high, Like a diamond in the sky.'\n\nWhat is the star compared to?", o:["A diamond","A candle","The moon","A firefly"], a:0, e:"The poem says 'Like a diamond in the sky.' This is a simile." },
-  { k:"rc_g02", r:"Reading Comprehension", q:"From the same poem:\nWhich word rhymes with 'star'?", o:["are","sky","high","wonder"], a:0, e:"'Star' and 'are' rhyme (/ɑːr/ ending)." },
-  { k:"rc_g03", r:"Reading Comprehension", q:"Read:\n'The owl is a bird that comes out at night. It has large eyes that help it see in the dark. Owls can turn their heads almost all the way around. A baby owl is called an owlet.'\n\nWhat helps the owl see at night?", o:["Large eyes","Big wings","Sharp claws","Long beak"], a:0, e:"'It has large eyes that help it see in the dark.'" },
-
-  // ══════════════════════════════════════════════════════════════
-  // CROSSWORD — Correct vs misspelled, with clues
-  // ══════════════════════════════════════════════════════════════
-
-  // FROM ACTUAL MOCK
-  { k:"cw_m01", r:"Crossword", q:"Plural of COOKIE:", o:["COOKIES","COOKEES","COOKEYS","COOKEIS"], a:0, e:"COOKIE → COOKIES. Just add 's'." },
-  { k:"cw_m02", r:"Crossword", q:"Food item (popcorn image clue):", o:["POPCORN","POPCAN","POPCOAN","POPCRN"], a:0, e:"POPCORN — pop + corn." },
-  { k:"cw_m03", r:"Crossword", q:"Household thing (clock image clue):", o:["CLOCK","CLOAK","CLOACK","CLOKC"], a:0, e:"CLOCK — tells the time." },
-  { k:"cw_m04", r:"Crossword", q:"A thing that lasts long:", o:["DURABLE","DURABEL","DURBLE","DUARABLE"], a:0, e:"DURABLE — able to last a long time." },
-  { k:"cw_m05", r:"Crossword", q:"Something that can fit or match rightly:", o:["SUITABLE","SUTABLE","SUTEABLE","SUITIBLE"], a:0, e:"SUITABLE — suit + able." },
-
-  // GENERATED similar
-  { k:"cw_g01", r:"Crossword", q:"Plural of BUTTERFLY:", o:["BUTTERFLIES","BUTTERFLYS","BUTTERFLIS","BUTTERFLYES"], a:0, e:"Butterfly → BUTTERFLIES. Change 'y' to 'ies'." },
-  { k:"cw_g02", r:"Crossword", q:"A person who does magic tricks:", o:["MAGICIAN","MAGISION","MAJICIAN","MAGICAIN"], a:0, e:"MAGICIAN — ends in '-cian'." },
-  { k:"cw_g03", r:"Crossword", q:"The opposite of difficult:", o:["COMFORTABLE","COMFARTABLE","COMFOTABLE","CUMFORTABLE"], a:0, e:"COMFORTABLE — comfort + able." },
-  { k:"cw_g04", r:"Crossword", q:"Plural of KNIFE:", o:["KNIVES","KNIFES","KNIFS","KNIVS"], a:0, e:"Knife → KNIVES. Change 'fe' to 'ves'." },
-  { k:"cw_g05", r:"Crossword", q:"A place where books are kept:", o:["LIBRARY","LIBARY","LIBERRY","LIBERY"], a:0, e:"LIBRARY — has two 'r's." },
-
-  // ══════════════════════════════════════════════════════════════
-  // WORD WEAVING — Word stairs, word wheel, word combo
-  // ══════════════════════════════════════════════════════════════
-
-  // FROM ACTUAL MOCK
-  { k:"ww_m01", r:"Word Weaving", q:"Word Wheel letters: F, T, O, L, B, A, L\nForm the word:", o:["FOOTBALL","FOOTBAL","FALLBOT","BOTFALL"], a:0, e:"F-O-O-T-B-A-L-L = FOOTBALL." },
-  { k:"ww_m02", r:"Word Weaving", q:"Word Stairs starting with Y:\nHints: 1) Greeting 2) A pronoun 3) Exercise for health 4) Not yet old\n\nY → Y_ → Y__ → Y___ → Y____", o:["YO, YOU, YOGA, YOUNG","YO, YOA, YOGA, YOUNG","YO, YOU, YOGA, YOUMG","YO, YOE, YOGA, YOUNG"], a:0, e:"YO (greeting), YOU (pronoun), YOGA (exercise), YOUNG (not old)." },
-  { k:"ww_m03", r:"Word Weaving", q:"Word Stairs starting with S:\nHints: 1) Abbrev. of southwest 2) Past of 'see' 3) Opposite of fast 4) Tool with spiral blade\n\nS → S_ → S__ → S___ → S____", o:["SW, SAW, SLOW, SCREW","SW, SEW, SLAW, SCREW","SW, SAW, SLAW, SCEW","SW, SOW, SLOW, SAREW"], a:0, e:"SW (southwest), SAW (past of see), SLOW (opposite of fast), SCREW (spiral tool)." },
-
-  // GENERATED similar
-  { k:"ww_g01", r:"Word Weaving", q:"Word Wheel letters: M, U, S, H, R, O, O, M\nForm the word:", o:["MUSHROOM","MUHSROOM","SHOOMRUM","ROOMHUMS"], a:0, e:"M-U-S-H-R-O-O-M = MUSHROOM." },
-  { k:"ww_g02", r:"Word Weaving", q:"Word Stairs starting with B:\nHints: 1) Past of 'be' 2) Writing instrument 3) Bench in a park 4) Under/beneath\n\nB → B__ → B___ → B____", o:["BE, PEN, BENCH, BELOW","WAS, PEN, BENCH, BELOW","BE, PEN, BENCH, BELOW","BE, PAN, BENCH, BELOW"], a:0, e:"Hmm — this doesn't start with B properly. Let me fix: Hints should all start with B." },
-  { k:"ww_g03", r:"Word Weaving", q:"Word Combo: Combine Column A + AS (middle) + Column H\n\nColumn A: K, E, G → Middle: AS → Column C: H\nForm TWO words:", o:["EASE, GASH","KASH, GASH","EASH, KASH","KASE, GASE"], a:0, e:"E+AS+E = EASE, G+AS+H = GASH. Two valid words!" },
-
-  // ══════════════════════════════════════════════════════════════
-  // COMPOUND WORDS AND TYPES
-  // ══════════════════════════════════════════════════════════════
-
-  // FROM ACTUAL MOCK
-  { k:"ct_m01", r:"Compound Words and Types", q:"Is VOLCANO a singular noun or collective noun?", o:["Singular noun","Collective noun"], a:0, e:"VOLCANO is a singular noun (one volcano). A collective noun names a group (flock, team)." },
-  { k:"ct_m02", r:"Compound Words and Types", q:"What is the correct past tense of GIVE UP?", o:["GAVE UP","GIVEN UP","GIVING UP"], a:0, e:"Give up → GAVE UP (past tense). 'Given up' is past participle (has given up)." },
-  { k:"ct_m03", r:"Compound Words and Types", q:"What is the adjective form?\n'They donated to the (NEED).'", o:["NEEDY","NEEDFUL","NEEDLESS"], a:0, e:"NEEDY = in need, poor. 'They donated to the needy.' Needy is the adjective." },
-  { k:"ct_m04", r:"Compound Words and Types", q:"Find the full form of the contraction:\n\"I've got it,\" said he.", o:["I HAVE","I AM","I WILL"], a:0, e:"I've = I HAVE. I've got it = I have got it." },
-  { k:"ct_m05", r:"Compound Words and Types", q:"Choose: regular word or capitonym?\n'A town in France.'", o:["Nice (capitonym)","nice (regular word)"], a:0, e:"Nice (capital N) is a city in France. nice (lowercase) means pleasant. A capitonym changes meaning with capitalisation!" },
-
-  // GENERATED similar
-  { k:"ct_g01", r:"Compound Words and Types", q:"Is ARMY a singular noun or collective noun?", o:["Collective noun","Singular noun"], a:0, e:"ARMY is a collective noun — it names a group of soldiers." },
-  { k:"ct_g02", r:"Compound Words and Types", q:"What is the correct past tense of LOOK UP?", o:["LOOKED UP","LOOKING UP","LOOK UPPED"], a:0, e:"Look up → LOOKED UP. Regular past tense." },
-  { k:"ct_g03", r:"Compound Words and Types", q:"Find the full form:\n\"She's coming tomorrow.\"", o:["She is","She has","She was"], a:0, e:"She's = SHE IS. She's coming = She is coming." },
-  { k:"ct_g04", r:"Compound Words and Types", q:"Choose: regular word or capitonym?\n'A month of the year.'", o:["March (capitonym)","march (regular word)"], a:0, e:"March (capital) = month. march (lowercase) = walk in step. Capitonym!" },
-  { k:"ct_g05", r:"Compound Words and Types", q:"What is the adjective form?\n'She looked (beauty) in her dress.'", o:["BEAUTIFUL","BEAUTIFY","BEAUTILESS"], a:0, e:"Beauty → BEAUTIFUL (adjective). 'She looked beautiful.'" },
-
-  // ══════════════════════════════════════════════════════════════
-  // SYNONYMS AND ANTONYMS — In-context sentence, 2 options
-  // ══════════════════════════════════════════════════════════════
-
-  // FROM ACTUAL MOCK - SYNONYMS
-  { k:"sa_m01", r:"Synonyms and Antonyms", q:"SYNONYM: Replace the bracketed word:\n'Strong pillars were used to (strengthen) the old building.'", o:["Support","Weaken"], a:0, e:"Strengthen → SUPPORT. Both mean to make/keep strong." },
-  { k:"sa_m02", r:"Synonyms and Antonyms", q:"SYNONYM: Replace the bracketed word:\n'The car came to a (halt) and could not be restarted.'", o:["Stop","Start"], a:0, e:"Halt → STOP. Both mean to cease moving." },
-  { k:"sa_m03", r:"Synonyms and Antonyms", q:"SYNONYM: Replace the bracketed word:\n'The tidal waves began to (ebb) slowly.'", o:["Recede","Come in"], a:0, e:"Ebb → RECEDE. Both mean to flow back/decrease." },
-  { k:"sa_m04", r:"Synonyms and Antonyms", q:"SYNONYM: Replace the bracketed word:\n'There was pin-drop (silence) in the auditorium.'", o:["Quiet","Speech"], a:0, e:"Silence → QUIET. Both mean no noise." },
-  { k:"sa_m05", r:"Synonyms and Antonyms", q:"SYNONYM: Replace the bracketed word:\n'Vasco da Gama set out to India and other (foreign) lands.'", o:["Distant","Familiar"], a:0, e:"Foreign → DISTANT. Both mean far away, not local." },
-
-  // FROM ACTUAL MOCK - ANTONYMS
-  { k:"sa_m06", r:"Synonyms and Antonyms", q:"ANTONYM: Replace the bracketed word with its OPPOSITE:\n'The peanuts tasted (crisp) and crunchy.'", o:["Soft","Firm"], a:0, e:"Crisp ↔ SOFT. Crisp=hard/crunchy, soft=not hard." },
-  { k:"sa_m07", r:"Synonyms and Antonyms", q:"ANTONYM: Replace with OPPOSITE:\n'A (foul) smell came from the drains.'", o:["Fragrant","Offensive"], a:0, e:"Foul ↔ FRAGRANT. Foul=bad smell, fragrant=sweet smell." },
-  { k:"sa_m08", r:"Synonyms and Antonyms", q:"ANTONYM: Replace with OPPOSITE:\n'She blended (raw) carrots to make soup.'", o:["Processed","Uncooked"], a:0, e:"Raw ↔ PROCESSED. Raw=uncooked, processed=treated/cooked." },
-  { k:"sa_m09", r:"Synonyms and Antonyms", q:"ANTONYM: Replace with OPPOSITE:\n'The silk cloth was (smooth) and soft.'", o:["Rough","Even"], a:0, e:"Smooth ↔ ROUGH. Smooth=even surface, rough=uneven." },
-  { k:"sa_m10", r:"Synonyms and Antonyms", q:"ANTONYM: Replace with OPPOSITE:\n'The Mughal king faced a (defeat) at the hands of Chhatrapati Shivaji Maharaj.'", o:["Conquer","Lose"], a:0, e:"Defeat ↔ CONQUER. Defeat=loss, conquer=victory/win." },
-
-  // GENERATED similar
-  { k:"sa_g01", r:"Synonyms and Antonyms", q:"SYNONYM: Replace the bracketed word:\n'The children were (glad) to see the circus.'", o:["Happy","Sad"], a:0, e:"Glad → HAPPY. Both mean feeling pleased." },
-  { k:"sa_g02", r:"Synonyms and Antonyms", q:"SYNONYM: Replace the bracketed word:\n'The (enormous) whale swam past our boat.'", o:["Huge","Tiny"], a:0, e:"Enormous → HUGE. Both mean very large." },
-  { k:"sa_g03", r:"Synonyms and Antonyms", q:"ANTONYM: Replace with OPPOSITE:\n'The road was very (narrow) and winding.'", o:["Wide","Thin"], a:0, e:"Narrow ↔ WIDE. Narrow=not much space, wide=lots of space." },
-  { k:"sa_g04", r:"Synonyms and Antonyms", q:"ANTONYM: Replace with OPPOSITE:\n'She gave a (brave) speech on stage.'", o:["Cowardly","Courageous"], a:0, e:"Brave ↔ COWARDLY. Brave=fearless, cowardly=full of fear." },
-  { k:"sa_g05", r:"Synonyms and Antonyms", q:"SYNONYM: Replace the bracketed word:\n'The old house looked (gloomy) and dark.'", o:["Dreary","Cheerful"], a:0, e:"Gloomy → DREARY. Both mean dark and depressing." },
-  { k:"sa_g06", r:"Synonyms and Antonyms", q:"ANTONYM: Replace with OPPOSITE:\n'The new student was very (shy) on the first day.'", o:["Bold","Timid"], a:0, e:"Shy ↔ BOLD. Shy=nervous/quiet, bold=confident/fearless." },
-
-  // ══════════════════════════════════════════════════════════════
-  // IDIOMS AND PHRASES — Fill idiom into sentence from pool
-  // ══════════════════════════════════════════════════════════════
-
-  // FROM ACTUAL MOCK
-  { k:"id_m01", r:"Idioms and Phrases", q:"Fill in the idiom:\n'My mother would ___ if I don't reach home before four.'\n\nOptions: crack of dawn | go bananas | bolt from the blue | tickled pink | time and again | eat like a horse", o:["go bananas","crack of dawn","bolt from the blue","tickled pink"], a:0, e:"GO BANANAS = become very angry/crazy. Mother would go bananas!" },
-  { k:"id_m02", r:"Idioms and Phrases", q:"Fill in the idiom:\n'I have told my sister ___ not to touch my books.'\n\nOptions: crack of dawn | go bananas | bolt from the blue | tickled pink | time and again | eat like a horse", o:["time and again","crack of dawn","go bananas","bolt from the blue"], a:0, e:"TIME AND AGAIN = repeatedly, over and over." },
-  { k:"id_m03", r:"Idioms and Phrases", q:"Fill in the idiom:\n'The farmers get to work at the ___.'\n\nOptions: crack of dawn | go bananas | bolt from the blue | tickled pink | time and again | eat like a horse", o:["crack of dawn","go bananas","time and again","tickled pink"], a:0, e:"CRACK OF DAWN = very early morning, when sun first appears." },
-  { k:"id_m04", r:"Idioms and Phrases", q:"Fill in the idiom:\n'The little girls were ___ by the tricks of the buffoon.'\n\nOptions: crack of dawn | go bananas | bolt from the blue | tickled pink | time and again | eat like a horse", o:["tickled pink","go bananas","crack of dawn","time and again"], a:0, e:"TICKLED PINK = very pleased/delighted." },
-  { k:"id_m05", r:"Idioms and Phrases", q:"What does this proverb mean?\n'A rotten apple spoils the barrel.'", o:["One bad person can badly influence the whole group","You needn't wait for a special time to begin","A friend in need is a real friend"], a:0, e:"One dishonest/bad person can spoil the whole group. Like one rotten apple making others rot." },
-
-  // GENERATED similar
-  { k:"id_g01", r:"Idioms and Phrases", q:"Fill in the idiom:\n'The news of his transfer was a ___.'\n\nOptions: crack of dawn | go bananas | bolt from the blue | tickled pink | time and again", o:["bolt from the blue","crack of dawn","tickled pink","go bananas"], a:0, e:"BOLT FROM THE BLUE = a sudden, unexpected surprise." },
-  { k:"id_g02", r:"Idioms and Phrases", q:"What does this proverb mean?\n'A stitch in time saves nine.'", o:["Fix small problems early before they become big","Sewing is important","Time passes quickly","Nine is enough"], a:0, e:"Fix a problem when it's small, or it will get much worse later." },
-  { k:"id_g03", r:"Idioms and Phrases", q:"Fill in the idiom:\n'Though I ___, I never get fat.'\n\nOptions: crack of dawn | go bananas | bolt from the blue | tickled pink | time and again | eat like a horse", o:["eat like a horse","go bananas","crack of dawn","time and again"], a:0, e:"EAT LIKE A HORSE = eat a very large amount of food." },
-  { k:"id_g04", r:"Idioms and Phrases", q:"What does this proverb mean?\n'Don't count your chickens before they hatch.'", o:["Don't assume success before it actually happens","Chickens are hard to count","Eggs are fragile","Always be prepared"], a:0, e:"Don't plan based on something that hasn't happened yet." },
-
-  // ══════════════════════════════════════════════════════════════
-  // PRESENTING AN ARGUMENT — Long passage reordering
-  // ══════════════════════════════════════════════════════════════
-
-  // FROM ACTUAL MOCK
-  { k:"pa_m01", r:"Presenting an Argument", q:"'I DON'T NEED A SNOOZE BUTTON' — Arrange in correct order:\n\n1. Happy throughout school day\n2. Didn't feel like sleeping again - unusual\n3. Helped granddad, finished school work quickly\n4. Took mom by surprise - was already fresh!\n5. Stirred from sleep at 5:45 am\n6. Early to bathe, breakfast, didn't run after bus\n7. Knew mom would come at 6 am\n8. Realised this is how I want all days to be\n9. Splashed water, brushed teeth\n10. During dinner, thought how different today was", o:["5, 7, 2, 9, 4, 6, 1, 3, 10, 8","5, 3, 4, 8, 5, 1, 7, 2, 10, 8","6, 7, 2, 9, 4, 5, 1, 3, 10, 8"], a:0, e:"Woke at 5:45(5)→knew mom comes at 6(7)→didn't feel sleepy(2)→washed up(9)→surprised mom(4)→early for everything(6)→happy at school(1)→helped at home(3)→reflected at dinner(10)→decided to continue(8)." },
-
-  // GENERATED similar
-  { k:"pa_g01", r:"Presenting an Argument", q:"'MY FIRST PET' — Arrange in correct order:\n\n1. I named him Buddy and we became best friends.\n2. One day, my father brought home a small puppy.\n3. I promised to take care of him every day.\n4. I was so excited that I jumped with joy.\n5. Now, Buddy follows me everywhere I go.", o:["2, 4, 3, 1, 5","4, 2, 1, 3, 5","2, 3, 4, 1, 5","1, 2, 3, 4, 5"], a:0, e:"Father brought puppy(2)→excited(4)→promised to care(3)→named Buddy(1)→follows everywhere(5). Cause→effect chain!" },
-  { k:"pa_g02", r:"Presenting an Argument", q:"'THE SCHOOL FAIR' — Arrange in correct order:\n\n1. We set up colourful stalls in the playground.\n2. Our teacher announced the annual school fair.\n3. Parents and children enjoyed the games and food.\n4. We planned different activities and food items.\n5. It was the best fair our school ever had.", o:["2, 4, 1, 3, 5","1, 2, 3, 4, 5","2, 1, 4, 3, 5","4, 2, 1, 3, 5"], a:0, e:"Announced(2)→planned(4)→set up(1)→enjoyed(3)→best fair(5). Planning→execution→result!" },
-  { k:"pa_g03", r:"Presenting an Argument", q:"'LEARNING TO RIDE' — Arrange in correct order:\n\n1. I fell down many times but did not give up.\n2. My uncle bought me a new bicycle for my birthday.\n3. After two weeks of practice, I could ride without help.\n4. My father held the seat and ran beside me.\n5. I decided to learn to ride it that very day.", o:["2, 5, 4, 1, 3","5, 2, 4, 1, 3","2, 4, 5, 1, 3","2, 5, 1, 4, 3"], a:0, e:"Got bicycle(2)→decided to learn(5)→father helped(4)→fell but persisted(1)→success(3)." },
-];
-
-// ─── ENGINE ─────────────────────────────────────────────────────
-function shuffle(a){var b=[].concat(a);for(var i=b.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=b[i];b[i]=b[j];b[j]=t;}return b;}
-
-function generateExam(missed, qPerRound) {
-  missed = missed || {};
-  // Real exam distribution
-  var distribution = {
-    "Spell It Right": 6, "Word Analysis": 4, "Inflections & Collocations": 6,
-    "Find the Correct Sentence": 4, "General Knowledge": 4, "Words and Meanings": 4,
-    "Form the Correct Sentence": 4, "Phonetics": 6, "Reading Comprehension": 4,
-    "Crossword": 4, "Word Weaving": 3, "Compound Words and Types": 4,
-    "Synonyms and Antonyms": 6, "Idioms and Phrases": 4, "Presenting an Argument": 2
-  };
-  var sections = [];
-  for (var ri = 0; ri < ROUNDS.length; ri++) {
-    var round = ROUNDS[ri];
-    var meta = RMETA[round];
-    var pool = Q.filter(function(q){return q.r === round;});
-    if (!pool.length) continue;
-    var count = Math.min(distribution[round] || 3, pool.length);
-    var weighted = pool.map(function(q){return {q:q, w: missed[q.k] ? 3 : 1};});
-    var selected = [];
-    var avail = [].concat(weighted);
-    for (var i = 0; i < count; i++) {
-      var tw = avail.reduce(function(s,x){return s+x.w;},0);
-      var r2 = Math.random()*tw, ci = 0;
-      for (var j = 0; j < avail.length; j++) { r2 -= avail[j].w; if (r2 <= 0){ci=j;break;} }
-      selected.push(avail[ci].q);
-      avail.splice(ci, 1);
-    }
-    // Shuffle options for non-complex questions (skip ones with only 2 options or complex formatting)
-    var questions = selected.map(function(q) {
-      if (q.o.length <= 2) return {k:q.k, q:q.q, options:q.o, answer:q.a, explain:q.e};
-      var idx = shuffle([0,1,2,3].slice(0, q.o.length));
-      return {k:q.k, q:q.q, options:idx.map(function(i){return q.o[i];}), answer:idx.indexOf(q.a), explain:q.e};
-    });
-    sections.push({name:round, icon:meta.icon, teach:meta.teach, questions:questions, marks: count});
-  }
-  return sections;
+function goto(idx) {
+  document.getElementById('block-' + current).classList.remove('visible');
+  document.querySelectorAll('.nav-item').forEach((n,i) => n.classList.toggle('active', i===idx));
+  current = idx;
+  document.getElementById('block-' + current).classList.add('visible');
+  window.scrollTo(0,0);
 }
 
-// ─── STORAGE ────────────────────────────────────────────────────
-var SK = "spellbee-v3";
-function loadData(){try{var d=localStorage.getItem(SK);return d?JSON.parse(d):{attempts:[],answerLog:{}};}catch(e){return {attempts:[],answerLog:{}};}}
-function saveData(d){try{localStorage.setItem(SK,JSON.stringify(d));}catch(e){}}
-
-// ─── THEME (closer to TCS iON blue) ────────────────────────────
-var T={bg:"#F0F7FF",card:"#FFF",pri:"#0078D4",priL:"#E1EBF5",ok:"#22C55E",okL:"#DCFCE7",err:"#EF4444",errL:"#FEE2E2",warn:"#F59E0B",warnL:"#FEF3C7",txt:"#1E293B",txtL:"#64748B",bdr:"#D1D9E6",ac1:"#EC4899",ac3:"#6366F1",hdr:"#003C71"};
-
-// ─── APP ────────────────────────────────────────────────────────
-var e = React.createElement;
-var useState=React.useState, useMemo=React.useMemo, useRef=React.useRef, useEffect=React.useEffect, useCallback=React.useCallback;
-
-function App(){
-  var _s=useState("home"),screen=_s[0],setScreen=_s[1];
-  var _e=useState(null),exam=_e[0],setExam=_e[1];
-  var _q=useState(0),curQ=_q[0],setCurQ=_q[1];
-  var _a=useState({}),ans=_a[0],setAns=_a[1];
-  var _d=useState(loadData()),data=_d[0],setData=_d[1];
-  var _rs=useState(null),retestSec=_rs[0],setRetestSec=_rs[1];
-  var _ra=useState({}),retestAns=_ra[0],setRetestAns=_ra[1];
-  var _rd=useState(false),retestDone=_rd[0],setRetestDone=_rd[1];
-  var startRef=useRef(null);
-  var _timer=useState(3600),timeLeft=_timer[0],setTimeLeft=_timer[1];
-  var timerRef=useRef(null);
-  var _dp=useState(""),dashPin=_dp[0],setDashPin=_dp[1];
-  var _da=useState(false),dashAuth=_da[0],setDashAuth=_da[1];
-
-  var allQ=useMemo(function(){
-    if(!exam)return[];
-    return exam.reduce(function(acc,s,si){
-      return acc.concat(s.questions.map(function(q){return Object.assign({},q,{si:si,sn:s.name,sic:s.icon});}));
-    },[]);
-  },[exam]);
-  var totQ=allQ.length;
-
-  function startExam(){
-    var missed={};
-    Object.keys(data.answerLog).forEach(function(k){var v=data.answerLog[k];if(v.wrong>0)missed[k]=v.wrong;});
-    var sections=generateExam(missed);
-    setExam(sections);setCurQ(0);setAns({});startRef.current=Date.now();setTimeLeft(3600);setScreen("exam");
-    if(timerRef.current)clearInterval(timerRef.current);
-    timerRef.current=setInterval(function(){setTimeLeft(function(t){if(t<=1){clearInterval(timerRef.current);return 0;}return t-1;});},1000);
-  }
-
-  function pick(qi,oi){setAns(function(p){var n=Object.assign({},p);n[qi]=oi;return n;});}
-
-  function submitExam(){
-    if(timerRef.current)clearInterval(timerRef.current);
-    var dur=Math.round((Date.now()-(startRef.current||Date.now()))/1000);
-    var correct=0;var newLog=Object.assign({},data.answerLog);
-    allQ.forEach(function(q,i){
-      var ua=ans[i],ic=ua===q.answer;if(ic)correct++;
-      if(!newLog[q.k])newLog[q.k]={seen:0,correct:0,wrong:0,round:q.sn};
-      newLog[q.k].seen++;if(ic)newLog[q.k].correct++;else newLog[q.k].wrong++;
-    });
-    var pct=Math.round(correct/totQ*100);
-    var attempt={date:new Date().toISOString(),score:correct,total:totQ,pct:pct,duration:dur};
-    var nd={attempts:data.attempts.concat([attempt]),answerLog:newLog};
-    setData(nd);saveData(nd);setScreen("results");
-  }
-
-  function getResults(){
-    if(!exam)return{total:0,correct:0,sections:[]};
-    var correct=0;
-    var sr=exam.map(function(sec,si){
-      var sc=0;
-      var qd=sec.questions.map(function(q,qi){
-        var gi=exam.slice(0,si).reduce(function(a,s){return a+s.questions.length;},0)+qi;
-        var ua=ans[gi],ic=ua===q.answer;if(ic){sc++;correct++;}
-        return Object.assign({},q,{userAnswer:ua,isCorrect:ic});
-      });
-      return Object.assign({},sec,{correct:sc,total:sec.questions.length,questions:qd});
-    });
-    return{total:totQ,correct:correct,sections:sr};
-  }
-
-  function fmtTime(s){return Math.floor(s/60)+":"+(s%60<10?"0":"")+s%60;}
-
-  // ─── DASHBOARD ────────────────────────────────────────────────
-  if(screen==="dashboard"){
-    if(!dashAuth){
-      return e("div",{style:{minHeight:"100vh",background:T.bg,display:"flex",alignItems:"center",justifyContent:"center"}},
-        e("div",{style:{background:T.card,borderRadius:16,padding:32,maxWidth:340,width:"100%",textAlign:"center",border:"1px solid "+T.bdr}},
-          e("div",{style:{fontSize:40,marginBottom:8}},"🔒"),
-          e("h2",{style:{margin:"0 0 4px",fontSize:20,fontWeight:700,color:T.txt}},"Parent Dashboard"),
-          e("input",{type:"password",value:dashPin,onChange:function(ev){setDashPin(ev.target.value);},onKeyDown:function(ev){if(ev.key==="Enter"&&dashPin==="1234")setDashAuth(true);},placeholder:"PIN",style:{width:"100%",padding:12,borderRadius:10,border:"2px solid "+T.bdr,fontSize:16,textAlign:"center",outline:"none",boxSizing:"border-box",margin:"16px 0 12px"}}),
-          e("button",{onClick:function(){if(dashPin==="1234")setDashAuth(true);else alert("Wrong PIN");},style:{width:"100%",padding:12,borderRadius:10,border:"none",background:T.pri,color:"#fff",fontSize:15,fontWeight:600,cursor:"pointer"}},"View"),
-          e("button",{onClick:function(){setScreen("home");},style:{marginTop:12,background:"none",border:"none",color:T.pri,cursor:"pointer",fontSize:13}},"← Back")));
-    }
-    var atts=data.attempts,avg=atts.length?Math.round(atts.reduce(function(s,a){return s+a.pct;},0)/atts.length):0,best=atts.length?Math.max.apply(null,atts.map(function(a){return a.pct;})):0;
-    var rs={};Object.keys(data.answerLog).forEach(function(k){var v=data.answerLog[k];if(!rs[v.round])rs[v.round]={t:0,c:0};rs[v.round].t+=v.seen;rs[v.round].c+=v.correct;});
-    var ra=Object.keys(rs).map(function(n){return{name:n,pct:Math.round(rs[n].c/rs[n].t*100)};}).sort(function(a,b){return a.pct-b.pct;});
-
-    return e("div",{style:{minHeight:"100vh",background:T.bg}},
-      e("div",{style:{maxWidth:650,margin:"0 auto",padding:"24px 16px"}},
-        e("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}},
-          e("h1",{style:{margin:0,fontSize:20,fontWeight:800,color:T.hdr}},"📊 Progress Dashboard"),
-          e("button",{onClick:function(){setDashAuth(false);setDashPin("");setScreen("home");},style:{padding:"8px 16px",borderRadius:8,background:T.priL,color:T.pri,fontWeight:600,fontSize:13,border:"none",cursor:"pointer"}},"← Home")),
-        e("div",{style:{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:20}},
-          [{l:"Attempts",v:atts.length,c:T.pri},{l:"Average",v:avg+"%",c:T.warn},{l:"Best",v:best+"%",c:T.ok}].map(function(s,i){
-            return e("div",{key:i,style:{background:T.card,borderRadius:10,padding:14,border:"1px solid "+T.bdr,textAlign:"center"}},
-              e("div",{style:{fontSize:26,fontWeight:800,color:s.c}},s.v),e("div",{style:{fontSize:11,color:T.txtL,marginTop:4}},s.l));})),
-        atts.length>0&&e("div",{style:{background:T.card,borderRadius:12,padding:16,border:"1px solid "+T.bdr,marginBottom:20}},
-          e("h2",{style:{margin:"0 0 12px",fontSize:14,fontWeight:700,color:T.txt}},"📈 Score History"),
-          e("div",{style:{display:"flex",alignItems:"flex-end",gap:3,height:100}},
-            atts.slice(-20).map(function(a,i){return e("div",{key:i,style:{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2}},
-              e("span",{style:{fontSize:8,color:T.txtL,fontWeight:600}},a.pct+"%"),
-              e("div",{style:{width:"100%",background:a.pct>=70?T.ok:a.pct>=50?T.warn:T.err,borderRadius:"3px 3px 0 0",height:Math.max(a.pct,5)+"%",minHeight:4}}),
-              e("span",{style:{fontSize:7,color:T.txtL}},"#"+(atts.indexOf(a)+1)));}))),
-        ra.length>0&&e("div",{style:{background:T.card,borderRadius:12,padding:16,border:"1px solid "+T.bdr,marginBottom:20}},
-          e("h2",{style:{margin:"0 0 12px",fontSize:14,fontWeight:700,color:T.txt}},"🎯 Accuracy by Round (weakest first)"),
-          ra.map(function(r,i){return e("div",{key:i,style:{marginBottom:7}},
-            e("div",{style:{display:"flex",justifyContent:"space-between",fontSize:11,marginBottom:2}},
-              e("span",{style:{color:T.txt}},r.name.length>28?r.name.slice(0,26)+"..":r.name),
-              e("span",{style:{fontWeight:700,color:r.pct>=70?T.ok:r.pct>=50?T.warn:T.err}},r.pct+"%")),
-            e("div",{style:{height:7,background:"#F1F5F9",borderRadius:99}},
-              e("div",{style:{height:"100%",borderRadius:99,width:r.pct+"%",background:r.pct>=70?T.ok:r.pct>=50?T.warn:T.err}})));})),
-        atts.length>0&&e("div",{style:{background:T.card,borderRadius:12,padding:16,border:"1px solid "+T.bdr,marginBottom:20}},
-          e("h2",{style:{margin:"0 0 10px",fontSize:14,fontWeight:700,color:T.txt}},"📋 All Attempts"),
-          atts.slice().reverse().map(function(a,i){return e("div",{key:i,style:{display:"flex",justifyContent:"space-between",padding:"5px 0",borderBottom:"1px solid "+T.bdr,fontSize:12}},
-            e("span",{style:{color:T.txtL}},new Date(a.date).toLocaleDateString("en-IN",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})),
-            e("span",{style:{fontWeight:700,color:a.pct>=70?T.ok:a.pct>=50?T.warn:T.err}},a.score+"/"+a.total+" ("+a.pct+"%)"));})),
-        atts.length===0&&e("div",{style:{textAlign:"center",padding:40,color:T.txtL}},e("div",{style:{fontSize:48}},"📝"),e("p",null,"No attempts yet!")),
-        e("button",{onClick:function(){if(confirm("Erase ALL data?")){saveData({attempts:[],answerLog:{}});setData({attempts:[],answerLog:{}});}},style:{display:"block",margin:"16px auto",padding:"6px 14px",borderRadius:6,border:"1px solid "+T.err,background:"transparent",color:T.err,fontSize:11,cursor:"pointer"}},"🗑 Reset Data")));
-  }
-
-  // ─── HOME ─────────────────────────────────────────────────────
-  if(screen==="home"){
-    return e("div",{style:{minHeight:"100vh",background:T.bg}},
-      e("div",{style:{maxWidth:600,margin:"0 auto",padding:"28px 16px"}},
-        // Header bar similar to TCS iON
-        e("div",{style:{background:T.hdr,borderRadius:12,padding:"16px 20px",color:"#fff",marginBottom:20,textAlign:"center"}},
-          e("div",{style:{fontSize:12,opacity:0.8,marginBottom:4}},"SpellBee International – Remote Assessment Practice"),
-          e("h1",{style:{margin:0,fontSize:22,fontWeight:700}},"SPIN MOCK GRADE 2"),
-          e("p",{style:{margin:"4px 0 0",fontSize:13,opacity:0.9}},"Level 4 (International) • 15 Sections • ~65 Questions")),
-        e("div",{onClick:startExam,style:{background:"linear-gradient(135deg,"+T.pri+",#005a9e)",borderRadius:12,padding:22,textAlign:"center",cursor:"pointer",color:"#fff",marginBottom:16,boxShadow:"0 4px 16px rgba(0,120,212,0.3)"}},
-          e("div",{style:{fontSize:28,marginBottom:6}},"▶"),
-          e("h2",{style:{margin:0,fontSize:18,fontWeight:700}},"Start Practice Exam"),
-          e("p",{style:{margin:"6px 0 0",opacity:0.9,fontSize:12}},"Fresh questions each time • Wrong answers reappear more • 60 min timer")),
-        data.attempts.length>0&&e("div",{style:{background:T.card,borderRadius:10,padding:14,border:"1px solid "+T.bdr,marginBottom:14}},
-          e("h3",{style:{margin:"0 0 8px",fontSize:13,fontWeight:700,color:T.txt}},"📊 Recent ("+data.attempts.length+" total)"),
-          data.attempts.slice().reverse().slice(0,5).map(function(a,i){return e("div",{key:i,style:{display:"flex",justifyContent:"space-between",padding:"4px 0",borderBottom:i<4?"1px solid "+T.bdr:"none",fontSize:12}},
-            e("span",{style:{color:T.txtL}},new Date(a.date).toLocaleDateString("en-IN",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})),
-            e("span",{style:{fontWeight:700,color:a.pct>=70?T.ok:a.pct>=50?T.warn:T.err}},a.score+"/"+a.total+" ("+a.pct+"%)"));})),
-        e("button",{onClick:function(){setScreen("dashboard");},style:{display:"block",width:"100%",textAlign:"center",padding:12,background:T.card,borderRadius:10,border:"1px solid "+T.bdr,color:T.pri,fontWeight:600,fontSize:13,cursor:"pointer",marginBottom:14}},"📊 Parent Dashboard (PIN: 1234)"),
-        e("div",{style:{padding:10,background:T.warnL,borderRadius:10,fontSize:11,color:"#92400E",lineHeight:"1.6",textAlign:"center"}},"💡 Questions match the real SPIN Mock format: phonemic spelling, odd-one-out inflections, in-context synonyms/antonyms, poem comprehension, passage reordering, and more.")));
-  }
-
-  // ─── EXAM ─────────────────────────────────────────────────────
-  if(screen==="exam"&&exam){
-    var q=allQ[curQ],ac=Object.keys(ans).length;
-    // Get current section's question index
-    var secStart=exam.slice(0,q.si).reduce(function(a,s){return a+s.questions.length;},0);
-    var qInSec=curQ-secStart;
-    return e("div",{style:{minHeight:"100vh",background:T.bg,display:"flex",flexDirection:"column"}},
-      // ── Top header bar (full width)
-      e("div",{style:{background:T.hdr,padding:"10px 20px",color:"#fff",display:"flex",justifyContent:"space-between",alignItems:"center",flexShrink:0}},
-        e("span",{style:{fontSize:14,fontWeight:700}},"SPIN MOCK GRADE 2"),
-        e("span",{style:{fontSize:14,fontWeight:700,background:"rgba(255,255,255,0.15)",padding:"4px 14px",borderRadius:20}},"⏱ "+fmtTime(timeLeft)),
-        e("span",{style:{fontSize:13}},ac+"/"+totQ+" answered")),
-      // ── Section tabs (full width, scrollable)
-      e("div",{className:"tab-bar"},
-        exam.map(function(s,i){
-          var st=exam.slice(0,i).reduce(function(a,sec){return a+sec.questions.length;},0);
-          var isCur=i===q.si;
-          // Show checkmark if all answered in section
-          var secEnd=st+s.questions.length;
-          var allDone=true;for(var j=st;j<secEnd;j++){if(ans[j]===undefined)allDone=false;}
-          var label=s.icon+" "+s.name;
-          if(label.length>18)label=s.icon+" "+s.name.split(" ").slice(0,2).join(" ");
-          return e("button",{key:i,onClick:function(){setCurQ(st);},className:isCur?"tab-active":"tab-inactive"},
-            (allDone?"✅ ":"")+label);})),
-      // ── Section sub-header
-      e("div",{style:{background:T.priL,padding:"8px 20px",fontSize:13,color:T.hdr,fontWeight:600,borderBottom:"1px solid "+T.bdr}},
-        exam[q.si].icon+" "+exam[q.si].name.toUpperCase()+" – ("+exam[q.si].questions.length+"×1 = "+exam[q.si].questions.length+" Marks)"),
-      // ── Two-panel body
-      e("div",{className:"exam-panels",style:{flex:1}},
-        // LEFT PANEL: Question + options
-        e("div",{className:"exam-left"},
-          // Section teaching hint (collapsible feel)
-          e("div",{style:{background:T.warnL,borderRadius:8,padding:"8px 12px",marginBottom:14,fontSize:11,color:"#92400E",lineHeight:"1.5"}},"💡 "+exam[q.si].teach),
-          // Question card
-          e("div",{style:{background:T.card,borderRadius:10,padding:20,border:"1px solid "+T.bdr,marginBottom:14}},
-            e("div",{style:{fontSize:13,color:T.hdr,marginBottom:10,fontWeight:700}},"Question No. "+(curQ+1)),
-            e("p",{style:{fontSize:15,fontWeight:600,color:T.txt,lineHeight:"1.8",whiteSpace:"pre-line",margin:"0 0 20px"}},q.q),
-            // Options with radio buttons
-            e("div",{style:{display:"flex",flexDirection:"column",gap:10}},
-              q.options.map(function(opt,i){
-                var sel=ans[curQ]===i;
-                return e("label",{key:i,onClick:function(){pick(curQ,i);},style:{display:"flex",alignItems:"center",gap:12,padding:"12px 16px",borderRadius:8,border:"2px solid "+(sel?T.pri:T.bdr),background:sel?T.priL:"#FAFCFF",cursor:"pointer",transition:"all 0.15s"}},
-                  e("span",{style:{width:20,height:20,borderRadius:20,border:"2px solid "+(sel?T.pri:"#aaa"),background:sel?T.pri:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}},
-                    sel&&e("span",{style:{width:8,height:8,borderRadius:8,background:"#fff"}})),
-                  e("span",{style:{fontSize:14,color:T.txt,lineHeight:"1.5"}},opt));}))),
-          // Navigation buttons
-          e("div",{style:{display:"flex",gap:10,marginTop:16,paddingBottom:20}},
-            curQ>0&&e("button",{onClick:function(){setCurQ(curQ-1);},style:{padding:"11px 24px",borderRadius:8,border:"1px solid "+T.bdr,background:T.card,color:T.txt,cursor:"pointer",fontWeight:600,fontSize:13}},"Previous"),
-            curQ<totQ-1?
-              e("button",{onClick:function(){setCurQ(curQ+1);},style:{padding:"11px 24px",borderRadius:8,border:"none",background:T.pri,color:"#fff",cursor:"pointer",fontWeight:600,fontSize:13}},"Save & Next"):
-              e("button",{onClick:submitExam,style:{padding:"11px 24px",borderRadius:8,border:"none",background:T.ok,color:"#fff",cursor:"pointer",fontWeight:700,fontSize:14}},"Submit"),
-            e("button",{onClick:function(){if(confirm("Submit exam now?"))submitExam();},style:{marginLeft:"auto",padding:"11px 20px",borderRadius:8,border:"2px solid "+T.err,background:"transparent",color:T.err,cursor:"pointer",fontWeight:600,fontSize:13}},"Submit"))),
-        // RIGHT PANEL: Section navigator + status
-        e("div",{className:"exam-right"},
-          // Status summary
-          e("div",{style:{display:"flex",gap:8,marginBottom:14}},
-            e("div",{style:{flex:1,textAlign:"center",padding:6,background:T.okL,borderRadius:6}},
-              e("div",{style:{fontSize:16,fontWeight:800,color:T.ok}},ac),
-              e("div",{style:{fontSize:9,color:T.ok}},"Answered")),
-            e("div",{style:{flex:1,textAlign:"center",padding:6,background:T.errL,borderRadius:6}},
-              e("div",{style:{fontSize:16,fontWeight:800,color:T.err}},totQ-ac),
-              e("div",{style:{fontSize:9,color:T.err}},"Remaining"))),
-          // Current section navigator
-          e("div",{style:{background:T.hdr,color:"#fff",padding:"8px 10px",borderRadius:"6px 6px 0 0",fontSize:12,fontWeight:600}},exam[q.si].name),
-          e("div",{style:{border:"1px solid "+T.bdr,borderTop:"none",borderRadius:"0 0 6px 6px",padding:10,marginBottom:14}},
-            e("div",{style:{fontSize:10,color:T.txtL,marginBottom:6}},"Choose a Question"),
-            e("div",{className:"q-nav"},
-              exam[q.si].questions.map(function(qq,qi){
-                var gi=secStart+qi;
-                var answered=ans[gi]!==undefined;var isCur=gi===curQ;
-                return e("button",{key:qi,onClick:function(){setCurQ(gi);},
-                  style:{border:isCur?"2px solid "+T.pri:"1px solid "+T.bdr,
-                    background:answered?"#22C55E":isCur?T.priL:T.card,
-                    color:answered?"#fff":T.txt}},qi+1);}))),
-          // Full exam jump grid
-          e("div",{style:{marginTop:8}},
-            e("div",{style:{fontSize:10,color:T.txtL,marginBottom:6,fontWeight:600}},"All Questions"),
-            e("div",{style:{display:"flex",flexWrap:"wrap",gap:3}},
-              allQ.map(function(_,i){
-                var answered=ans[i]!==undefined;var isCur=i===curQ;
-                return e("button",{key:i,onClick:function(){setCurQ(i);},
-                  style:{width:28,height:28,borderRadius:4,fontSize:9,fontWeight:600,border:isCur?"2px solid "+T.pri:"1px solid transparent",
-                    background:answered?T.priL:"#F1F5F9",color:answered?T.pri:T.txtL,cursor:"pointer"}},i+1);}))))));
-  }
-
-  // ─── RESULTS ──────────────────────────────────────────────────
-  if(screen==="results"&&exam){
-    var r=getResults(),pct=Math.round(r.correct/r.total*100);
-    var emoji=pct>=90?"🏆":pct>=70?"🌟":pct>=50?"💪":"🌱";
-    var msg=pct>=90?"Outstanding!":pct>=70?"Great job!":pct>=50?"Good effort!":"Keep practising!";
-    return e("div",{style:{minHeight:"100vh",background:T.bg}},
-      e("div",{style:{maxWidth:600,margin:"0 auto",padding:"24px 16px"}},
-        e("div",{style:{background:"linear-gradient(135deg,"+T.hdr+",#005a9e)",borderRadius:16,padding:24,textAlign:"center",color:"#fff",marginBottom:20}},
-          e("div",{style:{fontSize:48}},emoji),e("h1",{style:{margin:"4px 0",fontSize:22,fontWeight:800}},msg),
-          e("div",{style:{fontSize:40,fontWeight:800,margin:"4px 0"}},pct+"%"),
-          e("p",{style:{margin:0,opacity:0.9,fontSize:14}},r.correct+" / "+r.total+" correct")),
-        e("h2",{style:{fontSize:15,fontWeight:700,color:T.txt,margin:"0 0 10px"}},"📊 Section Results"),
-        r.sections.map(function(s,i){
-          var sp=Math.round(s.correct/s.total*100),perf=s.correct===s.total,sc=perf?T.ok:sp>=50?T.warn:T.err;
-          return e("div",{key:i,style:{background:T.card,borderRadius:8,padding:12,marginBottom:5,border:"1px solid "+T.bdr,borderLeft:"4px solid "+sc}},
-            e("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center"}},
-              e("div",null,e("span",{style:{fontSize:12,fontWeight:600,color:T.txt}},s.icon+" "+s.name),e("span",{style:{fontSize:11,color:T.txtL,marginLeft:6}},s.correct+"/"+s.total)),
-              perf?e("span",{style:{fontSize:10,color:T.ok,fontWeight:600}},"⭐"):
-                e("button",{onClick:function(){setRetestSec(s);setRetestAns({});setRetestDone(false);setScreen("retest");},style:{padding:"3px 8px",borderRadius:5,border:"none",fontSize:10,background:T.priL,color:T.pri,cursor:"pointer",fontWeight:600}},"Practice")),
-            e("div",{style:{height:4,background:"#F1F5F9",borderRadius:99,marginTop:5}},e("div",{style:{height:"100%",background:sc,borderRadius:99,width:sp+"%"}})));}),
-        e("h2",{style:{fontSize:15,fontWeight:700,color:T.txt,margin:"18px 0 10px"}},"📝 Review Mistakes"),
-        r.sections.filter(function(s){return s.correct<s.total;}).map(function(s,si){
-          return e("div",{key:si,style:{marginBottom:14}},
-            e("h3",{style:{fontSize:13,fontWeight:700,color:T.hdr,margin:"0 0 5px"}},s.icon+" "+s.name),
-            e("div",{style:{background:T.warnL,borderRadius:6,padding:8,marginBottom:6,fontSize:11,color:"#92400E",lineHeight:"1.5"}},"💡 "+s.teach),
-            s.questions.filter(function(q){return!q.isCorrect;}).map(function(q,qi){
-              return e("div",{key:qi,style:{background:T.card,borderRadius:6,padding:10,marginBottom:4,borderLeft:"3px solid "+T.err,border:"1px solid "+T.errL}},
-                e("p",{style:{margin:0,fontSize:11,fontWeight:600,color:T.txt,whiteSpace:"pre-line"}},q.q),
-                e("div",{style:{marginTop:3,fontSize:10}},
-                  q.userAnswer!==undefined?e("span",{style:{color:T.err,fontWeight:600}},"Your answer: "+q.options[q.userAnswer]):e("span",{style:{color:T.txtL}},"Not answered")),
-                e("div",{style:{marginTop:2,fontSize:10,color:T.ok,fontWeight:600}},"✓ Correct: "+q.options[q.answer]),
-                e("div",{style:{marginTop:5,padding:6,background:"#F0F7FF",borderRadius:5,fontSize:10,color:"#0369A1",lineHeight:"1.5"}},"📖 "+q.explain));}));}),
-        e("div",{style:{display:"flex",gap:8,marginTop:18,marginBottom:30}},
-          e("button",{onClick:function(){setScreen("home");},style:{flex:1,padding:12,borderRadius:10,border:"1px solid "+T.bdr,background:T.card,color:T.txt,cursor:"pointer",fontWeight:600,fontSize:13}},"🏠 Home"),
-          e("button",{onClick:startExam,style:{flex:1,padding:12,borderRadius:10,border:"none",background:T.pri,color:"#fff",cursor:"pointer",fontWeight:600,fontSize:13}},"🔄 New Exam"))));
-  }
-
-  // ─── RETEST ───────────────────────────────────────────────────
-  if(screen==="retest"&&retestSec){
-    var wq=retestSec.questions.filter(function(q){return!q.isCorrect;});
-    if(!wq.length)return e("div",{style:{minHeight:"100vh",background:T.bg,display:"flex",alignItems:"center",justifyContent:"center"}},
-      e("div",{style:{textAlign:"center"}},e("div",{style:{fontSize:48}},"⭐"),e("h2",null,"All correct!"),
-        e("button",{onClick:function(){setScreen("results");},style:{padding:"10px 20px",borderRadius:8,border:"none",background:T.pri,color:"#fff",cursor:"pointer",fontWeight:600,marginTop:12}},"Back")));
-    return e("div",{style:{minHeight:"100vh",background:T.bg}},
-      e("div",{style:{maxWidth:600,margin:"0 auto",padding:"20px 16px"}},
-        e("button",{onClick:function(){setScreen("results");},style:{background:"none",border:"none",color:T.txtL,cursor:"pointer",fontSize:13,marginBottom:10}},"← Results"),
-        e("div",{style:{background:T.hdr,borderRadius:10,padding:14,color:"#fff",marginBottom:14,textAlign:"center"}},
-          e("h2",{style:{margin:0,fontSize:16,fontWeight:700}},"🎯 "+retestSec.icon+" "+retestSec.name)),
-        e("div",{style:{background:T.warnL,borderRadius:8,padding:10,marginBottom:14,fontSize:11,color:"#92400E",lineHeight:"1.5"}},"💡 "+retestSec.teach),
-        wq.map(function(q,i){
-          var ua=retestAns[i],sh=retestDone,ok=sh&&ua===q.answer;
-          return e("div",{key:i,style:{background:T.card,borderRadius:10,padding:14,marginBottom:8,border:"1px solid "+(sh?(ok?T.ok:T.errL):T.bdr),borderLeft:sh?"4px solid "+(ok?T.ok:T.err):"4px solid "+T.pri}},
-            e("p",{style:{fontSize:12,fontWeight:600,color:T.txt,lineHeight:"1.6",margin:"0 0 10px",whiteSpace:"pre-line"}},q.q),
-            e("div",{style:{display:"flex",flexDirection:"column",gap:6}},
-              q.options.map(function(opt,oi){
-                var sel=ua===oi,cor=oi===q.answer,bg=T.card,bc=T.bdr;
-                if(sh&&cor){bg=T.okL;bc=T.ok;}if(sh&&sel&&!cor){bg=T.errL;bc=T.err;}if(!sh&&sel){bg=T.priL;bc=T.pri;}
-                return e("label",{key:oi,onClick:function(){if(!retestDone){var n=Object.assign({},retestAns);n[i]=oi;setRetestAns(n);}},style:{display:"flex",alignItems:"center",gap:8,padding:"8px 10px",borderRadius:6,border:"2px solid "+bc,background:bg,cursor:retestDone?"default":"pointer"}},
-                  e("span",{style:{width:16,height:16,borderRadius:16,border:"2px solid "+(sel?T.pri:"#999"),background:sel?T.pri:"transparent",display:"inline-block"}}),
-                  e("span",{style:{fontSize:12,color:T.txt}},opt));})),
-            sh&&e("div",{style:{marginTop:8,padding:8,background:"#F0F7FF",borderRadius:6,fontSize:11,color:"#0369A1",lineHeight:"1.5"}},"📖 "+q.explain));}),
-        !retestDone?
-          e("button",{onClick:function(){setRetestDone(true);},style:{width:"100%",padding:12,borderRadius:10,border:"none",marginTop:6,background:T.ok,color:"#fff",cursor:"pointer",fontWeight:600,fontSize:13}},"✓ Check Answers"):
-          e("div",{style:{display:"flex",gap:8,marginTop:10,justifyContent:"center"}},
-            e("button",{onClick:function(){setRetestAns({});setRetestDone(false);},style:{padding:"8px 14px",borderRadius:8,border:"1px solid "+T.bdr,background:T.card,color:T.txt,cursor:"pointer",fontWeight:600,fontSize:12}},"🔄 Retry"),
-            e("button",{onClick:function(){setScreen("results");},style:{padding:"8px 14px",borderRadius:8,border:"none",background:T.pri,color:"#fff",cursor:"pointer",fontWeight:600,fontSize:12}},"📊 Results"))));
-  }
-  return null;
+function markDone(idx) {
+  done.add(idx);
+  document.getElementById('dot-' + idx).style.background = 'var(--green)';
+  document.getElementById('nav-' + idx).classList.add('done');
+  document.getElementById('doneCount').textContent = done.size + ' / 5';
+  document.getElementById('progressFill').style.width = (done.size/5*100) + '%';
+  goto(idx + 1 < 5 ? idx + 1 : idx);
 }
 
-ReactDOM.render(React.createElement(App),document.getElementById("root"));
+function toggleTopic(hdr) {
+  const body = hdr.nextElementSibling;
+  const chev = hdr.querySelector('.topic-chev');
+  body.classList.toggle('open');
+  chev.classList.toggle('open');
+}
+
+function revealAns(id) {
+  document.getElementById(id + '-sol').classList.add('show');
+}
+
+function checkAns(id, correct, hint) {
+  const inp = document.getElementById(id + '-ans').value.trim().toLowerCase().replace(/\s/g,'');
+  const res = document.getElementById(id + '-result');
+  const corr = correct.toLowerCase().replace(/\s/g,'');
+  res.style.display = 'block';
+  if (inp === corr) {
+    res.textContent = '✓ Correct!';
+    res.className = 'check-result correct';
+  } else {
+    res.textContent = '✗ Not quite — try again or reveal solution.';
+    res.className = 'check-result wrong';
+  }
+}
+
+function toggleTimer() {
+  timerRunning = !timerRunning;
+  document.getElementById('timerBtn').textContent = timerRunning ? 'Pause' : 'Resume';
+  if (timerRunning) {
+    timerInterval = setInterval(() => {
+      timerSeconds++;
+      const h = Math.floor(timerSeconds/3600).toString().padStart(2,'0');
+      const m = Math.floor((timerSeconds%3600)/60).toString().padStart(2,'0');
+      const s = (timerSeconds%60).toString().padStart(2,'0');
+      document.getElementById('timer').textContent = h+':'+m+':'+s;
+    }, 1000);
+  } else {
+    clearInterval(timerInterval);
+  }
+}
 </script>
 </body>
 </html>
