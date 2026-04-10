@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz 2 Study — Computer Networks</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3350;
+    --text: #e8eaf6;
+    --muted: #7b82a8;
+    --accent: #6c63ff;
+    --accent2: #00d4aa;
+    --warn: #ff6b6b;
+    --gold: #ffd166;
+    --blue: #4fc3f7;
+    --green: #69f0ae;
+    --font: 'Segoe UI', system-ui, sans-serif;
+    --mono: 'Consolas', 'Fira Code', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 15px; line-height: 1.6; }
+
+  /* LAYOUT */
+  .shell { display: flex; min-height: 100vh; }
+  .sidebar { width: 260px; background: var(--surface); border-right: 1px solid var(--border); position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; flex-shrink: 0; }
+  .main { margin-left: 260px; flex: 1; max-width: 860px; padding: 2rem; }
+
+  /* SIDEBAR */
+  .sidebar-header { padding: 1.25rem 1.25rem .75rem; border-bottom: 1px solid var(--border); }
+  .sidebar-title { font-size: 13px; font-weight: 700; letter-spacing: .08em; color: var(--accent); text-transform: uppercase; }
+  .timer-box { background: var(--surface2); border-radius: 8px; padding: .6rem .75rem; margin-top: .75rem; display: flex; align-items: center; gap: .5rem; }
+  .timer-val { font-family: var(--mono); font-size: 18px; font-weight: 700; color: var(--gold); }
+  .timer-lbl { font-size: 11px; color: var(--muted); }
+  .score-box { margin-top: .75rem; }
+  .score-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .score-val { color: var(--green); font-weight: 600; }
+  .progress-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; margin-bottom: 8px; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 2px; transition: width .4s; }
+
+  .nav-section { padding: .75rem 1.25rem .25rem; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+  .nav-item { display: flex; align-items: center; gap: .6rem; padding: .5rem 1.25rem; cursor: pointer; font-size: 13px; color: var(--muted); transition: all .15s; border-left: 3px solid transparent; }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: var(--surface2); color: var(--accent); border-left-color: var(--accent); }
+  .nav-item.done { color: var(--green); }
+  .nav-item.done .nav-dot { background: var(--green); }
+  .nav-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border); flex-shrink: 0; }
+  .nav-marks { margin-left: auto; font-size: 11px; background: var(--surface2); padding: 1px 6px; border-radius: 8px; }
+
+  /* MAIN CONTENT */
+  .block { display: none; }
+  .block.visible { display: block; }
+  .block-header { margin-bottom: 1.75rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+  .block-tag { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; margin-bottom: .4rem; }
+  .block-title { font-size: 26px; font-weight: 700; color: var(--text); line-height: 1.2; }
+  .block-meta { font-size: 13px; color: var(--muted); margin-top: .4rem; }
+
+  /* TOPIC CARDS */
+  .topic { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 1.25rem; overflow: hidden; }
+  .topic-hdr { padding: 1rem 1.25rem; cursor: pointer; display: flex; align-items: center; gap: .75rem; user-select: none; }
+  .topic-hdr:hover { background: var(--surface2); }
+  .topic-num { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+  .topic-name { font-size: 15px; font-weight: 600; flex: 1; }
+  .topic-marks { font-size: 11px; color: var(--muted); }
+  .topic-chev { color: var(--muted); font-size: 12px; transition: transform .2s; }
+  .topic-chev.open { transform: rotate(90deg); }
+  .topic-body { display: none; padding: 0 1.25rem 1.25rem; border-top: 1px solid var(--border); }
+  .topic-body.open { display: block; }
+
+  /* CONTENT COMPONENTS */
+  .formula { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: .85rem 1rem; font-family: var(--mono); font-size: 13px; margin: .75rem 0; line-height: 1.8; color: var(--blue); }
+  .formula .comment { color: var(--muted); }
+  .example { background: var(--surface2); border-left: 3px solid var(--accent2); border-radius: 0 8px 8px 0; padding: .85rem 1rem; margin: .75rem 0; font-size: 13px; line-height: 1.8; }
+  .example .step { color: var(--muted); font-size: 12px; margin-bottom: 2px; }
+  .example .calc { font-family: var(--mono); color: var(--accent2); }
+  .example .answer { font-weight: 700; color: var(--green); margin-top: .5rem; }
+  .trap { background: #2a1a1a; border-left: 3px solid var(--warn); border-radius: 0 8px 8px 0; padding: .75rem 1rem; margin: .75rem 0; font-size: 13px; color: #ffb3b3; }
+  .trap-label { font-size: 11px; font-weight: 700; color: var(--warn); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+  .tip { background: #1a2a1a; border-left: 3px solid var(--green); border-radius: 0 8px 8px 0; padding: .75rem 1rem; margin: .75rem 0; font-size: 13px; color: #b3ffcc; }
+  .section-lbl { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin: 1rem 0 .4rem; }
+
+  /* PRACTICE PROBLEMS */
+  .practice { background: var(--surface2); border: 1px solid var(--accent); border-radius: 10px; margin-top: 1rem; padding: 1rem; }
+  .practice-label { font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .08em; margin-bottom: .6rem; }
+  .practice-q { font-size: 14px; margin-bottom: .85rem; line-height: 1.7; }
+  .practice-input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: .5rem .75rem; color: var(--text); font-size: 14px; font-family: var(--mono); outline: none; transition: border .15s; }
+  .practice-input:focus { border-color: var(--accent); }
+  .practice-btns { display: flex; gap: .5rem; margin-top: .6rem; }
+  .btn { padding: .45rem 1rem; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all .15s; }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: #5a52e0; }
+  .btn-reveal { background: var(--surface); border: 1px solid var(--border); color: var(--text); }
+  .btn-reveal:hover { border-color: var(--accent2); }
+  .btn-done { background: var(--surface); border: 1px solid var(--green); color: var(--green); }
+  .practice-answer { display: none; margin-top: .85rem; padding: .85rem; background: var(--bg); border-radius: 8px; border: 1px solid var(--border); font-size: 13px; line-height: 1.8; }
+  .practice-answer.show { display: block; }
+  .check-result { margin-top: .5rem; font-size: 13px; font-weight: 600; display: none; }
+  .check-result.correct { color: var(--green); }
+  .check-result.wrong { color: var(--warn); }
+
+  /* STEP TABLES */
+  .step-table { width: 100%; border-collapse: collapse; font-size: 12px; font-family: var(--mono); margin: .75rem 0; }
+  .step-table th { background: var(--surface); color: var(--muted); padding: 6px 10px; text-align: left; border: 1px solid var(--border); font-size: 11px; }
+  .step-table td { padding: 6px 10px; border: 1px solid var(--border); }
+  .step-table tr:nth-child(even) td { background: rgba(255,255,255,.02); }
+  .step-table .highlight td { background: rgba(108,99,255,.15); color: var(--accent); }
+
+  /* NAV BUTTONS */
+  .nav-btns { display: flex; gap: .75rem; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+  .btn-nav { padding: .6rem 1.25rem; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--text); transition: all .15s; }
+  .btn-nav:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-nav.next { background: var(--accent); color: white; border-color: var(--accent); }
+  .btn-nav.next:hover { background: #5a52e0; }
+
+  /* COLORS PER BLOCK */
+  .c-purple .topic-num { background: rgba(108,99,255,.2); color: var(--accent); }
+  .c-teal .topic-num { background: rgba(0,212,170,.15); color: var(--accent2); }
+  .c-blue .topic-num { background: rgba(79,195,247,.15); color: var(--blue); }
+  .c-gold .topic-num { background: rgba(255,209,102,.15); color: var(--gold); }
+
+  .tag-purple { color: var(--accent); }
+  .tag-teal { color: var(--accent2); }
+  .tag-blue { color: var(--blue); }
+  .tag-gold { color: var(--gold); }
+
+  /* SUMMARY */
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin: 1rem 0; }
+  .summary-card { background: var(--surface2); border-radius: 10px; padding: 1rem; }
+  .summary-card .lbl { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .summary-card .val { font-size: 22px; font-weight: 700; }
+  .cheatsheet { background: var(--surface2); border-radius: 10px; padding: 1rem 1.25rem; }
+  .cs-row { display: flex; align-items: baseline; gap: .75rem; padding: .35rem 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .cs-row:last-child { border-bottom: none; }
+  .cs-name { color: var(--muted); width: 220px; flex-shrink: 0; }
+  .cs-formula { font-family: var(--mono); color: var(--blue); }
+
+  code { font-family: var(--mono); background: var(--surface2); padding: 1px 5px; border-radius: 4px; font-size: 12px; color: var(--blue); }
+
+  @media (max-width: 768px) {
+    .sidebar { transform: translateX(-260px); }
+    .main { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-title">CN Quiz 2 — Study</div>
+    <div class="timer-box">
+      <div>
+        <div class="timer-val" id="timer">00:00:00</div>
+        <div class="timer-lbl">session time</div>
+      </div>
+      <button class="btn btn-reveal" id="timerBtn" style="margin-left:auto;padding:.3rem .6rem;font-size:12px" onclick="toggleTimer()">Start</button>
+    </div>
+    <div class="score-box">
+      <div class="score-row"><span>Topics done</span><span class="score-val" id="doneCount">0 / 5</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <div class="nav-section">Blocks</div>
+  <div class="nav-item active" id="nav-0" onclick="goto(0)"><div class="nav-dot" id="dot-0"></div><span>TCP Congestion Control</span><span class="nav-marks">~22 m</span></div>
+  <div class="nav-item" id="nav-1" onclick="goto(1)"><div class="nav-dot" id="dot-1"></div><span>IP / Subnetting / NAT</span><span class="nav-marks">~14 m</span></div>
+  <div class="nav-item" id="nav-2" onclick="goto(2)"><div class="nav-dot" id="dot-2"></div><span>Flow Control</span><span class="nav-marks">~6 m</span></div>
+  <div class="nav-item" id="nav-3" onclick="goto(3)"><div class="nav-dot" id="dot-3"></div><span>Dijkstra</span><span class="nav-marks">~4 m</span></div>
+  <div class="nav-item" id="nav-4" onclick="goto(4)"><div class="nav-dot" id="dot-4"></div><span>Full Formula Sheet</span><span class="nav-marks">ref</span></div>
+
+  <div class="nav-section" style="margin-top:.5rem">Exam stats</div>
+  <div style="padding:.5rem 1.25rem;font-size:12px;color:var(--muted);line-height:1.8">
+    15 questions<br>
+    50 marks total<br>
+    W5–8 only<br>
+    No W1–4 in Q2 PYQ
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+<!-- ============================================================ BLOCK 0: TCP -->
+<div class="block visible c-purple" id="block-0">
+  <div class="block-header">
+    <div class="block-tag tag-purple">Block 1 · Hours 1–5 · ~22 marks</div>
+    <div class="block-title">TCP Congestion Control</div>
+    <div class="block-meta">W5–W6 · Slow start · Congestion avoidance · Fast retransmit · Fast recovery · Jain's FI · TCP throughput</div>
+  </div>
+
+  <!-- TOPIC 1: Slow Start + CA cwnd tracing -->
+  <div class="topic">
+    <div class="topic-hdr" onclick="toggleTopic(this)">
+      <div class="topic-num">1</div>
+      <div class="topic-name">Slow start → congestion avoidance: cwnd tracing</div>
+      <div class="topic-marks">Q34 type · 4 marks</div>
+      <div class="topic-chev">▶</div>
+    </div>
+    <div class="topic-body">
+      <div class="section-lbl">How it works</div>
+      <p style="font-size:14px;color:var(--muted);margin-bottom:.5rem">TCP starts in <strong style="color:var(--text)">Slow Start</strong>: cwnd doubles each RTT. When cwnd hits ssthresh, it switches to <strong style="color:var(--text)">Congestion Avoidance</strong>: +1 MSS per RTT. On RTO (timeout): reset cwnd=1, new ssthresh = old cwnd/2.</p>
+      <div class="formula">
+<span class="comment">-- Slow Start (cwnd &lt; ssthresh) --</span>
+cwnd(n+1) = cwnd(n) × 2   <span class="comment">// doubles each RTT</span>
+
+<span class="comment">-- Congestion Avoidance (cwnd ≥ ssthresh) --</span>
+cwnd(n+1) = cwnd(n) + 1 MSS   <span class="comment">// +1 per RTT</span>
+
+<span class="comment">-- On RTO --</span>
+ssthresh = max(cwnd/2, 2·MSS)
+cwnd = 1 MSS   <span class="comment">// restart slow start</span></div>
+
+      <div class="section-lbl">Exact Q2 PYQ — Q34 worked solution</div>
+      <div class="example">
+        <div class="step">Given: cwnd=1 MSS, MSS=2KB, ssthresh=32KB. No loss for 4 RTTs. After SS ends at 32KB, 3 more RTTs of CA. Find final cwnd in KB.</div>
+        <div class="calc">SS starts: cwnd = 1 MSS = 2 KB</div>
+        <div class="calc">RTT1: 2×2 = 4 KB &nbsp; RTT2: 4×2 = 8 KB</div>
+        <div class="calc">RTT3: 8×2 = 16 KB &nbsp; RTT4: 16×2 = 32 KB = ssthresh → enter CA</div>
+        <div class="calc">CA RTT5: 32+2 = 34 KB</div>
+        <div class="calc">CA RTT6: 34+2 = 36 KB</div>
+        <div class="calc">CA RTT7: 36+2 = 38 KB</div>
+        <div class="answer">Answer: 38 KB ✓</div>
+      </div>
+      <div class="trap">
+        <div class="trap-label">⚠ Trap</div>
+        When cwnd reaches ssthresh it does NOT double again. It adds exactly 1 MSS in CA. Also: count RTTs carefully — the problem said "4 RTTs no loss, then slow start ENDS at 32KB, then 3 more RTTs". The 4 RTTs take you TO ssthresh, not past it.
+      </div>
+
+      <div class="practice">
+        <div class="practice-label">Practice — attempt before revealing</div>
+        <div class="practice-q">A TCP connection starts with cwnd = 1 MSS = 1 KB, ssthresh = 16 KB. There is no packet loss for 6 RTTs. What is the cwnd (in KB) after those 6 RTTs?</div>
+        <input class="practice-input" id="p1-ans" placeholder="Enter answer in KB" />
+        <div class="practice-btns">
+          <button class="btn btn-primary" onclick="checkAns('p1', '19', 'After 6 RTTs')">Check</button>
+          <button class="btn btn-reveal" onclick="revealAns('p1')">Reveal solution</button>
+        </div>
+        <div class="check-result" id="p1-result"></div>
+        <div class="practice-answer" id="p1-sol">
+          <strong style="color:var(--accent2)">Worked solution:</strong><br>
+          SS: RTT1=2, RTT2=4, RTT3=8, RTT4=16KB → hits ssthresh, enter CA<br>
+          CA: RTT5=16+1=17KB, RTT6=17+1=18KB... wait — MSS=1KB so +1KB per RTT<br>
+          RTT5: 17 KB, RTT6: 18 KB... hmm, but the question says 6 RTTs total.<br>
+          RTT1:2, RTT2:4, RTT3:8, RTT4:16(=ssthresh, enter CA), RTT5:17, RTT6:18, but that's 6 RTTs and answer = <strong style="color:var(--green)">18 KB</strong>.<br><br>
+          Wait — at RTT4 cwnd reaches 16=ssthresh. Does RTT4 end at 16 (entering CA) or does SS go to 16 and then CA adds? Entering CA means next RTT uses +1. So RTT5=17, RTT6=18. <strong style="color:var(--green)">Answer: 18 KB</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOPIC 2: cwnd after N ACKs in CA -->
+  <div class="topic">
+    <div class="topic-hdr" onclick="toggleTopic(this)">
+      <div class="topic-num">2</div>
+      <div class="topic-name">cwnd in bytes after N ACKs in congestion avoidance</div>
+      <div class="topic-marks">Q31 type · 4 marks</div>
+      <div class="topic-chev">▶</div>
+    </div>
+    <div class="topic-body">
+      <div class="section-lbl">The formula</div>
+      <p style="font-size:14px;color:var(--muted);margin-bottom:.5rem">In CA, each individual ACK increments cwnd by a fraction. After one full RTT (cwnd many ACKs), the net gain is exactly 1 MSS.</p>
+      <div class="formula">
+<span class="comment">-- Per-ACK increment in CA --</span>
+Δcwnd_per_ack = MSS² / cwnd_bytes
+
+<span class="comment">-- After one RTT (cwnd ACKs received) --</span>
+new_cwnd = cwnd + 1 MSS     <span class="comment">// net = 1 MSS per RTT</span>
+new_cwnd_bytes = (cwnd_MSS + 1) × MSS_bytes</div>
+
+      <div class="section-lbl">Exact Q2 PYQ — Q31 worked solution</div>
+      <div class="example">
+        <div class="step">cwnd = 15 MSS, MSS = 1200 bytes, in CA, 15 ACKs arrive (1 RTT worth). Find new cwnd in bytes.</div>
+        <div class="calc">Each ACK: Δ = 1200² / (15×1200) = 1200/15 = 80 bytes</div>
+        <div class="calc">15 ACKs: total gain = 15 × 80 = 1200 bytes = 1 MSS</div>
+        <div class="calc">new cwnd = (15+1) × 1200 = 16 × 1200</div>
+        <div class="answer">Answer: 19200 bytes ✓</div>
+      </div>
+      <div class="trap">
+        <div class="trap-label">⚠ Trap</div>
+        Do NOT just add 1200. You must convert to bytes: (cwnd_MSS + 1) × MSS_bytes. The number of ACKs in 1 RTT = cwnd (in MSS).
+      </div>
+
+      <div class="practice">
+        <div class="practice-label">Practice</div>
+        <div class="practice-q">cwnd = 20 MSS, MSS = 500 bytes, TCP is in congestion avoidance. After receiving 20 ACKs (one RTT), what is the new cwnd in bytes?</div>
+        <input class="practice-input" id="p2-ans" placeholder="Enter answer in bytes" />
+        <div class="practice-btns">
+          <button class="btn btn-primary" onclick="checkAns('p2', '10500', '')">Check</button>
+          <button class="btn btn-reveal" onclick="revealAns('p2')">Reveal</button>
+        </div>
+        <div class="check-result" id="p2-result"></div>
+        <div class="practice-answer" id="p2-sol">
+          After 1 RTT in CA: new cwnd = (20+1) × 500 = 21 × 500 = <strong style="color:var(--green)">10500 bytes</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOPIC 3: TCP Throughput -->
+  <div class="topic">
+    <div class="topic-hdr" onclick="toggleTopic(this)">
+      <div class="topic-num">3</div>
+      <div class="topic-name">TCP throughput from steady-state cwnd</div>
+      <div class="topic-marks">Q32 type · 4 marks</div>
+      <div class="topic-chev">▶</div>
+    </div>
+    <div class="topic-body">
+      <div class="formula">
+throughput = (cwnd × MSS_bytes) / RTT_seconds
+
+<span class="comment">-- Unit conversions --</span>
+RTT: ms → s (÷ 1000)
+Result in B/s → Mbps (÷ 10⁶)
+Result in B/s → KB/s (÷ 1024)</div>
+
+      <div class="section-lbl">Exact Q2 PYQ — Q32 worked solution</div>
+      <div class="example">
+        <div class="step">cwnd = 50 MSS, MSS = 1200 bytes, RTT = 80 ms. Find throughput in Mbps.</div>
+        <div class="calc">Data per RTT = 50 × 1200 = 60,000 bytes</div>
+        <div class="calc">RTT = 80 ms = 0.080 s</div>
+        <div class="calc">Throughput = 60,000 / 0.080 = 750,000 B/s</div>
+        <div class="calc">= 750,000 / 10⁶ Mbps = 0.75 Mbps... wait</div>
+        <div class="calc">= 750,000 × 8 bits/s = 6,000,000 bps = 6 Mbps</div>
+        <div class="answer">Answer: 6.00 Mbps ✓ (range: 5.90–6.10)</div>
+      </div>
+      <div class="trap">
+        <div class="trap-label">⚠ Trap</div>
+        The formula gives bytes/second. To convert to Mbps multiply by 8 (bits per byte) then divide by 10⁶. Do NOT just divide B/s by 10⁶ — that gives Megabytes/s not Megabits/s.
+      </div>
+
+      <div class="practice">
+        <div class="practice-label">Practice</div>
+        <div class="practice-q">A TCP connection has cwnd = 40 MSS, MSS = 1500 bytes, RTT = 100 ms. What is the maximum achievable throughput in Mbps?</div>
+        <input class="practice-input" id="p3-ans" placeholder="e.g. 4.80" />
+        <div class="practice-btns">
+          <button class="btn btn-primary" onclick="checkAns('p3', '4.8', '')">Check</button>
+          <button class="btn btn-reveal" onclick="revealAns('p3')">Reveal</button>
+        </div>
+        <div class="check-result" id="p3-result"></div>
+        <div class="practice-answer" id="p3-sol">
+          Data = 40×1500 = 60,000 B/RTT<br>
+          Throughput = 60,000/0.1 = 600,000 B/s<br>
+          = 600,000 × 8 / 10⁶ = <strong style="color:var(--green)">4.8 Mbps</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOPIC 4: Jain's Fairness Index -->
+  <div class="topic">
+    <div class="topic-hdr" onclick="toggleTopic(this)">
+      <div class="topic-num">4</div>
+      <div class="topic-name">Jain's Fairness Index</div>
+      <div class="topic-marks">Q33 type · 4 marks</div>
+      <div class="topic-chev">▶</div>
+    </div>
+    <div class="topic-body">
+      <div class="formula">
+JFI = (Σxᵢ)² / (n × Σxᵢ²)
+
+<span class="comment">-- Where --</span>
+xᵢ = bandwidth of flow i
+n  = number of flows
+Range: 1/n (most unfair) to 1.0 (perfect fairness)</div>
+
+      <div class="section-lbl">Exact Q2 PYQ — Q33 worked solution</div>
+      <div class="example">
+        <div class="step">3 flows: x₁=50 Mbps, x₂=30 Mbps, x₃=40 Mbps. Find JFI.</div>
+        <div class="calc">Σxᵢ = 50+30+40 = 120</div>
+        <div class="calc">(Σxᵢ)² = 120² = 14,400</div>
+        <div class="calc">Σxᵢ² = 50²+30²+40² = 2500+900+1600 = 5000</div>
+        <div class="calc">n × Σxᵢ² = 3 × 5000 = 15,000</div>
+        <div class="calc">JFI = 14,400 / 15,000 = 0.96</div>
+        <div class="answer">Answer: 0.96 ✓ (range: 0.94–0.98)</div>
+      </div>
+      <div class="tip">
+        Perfect fairness: all flows equal → JFI = 1.0. If one flow hogs all bandwidth → JFI = 1/n. UDP flows don't back off → can reduce JFI of TCP flows.
+      </div>
+
+      <div class="practice">
+        <div class="practice-label">Practice</div>
+        <div class="practice-q">Two TCP flows share a 100 Mbps link: Flow 1 gets 60 Mbps, Flow 2 gets 40 Mbps. What is the Jain's Fairness Index? (2 decimal places)</div>
+        <input class="practice-input" id="p4-ans" placeholder="e.g. 0.96" />
+        <div class="practice-btns">
+          <button class="btn btn-primary" onclick="checkAns('p4', '0.98', '')">Check</button>
+          <button class="btn btn-reveal" onclick="revealAns('p4')">Reveal</button>
+        </div>
+        <div class="check-result" id="p4-result"></div>
+        <div class="practice-answer" id="p4-sol">
+          Σxᵢ = 100, (Σxᵢ)² = 10,000<br>
+          Σxᵢ² = 3600+1600 = 5200<br>
+          n×Σxᵢ² = 2×5200 = 10,400<br>
+          JFI = 10,000/10,400 = <strong style="color:var(--green)">0.96</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOPIC 5: Fast Retransmit / Fast Recovery -->
+  <div class="topic">
+    <div class="topic-hdr" onclick="toggleTopic(this)">
+      <div class="topic-num">5</div>
+      <div class="topic-name">Fast retransmit & fast recovery cwnd</div>
+      <div class="topic-marks">Q24 + Q37 type · 3+5 marks</div>
+      <div class="topic-chev">▶</div>
+    </div>
+    <div class="topic-body">
+      <div class="formula">
+<span class="comment">-- On triple duplicate ACK (fast retransmit) --</span>
+ssthresh = inflight / 2
+cwnd     = ssthresh + 3×MSS   <span class="comment">// RFC 2581</span>
+
+<span class="comment">-- During fast recovery (each dup ACK) --</span>
+cwnd += 1 MSS   <span class="comment">// inflates cwnd</span>
+
+<span class="comment">-- When new ACK arrives (fast recovery ends) --</span>
+cwnd = ssthresh   <span class="comment">// deflate back to ssthresh</span>
+<span class="comment">// then continue with additive increase</span></div>
+
+      <div class="section-lbl">Exact Q2 PYQ — Q37 worked solution</div>
+      <div class="example">
+        <div class="step">MSS=2KB, inflight=80KB (just before triple dup ACK). Find cwnd immediately after fast retransmit (cwnd = ssthresh + 3×MSS).</div>
+        <div class="calc">ssthresh = inflight/2 = 80/2 = 40 KB</div>
+        <div class="calc">cwnd = ssthresh + 3×MSS = 40 + 3×2 = 40+6 = 46 KB</div>
+        <div class="answer">Answer: 46 KB ✓</div>
+      </div>
+
+      <div class="section-lbl">Exact Q2 PYQ — Q24 worked solution</div>
+      <div class="example">
+        <div class="step">During fast recovery: cwnd=8 MSS, inflight=4 MSS. 4 dup ACKs arrive. Find cwnd just BEFORE new ACK, and AFTER new ACK (when cwnd and inflight realign).</div>
+        <div class="calc">ssthresh was set = inflight_at_loss/2. Since cwnd starts at ssthresh+3, and cwnd=8, ssthresh=5... but given inflight=4 → ssthresh = 4/2 = 2... the question gives the state DURING recovery.</div>
+        <div class="calc">Each dup ACK: cwnd += 1 MSS</div>
+        <div class="calc">After 4 dup ACKs: cwnd = 8+4 = 12 MSS (just before new ACK)</div>
+        <div class="calc">New ACK arrives → cwnd deflates to ssthresh</div>
+        <div class="calc">ssthresh from the original loss = inflight/2 = 8/2 = 4 MSS (original cwnd=inflight=8)</div>
+        <div class="answer">Answer: 12 MSS before new ACK, 4 MSS after ✓ (Option C)</div>
+      </div>
+      <div class="trap">
+        <div class="trap-label">⚠ Trap — Q24 key insight</div>
+        The question says "cwnd=8, inflight=4" at the START of this observation. This means the fast retransmit ALREADY happened and brought inflight to 4. The original cwnd at time of loss was 8 → ssthresh=8/2=4. During recovery cwnd inflates (+1 per dup ACK). On new ACK it deflates back to ssthresh=4. Remember: ssthresh is set ONCE at the start of fast retransmit, not re-calculated from current inflight.
+      </div>
+
+      <div class="practice">
+        <div class="practice-label">Practice</div>
+        <div class="practice-q">A TCP flow has MSS = 1 KB. Just before a triple dup ACK, cwnd = inflight = 60 KB. What is cwnd immediately after fast retransmit (cwnd = ssthresh + 3×MSS), in KB?</div>
+        <input class="practice-input" id="p5-ans" placeholder="Answer in KB" />
+        <div class="practice-btns">
+          <button class="btn btn-primary" onclick="checkAns('p5', '33', '')">Check</button>
+          <button class="btn btn-reveal" onclick="revealAns('p5')">Reveal</button>
+        </div>
+        <div class="check-result" id="p5-result"></div>
+        <div class="practice-answer" id="p5-sol">
+          ssthresh = 60/2 = 30 KB<br>
+          cwnd = 30 + 3×1 = <strong style="color:var(--green)">33 KB</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-btns">
+    <button class="btn-nav next" onclick="markDone(0)">Mark block done & continue →</button>
+  </div>
+</div>
+
+<!-- ============================================================ BLOCK 1: IP -->
+<div class="block c-blue" id="block-1">
+  <div class="block-header">
+    <div class="block-tag tag-blue">Block 2 · Hours 6–9 · ~14 marks</div>
+    <div class="block-title">IP Addressing, Subnetting & NAT</div>
+    <div class="block-meta">W7–W8 · CIDR · Netmask · LPM · NAT</div>
+  </div>
+
+  <!-- Topic: CIDR usable hosts -->
+  <div class="topic">
+    <div class="topic-hdr" onclick="toggleTopic(this)">
+      <div class="topic-num">1</div>
+      <div class="topic-name">CIDR: usable host count from prefix</div>
+      <div class="topic-marks">Q28 type · 3 marks</div>
+      <div class="topic-chev">▶</div>
+    </div>
+    <div class="topic-body">
+      <div class="formula">
+usable_hosts = 2^(32 − prefix) − 2
+
+<span class="comment">-- Subtract 2 for: network address + broadcast address --</span>
+/26 → 2^6 − 2 = 64 − 2 = 62
+/24 → 2^8 − 2 = 254
+/30 → 2^2 − 2 = 2   <span class="comment">// minimum usable</span></div>
+
+      <div class="example">
+        <div class="step">Q28: Block = 10.25.4.0/26. How many usable hosts?</div>
+        <div class="calc">host bits h = 32−26 = 6</div>
+        <div class="calc">usable = 2^6 − 2 = 64 − 2 = 62</div>
+        <div class="answer">Answer: 62 ✓</div>
+      </div>
+
+      <div class="practice">
+        <div class="practice-label">Practice</div>
+        <div class="practice-q">How many usable host addresses are in the block 192.168.10.0/28?</div>
+        <input class="practice-input" id="p6-ans" placeholder="Number of hosts" />
+        <div class="practice-btns">
+          <button class="btn btn-primary" onclick="checkAns('p6', '14', '')">Check</button>
+          <button class="btn btn-reveal" onclick="revealAns('p6')">Reveal</button>
+        </div>
+        <div class="check-result" id="p6-result"></div>
+        <div class="practice-answer" id="p6-sol">
+          h = 32−28 = 4 → 2^4−2 = 16−2 = <strong style="color:var(--green)">14</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Topic: Min prefix for N hosts -->
+  <div class="topic">
+    <div class="topic-hdr" onclick="toggleTopic(this)">
+      <div class="topic-num">2</div>
+      <div class="topic-name">Find smallest prefix to support N hosts</div>
+      <div class="topic-marks">Q30 type · 3 marks</div>
+      <div class="topic-chev">▶</div>
+    </div>
+    <div class="topic-body">
+      <div class="formula">
+<span class="comment">-- You need: 2^h − 2 ≥ N --</span>
+h = ⌈log₂(N + 2)⌉
+prefix = 32 − h
+
+<span class="comment">-- Memory trick --</span>
+Round N up to next power of 2, then add 2 buffer.
+For N=500: need 2^h ≥ 502 → h=9 (2^9=512) → prefix=23</div>
+
+      <div class="example">
+        <div class="step">Q30: Need ≥500 hosts per subnet. Smallest prefix?</div>
+        <div class="calc">2^h − 2 ≥ 500 → 2^h ≥ 502</div>
+        <div class="calc">2^8 = 256 (too small), 2^9 = 512 ≥ 502 ✓</div>
+        <div class="calc">h = 9, prefix = 32−9 = 23</div>
+        <div class="answer">Answer: /23 ✓</div>
+      </div>
+      <div class="trap">
+        <div class="trap-label">⚠ Trap</div>
+        Always test 2^h − 2 ≥ N (not just 2^h ≥ N). For N=500: 2^9−2=510 ≥ 500 ✓. If N=510: 2^9−2=510 ✓ still /23. If N=511: 2^9−2=510 &lt; 511, need h=10 → /22.
+      </div>
+
+      <div class="practice">
+        <div class="practice-label">Practice</div>
+        <div class="practice-q">An admin needs subnets that each support at least 1000 hosts. What is the smallest CIDR prefix length they can use?</div>
+        <input class="practice-input" id="p7-ans" placeholder="Enter prefix number (e.g. 22)" />
+        <div class="practice-btns">
+          <button class="btn btn-primary" onclick="checkAns('p7', '22', '')">Check</button>
+          <button class="btn btn-reveal" onclick="revealAns('p7')">Reveal</button>
+        </div>
+        <div class="check-result" id="p7-result"></div>
+        <div class="practice-answer" id="p7-sol">
+          2^h − 2 ≥ 1000 → 2^h ≥ 1002<br>
+          2^10=1024 ≥ 1002 ✓, h=10<br>
+          prefix = 32−10 = <strong style="color:var(--green)">/22</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Topic: Network address from netmask -->
+  <div class="topic">
+    <div class="topic-hdr" onclick="toggleTopic(this)">
+      <div class="topic-num">3</div>
+      <div class="topic-name">Network address: bitwise AND with netmask</div>
+      <div class="topic-marks">Q35 type · 4 marks</div>
+      <div class="topic-chev">▶</div>
+    </div>
+    <div class="topic-body">
+      <div class="formula">
+network_address = IP_address AND netmask
+<span class="comment">// Apply byte by byte in binary or use shortcut</span>
+
+<span class="comment">-- Shortcut rules --</span>
+byte AND 255 = byte unchanged
+byte AND 0   = 0
+byte AND 240 = zero out lower 4 bits  <span class="comment">// 240 = 11110000</span>
+byte AND 128 = zero out lower 7 bits  <span class="comment">// 128 = 10000000</span></div>
+
+      <div class="example">
+        <div class="step">Q35: IP=172.25.50.22, Mask=255.255.240.0. Network address of A?</div>
+        <div class="calc">Byte 1: 172 AND 255 = 172</div>
+        <div class="calc">Byte 2: 25 AND 255 = 25</div>
+        <div class="calc">Byte 3: 50 AND 240 = ?</div>
+        <div class="calc">  50 = 0011 0010</div>
+        <div class="calc"> 240 = 1111 0000</div>
+        <div class="calc"> AND = 0011 0000 = 48</div>
+        <div class="calc">Byte 4: 22 AND 0 = 0</div>
+        <div class="answer">Network address: 172.25.48.0 ✓</div>
+      </div>
+      <div class="trap">
+        <div class="trap-label">⚠ Trap</div>
+        Do NOT assume the third byte is unchanged. 50 AND 240 = 48, not 50. Always convert the non-trivial byte to binary and AND carefully.
+      </div>
+
+      <div class="practice">
+        <div class="practice-label">Practice</div>
+        <div class="practice-q">IP = 10.45.130.77, Netmask = 255.255.128.0. What is the network address?</div>
+        <input class="practice-input" id="p8-ans" placeholder="e.g. 10.45.0.0" />
+        <div class="practice-btns">
+          <button class="btn btn-primary" onclick="checkAns('p8', '10.45.128.0', '')">Check</button>
+          <button class="btn btn-reveal" onclick="revealAns('p8')">Reveal</button>
+        </div>
+        <div class="check-result" id="p8-result"></div>
+        <div class="practice-answer" id="p8-sol">
+          10 AND 255 = 10<br>
+          45 AND 255 = 45<br>
+          130 AND 128: 130=10000010, 128=10000000 → AND=10000000=128<br>
+          77 AND 0 = 0<br>
+          Network: <strong style="color:var(--green)">10.45.128.0</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Topic: LPM -->
+  <div class="topic">
+    <div class="topic-hdr" onclick="toggleTopic(this)">
+      <div class="topic-num">4</div>
+      <div class="topic-name">Longest prefix matching</div>
+      <div class="topic-marks">Q25 type · 3 marks</div>
+      <div class="topic-chev">▶</div>
+    </div>
+    <div class="topic-body">
+      <div class="formula">
+<span class="comment">-- Algorithm --</span>
+1. For each table entry, check if dst IP matches the prefix
+2. A match means: IP AND mask == network_address
+3. Among ALL matching entries, pick the LONGEST prefix
+4. 0.0.0.0/0 (default) always matches — use ONLY if nothing else matches</div>
+
+      <div class="example">
+        <div class="step">Q25: dst=128.20.15.7, table: 128.0.0.0/8→P1, 128.20.0.0/16→P2, 128.20.15.0/24→P3, 0.0.0.0/0→P4</div>
+        <div class="calc">128.0.0.0/8:  128.20.15.7 starts with 128 ✓ (matches)</div>
+        <div class="calc">128.20.0.0/16: starts with 128.20 ✓ (matches)</div>
+        <div class="calc">128.20.15.0/24: starts with 128.20.15 ✓ (matches)</div>
+        <div class="calc">0.0.0.0/0: always matches ✓</div>
+        <div class="calc">Longest match = /24 → Port 3</div>
+        <div class="answer">Answer: Port 3 ✓</div>
+      </div>
+
+      <div class="practice">
+        <div class="practice-label">Practice</div>
+        <div class="practice-q">Destination IP: 192.168.5.200. Forwarding table: 192.0.0.0/8→P1, 192.168.0.0/16→P2, 192.168.5.0/24→P3, 192.168.5.192/26→P4. Which port?</div>
+        <input class="practice-input" id="p9-ans" placeholder="Port number (1-4)" />
+        <div class="practice-btns">
+          <button class="btn btn-primary" onclick="checkAns('p9', '4', '')">Check</button>
+          <button class="btn btn-reveal" onclick="revealAns('p9')">Reveal</button>
+        </div>
+        <div class="check-result" id="p9-result"></div>
+        <div class="practice-answer" id="p9-sol">
+          All 4 entries match (192.168.5.200 is inside all those networks).<br>
+          Longest match = /26. Check: 192.168.5.192/26 means .192–.255.<br>
+          200 is in that range ✓ → <strong style="color:var(--green)">Port 4</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Topic: NAT -->
+  <div class="topic">
+    <div class="topic-hdr" onclick="toggleTopic(this)">
+      <div class="topic-num">5</div>
+      <div class="topic-name">NAT — number of public IPs required</div>
+      <div class="topic-marks">Q29 type · 3 marks</div>
+      <div class="topic-chev">▶</div>
+    </div>
+    <div class="topic-body">
+      <div class="formula">
+routers_needed = ⌈total_devices / devices_per_router⌉
+public_IPs = routers_needed   <span class="comment">// 1 public IP per NAT router</span>
+
+<span class="comment">-- Always ceiling divide --</span>
+1800 / 300 = 6.0 → ⌈6.0⌉ = 6
+1801 / 300 = 6.003 → ⌈6.003⌉ = 7</div>
+
+      <div class="example">
+        <div class="step">Q29: 1800 devices, 300 devices/router. How many public IPs?</div>
+        <div class="calc">routers = ⌈1800/300⌉ = ⌈6⌉ = 6</div>
+        <div class="answer">Answer: 6 public IPs ✓</div>
+      </div>
+
+      <div class="practice">
+        <div class="practice-label">Practice</div>
+        <div class="practice-q">An org has 2500 devices. Each NAT router serves 400 devices. How many public IP addresses are needed?</div>
+        <input class="practice-input" id="p10-ans" placeholder="Number of public IPs" />
+        <div class="practice-btns">
+          <button class="btn btn-primary" onclick="checkAns('p10', '7', '')">Check</button>
+          <button class="btn btn-reveal" onclick="revealAns('p10')">Reveal</button>
+        </div>
+        <div class="check-result" id="p10-result"></div>
+        <div class="practice-answer" id="p10-sol">
+          ⌈2500/400⌉ = ⌈6.25⌉ = <strong style="color:var(--green)">7</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-btns">
+    <button class="btn-nav" onclick="goto(0)">← Back</button>
+    <button class="btn-nav next" onclick="markDone(1)">Mark done & continue →</button>
+  </div>
+</div>
+
+<!-- ============================================================ BLOCK 2: FLOW CONTROL -->
+<div class="block c-teal" id="block-2">
+  <div class="block-header">
+    <div class="block-tag tag-teal">Block 3 · Hours 10–11 · ~6 marks</div>
+    <div class="block-title">Flow Control</div>
+    <div class="block-meta">W5 · Buffer fill time · Advertised window throughput</div>
+  </div>
+
+  <div class="topic">
+    <div class="topic-hdr" onclick="toggleTopic(this)">
+      <div class="topic-num">1</div>
+      <div class="topic-name">Buffer fill time</div>
+      <div class="topic-marks">Q26 type · 3 marks</div>
+      <div class="topic-chev">▶</div>
+    </div>
+    <div class="topic-body">
+      <div class="formula">
+net_fill_rate = send_rate − read_rate   <span class="comment">// KB/s</span>
+time_to_fill  = buffer_size / net_fill_rate   <span class="comment">// seconds</span></div>
+
+      <div class="example">
+        <div class="step">Q26: buffer=30KB, send=10KB/s, read=6KB/s. When does buffer fill?</div>
+        <div class="calc">net rate = 10 − 6 = 4 KB/s</div>
+        <div class="calc">time = 30 / 4 = 7.5 s</div>
+        <div class="answer">Answer: 7.50 s ✓ (range: 7.40–7.60)</div>
+      </div>
+      <div class="trap">
+        <div class="trap-label">⚠ Trap</div>
+        Do NOT use the send rate alone. The receiver app drains the buffer simultaneously. Only the NET inflow rate (send minus read) fills the buffer.
+      </div>
+
+      <div class="practice">
+        <div class="practice-label">Practice</div>
+        <div class="practice-q">Buffer = 50 KB. Sender writes at 15 KB/s, app reads at 8 KB/s. How many seconds until the buffer is full?</div>
+        <input class="practice-input" id="p11-ans" placeholder="Seconds (2 decimal places)" />
+        <div class="practice-btns">
+          <button class="btn btn-primary" onclick="checkAns('p11', '7.14', '')">Check</button>
+          <button class="btn btn-reveal" onclick="revealAns('p11')">Reveal</button>
+        </div>
+        <div class="check-result" id="p11-result"></div>
+        <div class="practice-answer" id="p11-sol">
+          net = 15−8 = 7 KB/s<br>
+          time = 50/7 = <strong style="color:var(--green)">7.14 s</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="topic">
+    <div class="topic-hdr" onclick="toggleTopic(this)">
+      <div class="topic-num">2</div>
+      <div class="topic-name">Flow-control throughput from advertised window</div>
+      <div class="topic-marks">Q27 type · 3 marks</div>
+      <div class="topic-chev">▶</div>
+    </div>
+    <div class="topic-body">
+      <div class="formula">
+throughput = advertised_window / RTT
+
+<span class="comment">-- Units --</span>
+window in KB: convert to bytes (×1024) first
+RTT in ms: convert to seconds (÷1000) first
+Result in B/s → KB/s (÷1024)</div>
+
+      <div class="example">
+        <div class="step">Q27: adv_window=32KB, RTT=80ms. Throughput in KB/s?</div>
+        <div class="calc">window = 32 × 1024 = 32,768 bytes</div>
+        <div class="calc">RTT = 80 ms = 0.080 s</div>
+        <div class="calc">throughput = 32,768 / 0.080 = 409,600 B/s</div>
+        <div class="calc">= 409,600 / 1024 ≈ 400 KB/s</div>
+        <div class="answer">Answer: ≈400 KB/s ✓ (range: 340–410)</div>
+      </div>
+
+      <div class="practice">
+        <div class="practice-label">Practice</div>
+        <div class="practice-q">TCP connection: advertised window = 64 KB, RTT = 200 ms. What is the max throughput in KB/s?</div>
+        <input class="practice-input" id="p12-ans" placeholder="Answer in KB/s" />
+        <div class="practice-btns">
+          <button class="btn btn-primary" onclick="checkAns('p12', '320', '')">Check</button>
+          <button class="btn btn-reveal" onclick="revealAns('p12')">Reveal</button>
+        </div>
+        <div class="check-result" id="p12-result"></div>
+        <div class="practice-answer" id="p12-sol">
+          64×1024 = 65,536 B<br>
+          65,536 / 0.2 = 327,680 B/s<br>
+          / 1024 = <strong style="color:var(--green)">320 KB/s</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-btns">
+    <button class="btn-nav" onclick="goto(1)">← Back</button>
+    <button class="btn-nav next" onclick="markDone(2)">Mark done & continue →</button>
+  </div>
+</div>
+
+<!-- ============================================================ BLOCK 3: DIJKSTRA -->
+<div class="block c-gold" id="block-3">
+  <div class="block-header">
+    <div class="block-tag tag-gold">Block 4 · Hours 12–13 · ~4 marks</div>
+    <div class="block-title">Dijkstra's Algorithm</div>
+    <div class="block-meta">W8 · Link state routing · Shortest path · Forwarding tables</div>
+  </div>
+
+  <div class="topic">
+    <div class="topic-hdr" onclick="toggleTopic(this)">
+      <div class="topic-num">1</div>
+      <div class="topic-name">Dijkstra step-by-step + forwarding table</div>
+      <div class="topic-marks">Q36 type · 4 marks</div>
+      <div class="topic-chev">▶</div>
+    </div>
+    <div class="topic-body">
+      <div class="formula">
+<span class="comment">-- Initialise --</span>
+N' = {src}
+D(src) = 0
+D(neighbour) = c(src, neighbour)
+D(non-neighbour) = ∞
+
+<span class="comment">-- Repeat until all nodes in N' --</span>
+1. Pick w ∉ N' with minimum D(w) → add to N'
+2. For each neighbour v of w not in N':
+   D(v) = min(D(v), D(w) + c(w,v))
+   If updated: p(v) = w   <span class="comment">// predecessor</span></div>
+
+      <div class="section-lbl">Exact Q2 PYQ — Q36 worked solution</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:.75rem">Graph: U–V=3, U–W=6, U–X=2, X–Y=2, X–W=4, Y–W=3, Y–Z=1. Find shortest path cost from U to Z.</p>
+
+      <table class="step-table">
+        <thead><tr><th>Step</th><th>N'</th><th>D(V)</th><th>D(W)</th><th>D(X)</th><th>D(Y)</th><th>D(Z)</th><th>Pick</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td>{U}</td><td>3,U</td><td>6,U</td><td>2,U</td><td>∞</td><td>∞</td><td>—</td></tr>
+          <tr class="highlight"><td>1</td><td>{U,X}</td><td>3,U</td><td>min(6,2+4)=6,U</td><td>—</td><td>2+2=4,X</td><td>∞</td><td>X(D=2)</td></tr>
+          <tr><td>2</td><td>{U,X,V}</td><td>—</td><td>6,U</td><td>—</td><td>4,X</td><td>∞</td><td>V(D=3)</td></tr>
+          <tr class="highlight"><td>3</td><td>{U,X,V,Y}</td><td>—</td><td>min(6,4+3)=6,U</td><td>—</td><td>—</td><td>4+1=5,Y</td><td>Y(D=4)</td></tr>
+          <tr><td>4</td><td>{U,X,V,Y,Z}</td><td>—</td><td>6,U</td><td>—</td><td>—</td><td>—</td><td>Z(D=5) ✓</td></tr>
+        </tbody>
+      </table>
+
+      <div class="example">
+        <div class="answer">Shortest path U→Z = U→X→Y→Z, total cost = 2+2+1 = 5 ✓</div>
+      </div>
+      <div class="tip">
+        To find forwarding table entry for Z: trace back p(Z)=Y, p(Y)=X, p(X)=U. First hop from U is X → forward to port connected to X.
+      </div>
+
+      <div class="practice">
+        <div class="practice-label">Practice</div>
+        <div class="practice-q">Graph (undirected): A–B=4, A–C=2, B–D=3, C–B=1, C–D=5. Using Dijkstra from A, what is the shortest path cost from A to D?</div>
+        <input class="practice-input" id="p13-ans" placeholder="Total cost" />
+        <div class="practice-btns">
+          <button class="btn btn-primary" onclick="checkAns('p13', '6', '')">Check</button>
+          <button class="btn btn-reveal" onclick="revealAns('p13')">Reveal</button>
+        </div>
+        <div class="check-result" id="p13-result"></div>
+        <div class="practice-answer" id="p13-sol">
+          Init: D(B)=4, D(C)=2, D(D)=∞<br>
+          Step1: pick C(2). Relax: D(B)=min(4,2+1)=3,C. D(D)=min(∞,2+5)=7,C<br>
+          Step2: pick B(3). Relax: D(D)=min(7,3+3)=6,B<br>
+          Step3: pick D(6) ✓<br>
+          Path: A→C→B→D, cost = <strong style="color:var(--green)">6</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-btns">
+    <button class="btn-nav" onclick="goto(2)">← Back</button>
+    <button class="btn-nav next" onclick="markDone(3)">Mark done & continue →</button>
+  </div>
+</div>
+
+<!-- ============================================================ BLOCK 4: FORMULA SHEET -->
+<div class="block" id="block-4">
+  <div class="block-header">
+    <div class="block-tag" style="color:var(--gold)">Reference · All formulas in one place</div>
+    <div class="block-title">Complete Formula Cheatsheet</div>
+    <div class="block-meta">Everything you need, one glance before the exam</div>
+  </div>
+
+  <div class="summary-grid">
+    <div class="summary-card"><div class="lbl">Topics covered</div><div class="val" style="color:var(--accent)">13</div></div>
+    <div class="summary-card"><div class="lbl">Total marks</div><div class="val" style="color:var(--green)">50</div></div>
+    <div class="summary-card"><div class="lbl">Weeks tested</div><div class="val" style="color:var(--blue)">5–8</div></div>
+    <div class="summary-card"><div class="lbl">W1–4 in Q2</div><div class="val" style="color:var(--warn)">0</div></div>
+  </div>
+
+  <div class="section-lbl" style="margin-top:1.25rem">All formulas — W5–8</div>
+  <div class="cheatsheet">
+    <div class="cs-row"><span class="cs-name">TCP throughput</span><span class="cs-formula">cwnd × MSS / RTT → × 8 for Mbps</span></div>
+    <div class="cs-row"><span class="cs-name">cwnd after 1 RTT in CA</span><span class="cs-formula">(cwnd_MSS + 1) × MSS_bytes</span></div>
+    <div class="cs-row"><span class="cs-name">Fast retransmit cwnd</span><span class="cs-formula">ssthresh = inflight/2 ; cwnd = ssthresh + 3×MSS</span></div>
+    <div class="cs-row"><span class="cs-name">Fast recovery inflation</span><span class="cs-formula">each dup ACK: cwnd += 1 MSS</span></div>
+    <div class="cs-row"><span class="cs-name">After new ACK in FR</span><span class="cs-formula">cwnd = ssthresh (deflates)</span></div>
+    <div class="cs-row"><span class="cs-name">RTO reaction</span><span class="cs-formula">ssthresh = cwnd/2 ; cwnd = 1 MSS</span></div>
+    <div class="cs-row"><span class="cs-name">Jain's Fairness Index</span><span class="cs-formula">(Σxᵢ)² / (n × Σxᵢ²)</span></div>
+    <div class="cs-row"><span class="cs-name">Buffer fill time</span><span class="cs-formula">buffer / (send_rate − read_rate)</span></div>
+    <div class="cs-row"><span class="cs-name">Flow control throughput</span><span class="cs-formula">adv_window / RTT</span></div>
+    <div class="cs-row"><span class="cs-name">Usable hosts from /x</span><span class="cs-formula">2^(32−x) − 2</span></div>
+    <div class="cs-row"><span class="cs-name">Min prefix for N hosts</span><span class="cs-formula">prefix = 32 − ⌈log₂(N+2)⌉</span></div>
+    <div class="cs-row"><span class="cs-name">Network address</span><span class="cs-formula">IP AND netmask (bitwise, byte by byte)</span></div>
+    <div class="cs-row"><span class="cs-name">Longest prefix match</span><span class="cs-formula">all matching entries → pick longest prefix</span></div>
+    <div class="cs-row"><span class="cs-name">NAT router count</span><span class="cs-formula">⌈total_devices / devices_per_router⌉</span></div>
+    <div class="cs-row"><span class="cs-name">Dijkstra relaxation</span><span class="cs-formula">D(v) = min(D(v), D(w) + c(w,v))</span></div>
+  </div>
+
+  <div class="section-lbl" style="margin-top:1.25rem">Unit conversion quick reference</div>
+  <div class="formula">
+ms → s:   divide by 1000     (80 ms = 0.080 s)
+μs → s:   divide by 10⁶     (100 μs = 0.0001 s)
+KB → B:   multiply by 1024   (32 KB = 32768 B)
+B/s → Mbps: multiply by 8, divide by 10⁶
+B/s → KB/s: divide by 1024
+km → m:   multiply by 1000  (650 km = 650,000 m)</div>
+
+  <div class="nav-btns">
+    <button class="btn-nav" onclick="goto(3)">← Back</button>
+  </div>
+</div>
+
+</main>
+</div>
+
+<script>
+let current = 0;
+let done = new Set();
+let timerRunning = false;
+let timerSeconds = 0;
+let timerInterval;
+
+function goto(idx) {
+  document.getElementById('block-' + current).classList.remove('visible');
+  document.querySelectorAll('.nav-item').forEach((n,i) => n.classList.toggle('active', i===idx));
+  current = idx;
+  document.getElementById('block-' + current).classList.add('visible');
+  window.scrollTo(0,0);
+}
+
+function markDone(idx) {
+  done.add(idx);
+  document.getElementById('dot-' + idx).style.background = 'var(--green)';
+  document.getElementById('nav-' + idx).classList.add('done');
+  document.getElementById('doneCount').textContent = done.size + ' / 5';
+  document.getElementById('progressFill').style.width = (done.size/5*100) + '%';
+  goto(idx + 1 < 5 ? idx + 1 : idx);
+}
+
+function toggleTopic(hdr) {
+  const body = hdr.nextElementSibling;
+  const chev = hdr.querySelector('.topic-chev');
+  body.classList.toggle('open');
+  chev.classList.toggle('open');
+}
+
+function revealAns(id) {
+  document.getElementById(id + '-sol').classList.add('show');
+}
+
+function checkAns(id, correct, hint) {
+  const inp = document.getElementById(id + '-ans').value.trim().toLowerCase().replace(/\s/g,'');
+  const res = document.getElementById(id + '-result');
+  const corr = correct.toLowerCase().replace(/\s/g,'');
+  res.style.display = 'block';
+  if (inp === corr) {
+    res.textContent = '✓ Correct!';
+    res.className = 'check-result correct';
+  } else {
+    res.textContent = '✗ Not quite — try again or reveal solution.';
+    res.className = 'check-result wrong';
+  }
+}
+
+function toggleTimer() {
+  timerRunning = !timerRunning;
+  document.getElementById('timerBtn').textContent = timerRunning ? 'Pause' : 'Resume';
+  if (timerRunning) {
+    timerInterval = setInterval(() => {
+      timerSeconds++;
+      const h = Math.floor(timerSeconds/3600).toString().padStart(2,'0');
+      const m = Math.floor((timerSeconds%3600)/60).toString().padStart(2,'0');
+      const s = (timerSeconds%60).toString().padStart(2,'0');
+      document.getElementById('timer').textContent = h+':'+m+':'+s;
+    }, 1000);
+  } else {
+    clearInterval(timerInterval);
+  }
+}
+</script>
+</body>
+</html>
